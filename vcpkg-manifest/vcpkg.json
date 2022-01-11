@@ -2,7 +2,8 @@
     "name": "xserver-vcpkg",
     "version-string": "0.1.0",
     "dependencies": [
-          "xserver"
+          "xserver",
+          "xkeyboard-config"
     ],
     "features": {
     }

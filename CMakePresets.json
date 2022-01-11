@@ -16,7 +16,7 @@
             "name" :"vcpkg_settings",
             "hidden" : true,
             "cacheVariables": {
-                "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports/lib;${sourceDir}/ports/apps",
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports/libs;${sourceDir}/ports/apps",
                 "VCPKG_MANIFEST_DIR" : "${sourceDir}/vcpkg-manifest"
             }
         },

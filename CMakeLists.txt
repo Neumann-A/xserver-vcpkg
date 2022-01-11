@@ -1,4 +1,6 @@
 
+cmake_minimum_required(VERSION 3.21)
+include(FetchContent)
 FetchContent_Declare(
     vcpkg
     GIT_REPOSITORY https://github.com/microsoft/vcpkg.git
@@ -7,7 +9,7 @@ FetchContent_Declare(
 if(NOT CMAKE_TOOLCHAIN_FILE)
     if(NOT vcpkg_POPULATED)
         FetchContent_Populate(vcpkg)
-        set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake")
+        set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
     endif()
 endif()
 
