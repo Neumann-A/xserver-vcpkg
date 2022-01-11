@@ -1,0 +1,35 @@
+--- ./dix/save_registry.c	2014-09-19 10:58:26.541571958 +0100
++++ ./dix/registry.c	2014-09-19 11:03:21.600565495 +0100
+@@ -32,7 +32,15 @@
+ 
+ #ifdef X_REGISTRY_REQUEST
+ #define CORE "X11"
++#ifdef __MINGW32__
++#define FILENAME "protocol.txt"
++#ifndef MAX_PATH
++#define MAX_PATH 260
++#endif
++extern const char *winGetBaseDir(void);
++#else
+ #define FILENAME SERVER_MISC_CONFIG_PATH "/protocol.txt"
++#endif
+ 
+ #define PROT_COMMENT '#'
+ #define PROT_REQUEST 'R'
+@@ -350,7 +358,16 @@
+ 
+ #ifdef X_REGISTRY_REQUEST
+     /* Open the protocol file */
++#ifdef __MINGW32__
++    {
++        char filename[MAX_PATH];
++        snprintf(filename, sizeof(filename), "%s\\%s", winGetBaseDir(), FILENAME);
++        filename[sizeof(filename)-1] = 0;
++        fh = fopen(filename, "r");
++    }
++#else
+     fh = fopen(FILENAME, "r");
++#endif
+     if (!fh)
+         LogMessage(X_WARNING,
+                    "Failed to open protocol names file " FILENAME "\n");

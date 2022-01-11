@@ -1,0 +1,41 @@
+--- ./hw/xwin/save_winmultiwindowclass.c	2013-07-25 09:05:58.000000000 +0100
++++ ./hw/xwin/winmultiwindowclass.c	2016-04-24 14:15:58.718320906 +0100
+@@ -134,8 +134,8 @@
+     memset(hints, 0, sizeof(WinXWMHints));
+ 
+     while (prop) {
+-        if (prop->propertyName == XA_WM_HINTS && prop->data) {
+-            memcpy(hints, prop->data, sizeof(WinXWMHints));
++        if (prop->propertyName == XA_WM_HINTS && prop->format == 32 && prop->data) {
++            memcpy(hints, prop->data, 4*(int)prop->size); /* format/8 = 4 */
+             return 1;
+         }
+         else
+@@ -208,8 +208,8 @@
+     memset(hints, 0, sizeof(WinXSizeHints));
+ 
+     while (prop) {
+-        if (prop->propertyName == XA_WM_NORMAL_HINTS && prop->data) {
+-            memcpy(hints, prop->data, sizeof(WinXSizeHints));
++        if (prop->propertyName == XA_WM_NORMAL_HINTS && prop->format == 32 && prop->data) {
++            memcpy(hints, prop->data, 4*(int)prop->size); /* format/8 = 4 */
+             return 1;
+         }
+         else
+@@ -237,13 +237,12 @@
+     else
+         prop = NULL;
+ 
+-    if (pDaddyId)
+-        *pDaddyId = 0;
++    memset(pDaddyId, 0, sizeof(Window));
+ 
+     while (prop) {
+-        if (prop->propertyName == XA_WM_TRANSIENT_FOR) {
++        if (prop->propertyName == XA_WM_TRANSIENT_FOR && prop->format == 32 && prop->data) {
+             if (pDaddyId)
+-                memcpy(pDaddyId, prop->data, sizeof(Window));
++                memcpy(pDaddyId, prop->data, 4*(int)prop->size); /* format/8 = 4 */
+             return 1;
+         }
+         else

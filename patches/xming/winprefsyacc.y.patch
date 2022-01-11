@@ -1,0 +1,208 @@
+--- ./hw/xwin/save_winprefsyacc.y	2014-10-27 23:08:25.303955952 +0000
++++ ./hw/xwin/winprefsyacc.y	2019-01-28 14:54:52.813563279 +0000
+@@ -59,8 +59,8 @@
+ 
+ static void SetIconDirectory (char *path);
+ static void SetDefaultIcon (char *fname);
+-static void SetRootMenu (char *menu);
+-static void SetDefaultSysMenu (char *menu, int pos);
++static void SetRootMenu (char *menuname);
++static void SetDefaultSysMenu (char *menuname, int pos);
+ static void SetTrayIcon (char *fname);
+ 
+ static void OpenMenu(char *menuname);
+@@ -75,6 +75,10 @@
+ static void AddStyleLine(char *matchstr, unsigned long style);
+ static void CloseStyles(void);
+ 
++static void OpenTaskbar(void);
++static void AddTaskbarLine(char *matchstr, unsigned long type);
++static void CloseTaskbar(void);
++
+ static void OpenSysMenu(void);
+ static void AddSysMenuLine(char *matchstr, char *menuname, int pos);
+ static void CloseSysMenu(void);
+@@ -108,6 +112,9 @@
+ %token NOTITLE
+ %token OUTLINE
+ %token NOFRAME
++%token TASKBAR
++%token NOTAB
++%token NEWTAB
+ %token DEFAULTSYSMENU
+ %token SYSMENU
+ %token ROOTMENU
+@@ -115,17 +122,22 @@
+ %token ATSTART
+ %token ATEND
+ %token EXEC
++%token EXECD
+ %token ALWAYSONTOP
+-%token DEBUGOUTPUT "DEBUG"
++%token DEBUGOUTPUT
+ %token RELOAD
++%token FINDER
++%token VIEWLOG
+ %token TRAYICON
+ %token FORCEEXIT
+ %token SILENTEXIT
+ 
+ %token <sVal> STRING
++%type <iVal>  menucmd
+ %type <uVal>  group1
+ %type <uVal>  group2
+ %type <uVal>  stylecombo
++%type <uVal>  group3
+ %type <iVal>  atspot
+ 
+ %%
+@@ -148,6 +160,7 @@
+ 	| menu
+ 	| icons
+ 	| styles
++	| taskbar
+ 	| sysmenu
+ 	| rootmenu
+ 	| defaultsysmenu
+@@ -172,11 +185,17 @@
+ icondirectory:	ICONDIRECTORY STRING NEWLINE { SetIconDirectory($2); free($2); }
+ 	;
+ 
++menucmd:	EXEC { $$=CMD_EXEC; }
++	| EXECD { $$=CMD_EXECD; }
++	| MENU	{ $$=CMD_MENU; }
++	;
++
+ menuline:	SEPARATOR NEWLINE newline_or_nada  { AddMenuLine("-", CMD_SEPARATOR, ""); }
++	| STRING menucmd STRING NEWLINE newline_or_nada  { AddMenuLine($1, $2, $3); free($1); free($3); }
+ 	| STRING ALWAYSONTOP NEWLINE newline_or_nada  { AddMenuLine($1, CMD_ALWAYSONTOP, ""); free($1); }
+-	| STRING EXEC STRING NEWLINE newline_or_nada  { AddMenuLine($1, CMD_EXEC, $3); free($1); free($3); }
+-	| STRING MENU STRING NEWLINE newline_or_nada  { AddMenuLine($1, CMD_MENU, $3); free($1); free($3); }
+ 	| STRING RELOAD NEWLINE newline_or_nada  { AddMenuLine($1, CMD_RELOAD, ""); free($1); }
++	| STRING FINDER NEWLINE newline_or_nada  { AddMenuLine($1, CMD_FINDER, ""); free($1); }
++	| STRING VIEWLOG NEWLINE newline_or_nada  { AddMenuLine($1, CMD_VIEWLOG, ""); free($1); }
+ 	;
+ 
+ menulist:	menuline
+@@ -223,6 +242,20 @@
+ styles:	STYLES LB {OpenStyles();} newline_or_nada stylelist RB {CloseStyles();}
+ 	;
+ 
++group3:	NOTAB { $$=TASKBAR_NOTAB; }
++        | NEWTAB { $$=TASKBAR_NEWTAB; }
++        ;
++
++taskbarline:	STRING group3 NEWLINE newline_or_nada { AddTaskbarLine($1, $2); free($1); }
++	;
++
++taskbarlist:	taskbarline
++	| taskbarline taskbarlist
++	;
++
++taskbar:	TASKBAR LB {OpenTaskbar();} newline_or_nada taskbarlist RB {CloseTaskbar();}
++	;
++
+ atspot:	{ $$=AT_END; }
+ 	| ATSTART { $$=AT_START; }
+ 	| ATEND { $$=AT_END; }
+@@ -244,7 +277,7 @@
+ silentexit:	SILENTEXIT NEWLINE { pref.fSilentExit = TRUE; }
+ 	;
+ 
+-debug: 	DEBUGOUTPUT STRING NEWLINE { ErrorF("LoadPreferences: %s\n", $2); free($2); }
++debug: 	DEBUGOUTPUT STRING NEWLINE { ErrorF("LoadPreferences - %s\n", $2); free($2); }
+ 	;
+ 
+ 
+@@ -253,9 +286,9 @@
+  * Errors in parsing abort and print log messages
+  */
+ static int
+-yyerror (const char *s)
++yyerror (const char *s) 
+ {
+-  ErrorF("LoadPreferences: %s line %d\n", s, yylineno);
++  ErrorF("LoadPreferences - %s line %d\n", s, yylineno);
+   return 1;
+ }
+ 
+@@ -299,7 +332,7 @@
+ static void
+ OpenMenu (char *menuname)
+ {
+-  if (menu.menuItem) free(menu.menuItem);
++  free(menu.menuItem);
+   menu.menuItem = NULL;
+   strncpy(menu.menuName, menuname, MENU_MAX);
+   menu.menuName[MENU_MAX] = 0;
+@@ -332,7 +365,7 @@
+ {
+   if (menu.menuItem==NULL || menu.menuItems==0)
+     {
+-      ErrorF("LoadPreferences: Empty menu detected\n");
++      ErrorF("LoadPreferences - Empty menu detected\n");
+       return;
+     }
+   
+@@ -351,7 +384,7 @@
+ OpenIcons (void)
+ {
+   if (pref.icon != NULL) {
+-    ErrorF("LoadPreferences: Redefining icon mappings\n");
++    ErrorF("LoadPreferences - Redefining icon mappings\n");
+     free(pref.icon);
+     pref.icon = NULL;
+   }
+@@ -386,7 +419,7 @@
+ OpenStyles (void)
+ {
+   if (pref.style != NULL) {
+-    ErrorF("LoadPreferences: Redefining window style\n");
++    ErrorF("LoadPreferences - Redefining window style\n");
+     free(pref.style);
+     pref.style = NULL;
+   }
+@@ -415,10 +448,42 @@
+ }
+ 
+ static void
++OpenTaskbar (void)
++{
++  if (pref.taskbar != NULL) {
++    ErrorF("LoadPreferences - Redefining taskbar property\n");
++    free(pref.taskbar);
++    pref.taskbar = NULL;
++  }
++  pref.taskbarItems = 0;
++}
++
++static void
++AddTaskbarLine (char *matchstr, unsigned long type)
++{
++  if (pref.taskbar==NULL)
++    pref.taskbar = malloc(sizeof(TASKBARITEM));
++  else
++    pref.taskbar = realloc(pref.taskbar, sizeof(TASKBARITEM)*(pref.taskbarItems+1));
++
++  strncpy(pref.taskbar[pref.taskbarItems].match, matchstr, MENU_MAX);
++  pref.taskbar[pref.taskbarItems].match[MENU_MAX] = 0;
++
++  pref.taskbar[pref.taskbarItems].type = type;
++
++  pref.taskbarItems++;
++}
++
++static void
++CloseTaskbar (void)
++{
++}
++
++static void
+ OpenSysMenu (void)
+ {
+   if (pref.sysMenu != NULL) {
+-    ErrorF("LoadPreferences: Redefining system menu\n");
++    ErrorF("LoadPreferences - Redefining system menu\n");
+     free(pref.sysMenu);
+     pref.sysMenu = NULL;
+   }

@@ -1,0 +1,173 @@
+--- ./hw/xwin/glx/save_winpriv.c	2019-06-28 20:16:29.000000000 +0100
++++ ./hw/xwin/glx/winpriv.c	2020-09-25 14:55:18.015247748 +0100
+@@ -11,6 +11,8 @@
+ #include "winpriv.h"
+ #include "winwindow.h"
+ 
++extern Bool			g_fXdmcpEnabled;
++
+ void
+  winCreateWindowsWindow(WindowPtr pWin);
+ 
+@@ -21,6 +23,8 @@
+ HWND
+ winGetWindowInfo(WindowPtr pWin)
+ {
++    HWND hwnd = NULL;
++
+     winTrace("%s: pWin %p XID 0x%x\n", __FUNCTION__, pWin, (unsigned int)pWin->drawable.id);
+ 
+     /* a real window was requested */
+@@ -29,11 +33,10 @@
+         ScreenPtr pScreen = pWin->drawable.pScreen;
+         winPrivScreenPtr pWinScreen = winGetScreenPriv(pScreen);
+         winScreenInfoPtr pScreenInfo = NULL;
+-        HWND hwnd = NULL;
+ 
+         if (pWinScreen == NULL) {
+             ErrorF("winGetWindowInfo: screen has no privates\n");
+-            return NULL;
++            return hwnd;
+         }
+ 
+         hwnd = pWinScreen->hwndScreen;
+@@ -49,19 +52,97 @@
+             }
+ 
+             if (pWinPriv->hWnd == NULL) {
++              if (pWin->parent && pWin->parent->parent) /* Not root windows && not a top level window */
++              {
++                int offsetx = 0;
++                int offsety = 0;
++                int ExtraClass = (pWin->realized) ? WS_VISIBLE : 0;
++                HWND hWndParent;
++                WindowPtr pParent = pWin->parent;
++                while (pParent)
++                {
++                  winWindowPriv(pParent);
++                  hWndParent = pWinPriv->hWnd;
++                  if (hWndParent)
++                    break;
++                  pParent = pParent->parent;
++                }
++                if (!hWndParent)
++                  hWndParent = hwnd;
++                if (pParent)
++                {
++                  offsetx = pParent->drawable.x;
++                  offsety = pParent->drawable.y;
++                }
++                pWinPriv->hWnd = CreateWindowExA(0,
++                             WIN_GL_TEST_WINDOW_CLASS,
++                             "",
++                             WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED | ExtraClass,
++                             pWin->drawable.x-offsetx,
++                             pWin->drawable.y-offsety,
++                             pWin->drawable.width,
++                             pWin->drawable.height,
++                             hWndParent,
++                             (HMENU) NULL,
++                             g_hInstance,
++                             pWin);
++                pWinPriv->fWglUsed = TRUE;
++              }
++              else
++              {
+                 winCreateWindowsWindow(pWin);
+-                winDebug("winGetWindowInfo: forcing window to exist\n");
++                winDebug("winGetWindowInfo - forcing window to exist...\n");
++              }
+             }
+ 
+             if (pWinPriv->hWnd != NULL) {
+                 /* copy window handle */
+                 hwnd = pWinPriv->hWnd;
++            }
++        }
++        else if (g_fXdmcpEnabled)
++        {
++            winWindowPriv(pWin);
+ 
+-                /* mark GLX active on that hwnd */
++            if (pWinPriv == NULL)
++            {
++                ErrorF("winGetWindowInfo: window has no privates\n");
++                return hwnd;
++            }
++            if (pWinPriv->hWnd == NULL)
++            {
++              if (!((pWin->drawable.x == 0) &&
++                     (pWin->drawable.y == 0) &&
++                     (pWin->drawable.width == pScreen->width) &&
++                     (pWin->drawable.height == pScreen->height)
++                    )
++                  )
++              {
++                int ExtraClass = (pWin->realized) ? WS_VISIBLE : 0;
++                pWinPriv->hWnd = CreateWindowExA(0,
++                             WIN_GL_TEST_WINDOW_CLASS,
++                             "",
++                             WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED | ExtraClass,
++                             pWin->drawable.x,
++                             pWin->drawable.y,
++                             pWin->drawable.width,
++                             pWin->drawable.height,
++                             pWinScreen->hwndScreen,
++                             (HMENU) NULL,
++                             g_hInstance,
++                             pWin);
+                 pWinPriv->fWglUsed = TRUE;
++                hwnd = pWinPriv->hWnd;
++              }
++              else
++              {
++                hwnd = pWinScreen->hwndScreen;
++              }
++            }
++            else
++            {
++              hwnd = pWinPriv->hWnd;
+             }
+-
+-            return hwnd;
+         }
+     }
+     else {
+@@ -70,15 +151,16 @@
+ 
+         if (pWinScreen == NULL) {
+             ErrorF("winGetWindowInfo: screen has no privates\n");
+-            return NULL;
+         }
++        else
++        {
++            winDebug("winGetWindowInfo - returning root window\n");
+ 
+-        ErrorF("winGetWindowInfo: returning root window\n");
+-
+-        return pWinScreen->hwndScreen;
++            hwnd = pWinScreen->hwndScreen;
++        }
+     }
+ 
+-    return NULL;
++    return hwnd;
+ }
+ 
+ Bool
+@@ -90,12 +172,8 @@
+     if (pScreenInfo->fMultiWindow)
+         return TRUE;
+ 
+-    return FALSE;
+-}
++  if (g_fXdmcpEnabled)
++      return TRUE;
+ 
+-void
+-winSetScreenAiglxIsActive(ScreenPtr pScreen)
+-{
+-    winPrivScreenPtr pWinScreen = winGetScreenPriv(pScreen);
+-    pWinScreen->fNativeGlActive = TRUE;
++    return FALSE;
+ }

@@ -1,0 +1,193 @@
+--- ./hw/xwin/save_winmultiwindowwndproc.c	2019-07-21 16:42:51.000000000 +0100
++++ ./hw/xwin/winmultiwindowwndproc.c	2020-09-25 14:31:44.443640845 +0100
+@@ -49,6 +49,7 @@
+ #endif
+ 
+ extern void winUpdateWindowPosition(HWND hWnd, HWND * zstyle);
++extern void winSetAppUserModelID(HWND hWnd, char *AppID);
+ 
+ /*
+  * Local globals
+@@ -285,6 +286,32 @@
+     }
+ }
+ 
++static void raiseWinIfNeeded(WindowPtr pWin, HWND hwnd)
++{
++    /* Check if this window is top of X windows. */
++    HWND hWndAbove = NULL;
++    DWORD dwCurrentProcessID = GetCurrentProcessId();
++    DWORD dwWindowProcessID = 0;
++
++    for (hWndAbove = hwnd;
++         hWndAbove != NULL;
++         hWndAbove = GetNextWindow(hWndAbove, GW_HWNDPREV)) {
++        /* Ignore other XWin process's window */
++        GetWindowThreadProcessId(hWndAbove, &dwWindowProcessID);
++
++        if ((dwWindowProcessID == dwCurrentProcessID)
++            && GetProp(hWndAbove, WIN_WINDOW_PROP)
++            && !IsWindowVisible(hWndAbove)
++            && !IsIconic(hWndAbove))        /* ignore minimized windows */
++            break;
++    }
++    /* If this is top of X windows in Windows stack,
++       raise it in X stack. */
++    if (hWndAbove == NULL) {
++        winRaiseWindow(pWin);
++    }
++}
++
+ static
+     void
+ winStartMousePolling(winPrivScreenPtr s_pScreenPriv)
+@@ -407,6 +434,35 @@
+         }
+ }
+ 
++static
++void
++winAdjustXWindowState(winPrivScreenPtr s_pScreenPriv, winWMMessageRec *wmMsg)
++{
++    /* Do nothing if window has not yet been given initial state */
++    if (!GetProp(wmMsg->hwndWindow, WIN_STATE_PROP))
++        return;
++
++    wmMsg->msg = WM_WM_CHANGE_STATE;
++    if (IsIconic(wmMsg->hwndWindow)) {
++        wmMsg->dwID = 3; // IconicState
++        winSendMessageToWM(s_pScreenPriv->pWMInfo, wmMsg);
++    }
++    else if (IsZoomed(wmMsg->hwndWindow)) {
++        wmMsg->dwID = 2; // ZoomState
++        winSendMessageToWM(s_pScreenPriv->pWMInfo, wmMsg);
++    }
++    else if (IsWindowVisible(wmMsg->hwndWindow)) {
++        wmMsg->dwID = 1; // NormalState
++        winSendMessageToWM(s_pScreenPriv->pWMInfo, wmMsg);
++     }
++    else {
++        /* Only the client, not the user can Withdraw windows, so it doesn't make
++           much sense to handle that state here, and anything else is an
++           unanticapted state. */
++        ErrorF("winAdjustXWindowState - Unknown state for %p\n", wmMsg->hwndWindow);
++    }
++}
++
+ /*
+  * winTopLevelWindowProc - Window procedure for all top-level Windows windows.
+  */
+@@ -524,7 +580,7 @@
+             GetWindowRect(hwnd, &rWindow);
+             hRgnWindow = CreateRectRgnIndirect(&rWindow);
+             SetWindowRgn(hwnd, hRgnWindow, TRUE);
+-            DeleteObject(hRgnWindow);
++            /* DeleteObject(hRgnWindow); the system deletes the handle when no longer needed, see SetWindowRgn() on msdn */
+         }
+ 
+         SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR) XMING_SIGNATURE);
+@@ -897,18 +953,13 @@
+         SendMessage(hwndScreen, message, wParam, lParam);
+ 
+         if (LOWORD(wParam) != WA_INACTIVE) {
+-            /* Raise the window to the top in Z order */
+-            /* ago: Activate does not mean putting it to front! */
+-            /*
+-               wmMsg.msg = WM_WM_RAISE;
+-               if (fWMMsgInitialized)
+-               winSendMessageToWM (s_pScreenPriv->pWMInfo, &wmMsg);
+-             */
++            /* Raise the window to the top in Z order if needed */
++            raiseWinIfNeeded(pWin, GetNextWindow(hwnd, GW_HWNDPREV));
+ 
+             /* Tell our Window Manager thread to activate the window */
+             wmMsg.msg = WM_WM_ACTIVATE;
+-            if (fWMMsgInitialized)
+-                if (!pWin || !pWin->overrideRedirect)   /* for OOo menus */
++            if (fWMMsgInitialized && pWin &&
++                pWin->realized && !pWin->overrideRedirect) /* for OOo menus */
+                     winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+         }
+         /* Prevent the mouse wheel from stalling when another window is minimized */
+@@ -944,17 +995,22 @@
+ 
+         /* Branch on if the window was killed in X already */
+         if (pWinPriv && !pWinPriv->fXKilled) {
+-            ErrorF("winTopLevelWindowProc - WM_DESTROY - WM_WM_KILL\n");
+-
+-            /* Tell our Window Manager thread to kill the window */
+-            wmMsg.msg = WM_WM_KILL;
+-            if (fWMMsgInitialized)
+-                winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
++            /* Unowned i.e. at the top of a TRANSIENT_FOR hierarchy */
++            HWND owner = GetWindow(hwnd, GW_OWNER);
++            if (!owner) {
++                ErrorF("winTopLevelWindowProc - WM_DESTROY - WM_WM_KILL\n");
++
++                /* Tell our Window Manager thread to kill the window */
++                wmMsg.msg = WM_WM_KILL;
++                if (fWMMsgInitialized)
++                    winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
++            }
+         }
+ 
+         RemoveProp(hwnd, WIN_WINDOW_PROP);
+         RemoveProp(hwnd, WIN_WID_PROP);
+         RemoveProp(hwnd, WIN_NEEDMANAGE_PROP);
++        RemoveProp(hwnd, WIN_STATE_PROP);
+ 
+         break;
+ 
+@@ -1061,31 +1117,7 @@
+             else if (pWinPos->hwndInsertAfter == HWND_BOTTOM) {
+             }
+             else {
+-                /* Check if this window is top of X windows. */
+-                HWND hWndAbove = NULL;
+-                DWORD dwCurrentProcessID = GetCurrentProcessId();
+-                DWORD dwWindowProcessID = 0;
+-
+-                for (hWndAbove = pWinPos->hwndInsertAfter;
+-                     hWndAbove != NULL;
+-                     hWndAbove = GetNextWindow(hWndAbove, GW_HWNDPREV)) {
+-                    /* Ignore other XWin process's window */
+-                    GetWindowThreadProcessId(hWndAbove, &dwWindowProcessID);
+-
+-                    if ((dwWindowProcessID == dwCurrentProcessID)
+-                        && GetProp(hWndAbove, WIN_WINDOW_PROP)
+-                        && !IsWindowVisible(hWndAbove)
+-                        && !IsIconic(hWndAbove))        /* ignore minimized windows */
+-                        break;
+-                }
+-                /* If this is top of X windows in Windows stack,
+-                   raise it in X stack. */
+-                if (hWndAbove == NULL) {
+-#if CYGWINDOWING_DEBUG
+-                    winDebug("\traise to top\n");
+-#endif
+-                    winRaiseWindow(pWin);
+-                }
++                raiseWinIfNeeded(pWin, pWinPos->hwndInsertAfter);
+             }
+         }
+     }
+@@ -1103,6 +1135,8 @@
+         /* Adjust the X Window to the moved Windows window */
+         hasEnteredSizeMove = FALSE;
+         winAdjustXWindow(pWin, hwnd);
++        if (fWMMsgInitialized)
++            winAdjustXWindowState(s_pScreenPriv, &wmMsg);
+         return 0;
+ 
+     case WM_SIZE:
+@@ -1131,6 +1165,10 @@
+         if (!hasEnteredSizeMove) {
+             /* Adjust the X Window to the moved Windows window */
+             winAdjustXWindow(pWin, hwnd);
++            if (fWMMsgInitialized)
++                winAdjustXWindowState(s_pScreenPriv, &wmMsg);
++            if (wParam == SIZE_MINIMIZED)
++                winReorderWindowsMultiWindow();
+         }
+         /* else: wait for WM_EXITSIZEMOVE */
+         return 0;               /* end of WM_SIZE handler */

@@ -1,0 +1,28 @@
+--- ./xkb/save_xkbInit.c	2017-03-27 06:25:35.552714812 +0100
++++ ./xkb/xkbInit.c	2017-03-27 06:34:05.022196706 +0100
+@@ -806,6 +806,9 @@
+         }
+         return j;
+     }
++#ifdef __MINGW32__
++    return 0;
++#endif
+     if ((strcmp(argv[i], "-ardelay") == 0) || (strcmp(argv[i], "-ar1") == 0)) { /* -ardelay int */
+         if (++i >= argc)
+             UseMsg();
+@@ -826,9 +829,15 @@
+ void
+ XkbUseMsg(void)
+ {
++#ifdef __MINGW32__
++    ErrorF("\nXKEYBOARD Options...\n\n");
++#endif
+     ErrorF
+         ("[+-]accessx [ timeout [ timeout_mask [ feedback [ options_mask] ] ] ]\n");
+     ErrorF("                       enable/disable accessx key sequences\n");
++#ifdef __MINGW32__
++    return;
++#endif
+     ErrorF("-ardelay               set XKB autorepeat delay\n");
+     ErrorF("-arinterval            set XKB autorepeat interval\n");
+ }

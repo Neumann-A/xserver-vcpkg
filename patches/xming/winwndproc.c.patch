@@ -1,0 +1,46 @@
+--- ./hw/xwin/save_winwndproc.c	2020-04-08 13:01:17.390342499 +0100
++++ ./hw/xwin/winwndproc.c	2020-04-08 13:02:06.590965069 +0100
+@@ -164,8 +164,8 @@
+             break;
+         }
+ 
+-        ErrorF("winWindowProc - WM_DISPLAYCHANGE - new width: %d "
+-               "new height: %d new bpp: %d\n",
++        ErrorF("winWindowProc - WM_DISPLAYCHANGE - primary monitor "
++               "width: %d height: %d bpp: %d\n",
+                LOWORD(lParam), HIWORD(lParam), (int)wParam);
+ 
+         /* 0 bpp has no defined meaning, ignore this message */
+@@ -315,7 +315,7 @@
+         if (wParam == SIZE_MINIMIZED)
+             return 0;
+ 
+-        ErrorF("winWindowProc - WM_SIZE - new client area w: %d h: %d\n",
++        winDebug("winWindowProc - WM_SIZE - new client area w: %d h: %d\n",
+                LOWORD(lParam), HIWORD(lParam));
+ 
+         if (s_pScreenInfo->iResizeMode == resizeWithRandr) {
+@@ -404,11 +404,11 @@
+         break;
+ 
+     case WM_ENTERSIZEMOVE:
+-        ErrorF("winWindowProc - WM_ENTERSIZEMOVE\n");
++        winDebug("winWindowProc - WM_ENTERSIZEMOVE\n");
+         break;
+ 
+     case WM_EXITSIZEMOVE:
+-        ErrorF("winWindowProc - WM_EXITSIZEMOVE\n");
++        winDebug("winWindowProc - WM_EXITSIZEMOVE\n");
+ 
+         if (s_pScreenInfo->iResizeMode == resizeWithRandr) {
+             /* Set screen size to match new client area, if it is different to current */
+@@ -1150,6 +1150,9 @@
+         break;
+ 
+     case WM_GIVEUP:
++        /* Delete the tray Icon */
++        if (!s_pScreenInfo->fNoTrayIcon && s_pScreenPriv->hiconNotifyIcon != NULL)
++            winDeleteNotifyIcon(s_pScreenPriv);
+         /* Tell X that we are giving up */
+         if (s_pScreenInfo->fMultiWindow)
+             winDeinitMultiWindowWM();

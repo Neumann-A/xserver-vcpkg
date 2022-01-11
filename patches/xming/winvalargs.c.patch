@@ -1,0 +1,34 @@
+--- ./hw/xwin/save_winvalargs.c	2019-06-28 19:03:36.195112576 +0100
++++ ./hw/xwin/winvalargs.c	2019-06-28 17:12:21.287409308 +0100
+@@ -35,6 +35,13 @@
+ #include "winmsg.h"
+ 
+ /*
++ * Prototypes
++ */
++
++Bool
++winValidateArgs(void);
++
++/*
+  * Verify all screens have been explicitly specified
+  */
+ static BOOL
+@@ -67,12 +74,11 @@
+      *    XWin -screen 1 -screen 2
+      */
+     if (!isEveryScreenExplicit()) {
+-        ErrorF("winValidateArgs - Malformed set of screen parameter(s).  "
+-               "Screens must be specified consecutively starting with "
+-               "screen 0.  That is, you cannot have only a screen 1, nor "
+-               "could you have screen 0 and screen 2.  You instead must "
+-               "have screen 0, or screen 0 and screen 1, respectively.  "
+-               "You can specify as many screens as you want.\n");
++        ErrorF("winValidateArgs - Malformed set of screen parameter(s).\n"
++               "\t\tScreens must be specified consecutively starting with screen 0.\n"
++               "\t\tThat is, you cannot have only a screen 1, nor could you have screen 0 and screen 2.\n"
++               "\t\tYou instead must have screen 0, or screen 0 and screen 1, respectively.\n"
++               "\t\tYou can specify as many screens as you want.\n");
+         return FALSE;
+     }
+ 

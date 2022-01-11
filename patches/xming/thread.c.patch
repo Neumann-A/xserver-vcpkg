@@ -1,0 +1,171 @@
+--- ./hw/xwin/winclipboard/save_thread.c	2020-04-08 13:01:17.378341269 +0100
++++ ./hw/xwin/winclipboard/thread.c	2020-04-17 11:54:09.530358543 +0100
+@@ -36,6 +36,7 @@
+ #define HAS_WINSOCK 1
+ #endif
+ 
++#include <malloc.h>
+ #include <assert.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+@@ -48,6 +49,7 @@
+ #include <errno.h>
+ #endif
+ 
++#undef INCL_WINSOCK_API_TYPEDEFS
+ #include <xcb/xcb.h>
+ #include <xcb/xcb_aux.h>
+ #include <xcb/xcb_icccm.h>
+@@ -70,10 +72,16 @@
+  */
+ 
+ static HWND g_hwndClipboard = NULL;
++#ifdef __MINGW32__
++extern Window g_iClipboardWindow;
++#endif
+ 
+ int xfixes_event_base;
+ int xfixes_error_base;
+ 
++ADDCLIPBOARDFORMATLISTENERPROC g_fpAddClipboardFormatListener;
++REMOVECLIPBOARDFORMATLISTENERPROC g_fpRemoveClipboardFormatListener;
++
+ /*
+  * Local function prototypes
+  */
+@@ -117,15 +125,27 @@
+ #endif
+     fd_set fdsRead;
+     int iMaxDescriptor;
+-    xcb_connection_t *conn;
++    xcb_connection_t *conn = NULL;
+     xcb_window_t iWindow = XCB_NONE;
+     int iSelectError;
+     BOOL fShutdown = FALSE;
+     ClipboardConversionData data;
+-    int screen;
++    int screen = 0;
++
++    const xcb_query_extension_reply_t *xfixes_query;
++    xcb_screen_t *root_screen;
++    xcb_window_t root_window_id;
++    xcb_void_cookie_t cookie;
++    xcb_generic_error_t *error;
++    const static uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
+ 
+     winDebug("winClipboardProc - Hello\n");
+ 
++    g_fpAddClipboardFormatListener = (ADDCLIPBOARDFORMATLISTENERPROC)GetProcAddress(GetModuleHandle("user32"),"AddClipboardFormatListener");
++    g_fpRemoveClipboardFormatListener = (REMOVECLIPBOARDFORMATLISTENERPROC)GetProcAddress(GetModuleHandle("user32"),"RemoveClipboardFormatListener");
++    ErrorF("OS maintains clipboard viewer chain: %s\n", (g_fpAddClipboardFormatListener && g_fpRemoveClipboardFormatListener) ? "yes" : "no");
++
++
+     /* Make sure that the display opened */
+     conn = xcb_connect_to_display_with_auth_info(szDisplay, auth_info, &screen);
+     if (xcb_connection_has_error(conn)) {
+@@ -153,7 +173,6 @@
+     iMaxDescriptor = iConnectionNumber + 1;
+ #endif
+ 
+-    const xcb_query_extension_reply_t *xfixes_query;
+     xfixes_query = xcb_get_extension_data(conn, &xcb_xfixes_id);
+     if (!xfixes_query->present)
+       ErrorF ("winClipboardProc - XFixes extension not present\n");
+@@ -164,30 +183,29 @@
+ 
+     /* Create atoms */
+     atoms.atomClipboard = intern_atom(conn, "CLIPBOARD");
+-    atoms.atomLocalProperty = intern_atom(conn, "CYGX_CUT_BUFFER");
++    atoms.atomLocalProperty = intern_atom(conn, "XWIN_CUT_BUFFER");
+     atoms.atomUTF8String = intern_atom(conn, "UTF8_STRING");
+     atoms.atomCompoundText = intern_atom(conn, "COMPOUND_TEXT");
+     atoms.atomTargets = intern_atom(conn, "TARGETS");
+     atoms.atomIncr = intern_atom(conn, "INCR");
+ 
+-    xcb_screen_t *root_screen = xcb_aux_get_screen(conn, screen);
+-    xcb_window_t root_window_id = root_screen->root;
++    root_screen = xcb_aux_get_screen(conn, screen);
++    root_window_id = root_screen->root;
+ 
+     /* Create a messaging window */
+     iWindow = xcb_generate_id(conn);
+-    xcb_void_cookie_t cookie = xcb_create_window_checked(conn,
+-                                                         XCB_COPY_FROM_PARENT,
+-                                                         iWindow,
+-                                                         root_window_id,
+-                                                         1, 1,
+-                                                         500, 500,
+-                                                         0,
+-                                                         XCB_WINDOW_CLASS_INPUT_ONLY,
+-                                                         XCB_COPY_FROM_PARENT,
+-                                                         0,
+-                                                         NULL);
++    cookie = xcb_create_window_checked(conn,
++                                       XCB_COPY_FROM_PARENT,
++                                       iWindow,
++                                       root_window_id,
++                                       1, 1,
++                                       500, 500,
++                                       0,
++                                       XCB_WINDOW_CLASS_INPUT_ONLY,
++                                       XCB_COPY_FROM_PARENT,
++                                       0,
++                                       NULL);
+ 
+-    xcb_generic_error_t *error;
+     if ((error = xcb_request_check(conn, cookie))) {
+         ErrorF("winClipboardProc - Could not create an X window.\n");
+         free(error);
+@@ -197,13 +215,16 @@
+     xcb_icccm_set_wm_name(conn, iWindow, XCB_ATOM_STRING, 8, strlen("xwinclip"), "xwinclip");
+ 
+     /* Select event types to watch */
+-    const static uint32_t values[] = { XCB_EVENT_MASK_PROPERTY_CHANGE };
+     cookie = xcb_change_window_attributes_checked(conn, iWindow, XCB_CW_EVENT_MASK, values);
+     if ((error = xcb_request_check(conn, cookie))) {
+         ErrorF("winClipboardProc - Could not set event mask on messaging window\n");
+         free(error);
+     }
+ 
++    #ifdef __MINGW32__ /* Save the window for use by Xming in XDMCP mode */
++    g_iClipboardWindow = iWindow;
++    #endif
++
+     xcb_xfixes_select_selection_input(conn,
+                                       iWindow,
+                                       XCB_ATOM_PRIMARY,
+@@ -319,7 +340,7 @@
+         /* Check for Windows event ready */
+         if (FD_ISSET(fdMessageQueue, &fdsRead))
+ #else
+-        if (1)
++        if (0)
+ #endif
+         {
+             winDebug
+@@ -344,14 +365,8 @@
+     }
+ 
+     /* Close our X window */
+-    if (!xcb_connection_has_error(conn) && iWindow) {
++    if (!xcb_connection_has_error(conn) && iWindow)
+         cookie = xcb_destroy_window_checked(conn, iWindow);
+-        if ((error = xcb_request_check(conn, cookie)))
+-            ErrorF("winClipboardProc - XDestroyWindow failed.\n");
+-        else
+-            ErrorF("winClipboardProc - XDestroyWindow succeeded.\n");
+-        free(error);
+-    }
+ 
+ #ifdef HAS_DEVWINDOWS
+     /* Close our Win32 message handle */
+@@ -370,6 +385,9 @@
+     }
+ 
+     /* global clipboard variable reset */
++#ifdef __MINGW32__
++    g_iClipboardWindow = None;
++#endif
+     g_hwndClipboard = NULL;
+ 
+     return fShutdown;

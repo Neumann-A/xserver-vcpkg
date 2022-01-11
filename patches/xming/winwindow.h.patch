@@ -1,0 +1,48 @@
+--- ./hw/xwin/save_winwindow.h	2019-07-21 16:50:32.745504376 +0100
++++ ./hw/xwin/winwindow.h	2019-07-21 16:34:19.193321428 +0100
+@@ -41,15 +41,14 @@
+ 
+ /* Constant strings */
+ #ifndef PROJECT_NAME
+-#define PROJECT_NAME		"Cygwin/X"
++#define PROJECT_NAME		"Xming"
+ #endif
+-#define EXECUTABLE_NAME         "XWin"
+-#define WINDOW_CLASS		"cygwin/x"
++#define WINDOW_CLASS		PROJECT_NAME
+ #define WINDOW_TITLE		PROJECT_NAME ":%s.%d"
+ #define WINDOW_TITLE_XDMCP	"%s:%s.%d"
+ #define WIN_SCR_PROP		"cyg_screen_prop rl"
+-#define WINDOW_CLASS_X		"cygwin/x X rl"
+-#define WINDOW_CLASS_X_MSG      "cygwin/x X msg"
++#define WINDOW_CLASS_X		PROJECT_NAME " X rl"
++#define WINDOW_CLASS_X_MSG	PROJECT_NAME " X msg"
+ #define WINDOW_TITLE_X		PROJECT_NAME " X"
+ #define WIN_WINDOW_PROP		"cyg_window_prop_rl"
+ #ifdef HAS_DEVWINDOWS
+@@ -57,6 +56,7 @@
+ #endif
+ #define WIN_WID_PROP		"cyg_wid_prop_rl"
+ #define WIN_NEEDMANAGE_PROP	"cyg_override_redirect_prop_rl"
++#define WIN_STATE_PROP		"cyg_state_prop_rl"
+ #ifndef CYGMULTIWINDOW_DEBUG
+ #define CYGMULTIWINDOW_DEBUG    NO
+ #endif
+@@ -144,7 +144,7 @@
+           pthread_t * ptWMProc,
+           pthread_t * ptXMsgProc,
+           pthread_mutex_t * ppmServerStarted,
+-          int dwScreen, HWND hwndScreen);
++          int dwScreen, HWND hwndScreen, Bool compositeWM);
+ 
+ void
+  winDeinitMultiWindowWM(void);
+@@ -156,7 +156,7 @@
+  winPropertyStoreDestroy(void);
+ 
+ void
+- winSetAppUserModelID(HWND hWnd, const char *AppID);
++ winSetAppUserModelID(HWND hWnd, char *AppID);
+ 
+ void
+  winShowWindowOnTaskbar(HWND hWnd, Bool show);

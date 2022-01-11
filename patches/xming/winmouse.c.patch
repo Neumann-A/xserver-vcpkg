@@ -1,0 +1,30 @@
+--- ./hw/xwin/save_winmouse.c	2013-07-25 09:05:58.262517589 +0100
++++ ./hw/xwin/winmouse.c	2013-07-25 09:04:47.016229867 +0100
+@@ -45,18 +45,6 @@
+ static CARD8 const *g_winMouseButtonMap = NULL;
+ 
+ /*
+- * Local prototypes
+- */
+-
+-static void
+- winMouseCtrl(DeviceIntPtr pDevice, PtrCtrl * pCtrl);
+-
+-static void
+-winMouseCtrl(DeviceIntPtr pDevice, PtrCtrl * pCtrl)
+-{
+-}
+-
+-/*
+  * See Porting Layer Definition - p. 18
+  * This is known as a DeviceProc
+  */
+@@ -122,7 +110,7 @@
+                                 map,
+                                 lngMouseButtons + lngWheelEvents,
+                                 btn_labels,
+-                                winMouseCtrl,
++                                (PtrCtrlProcPtr)NoopDDA,
+                                 GetMotionHistorySize(), 2, axes_labels);
+         free(map);
+ 

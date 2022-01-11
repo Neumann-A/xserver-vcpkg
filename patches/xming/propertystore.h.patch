@@ -1,0 +1,57 @@
+--- ./hw/xwin/save_propertystore.h	2012-11-27 23:23:04.158518143 +0000
++++ ./hw/xwin/propertystore.h	2012-11-28 09:56:48.541231876 +0000
+@@ -33,7 +33,7 @@
+ #else /*  !__MINGW64_VERSION_MAJOR */
+ /* ... otherwise, we need to define all this stuff ourselves */
+ 
+-typedef struct _tagpropertykey {
++typedef struct  {
+     GUID fmtid;
+     DWORD pid;
+ } PROPERTYKEY;
+@@ -41,7 +41,9 @@
+ #define REFPROPERTYKEY const PROPERTYKEY *
+ #define REFPROPVARIANT const PROPVARIANT *
+ 
+-WINOLEAPI PropVariantClear(PROPVARIANT *pvar);
++WINOLEAPI PropVariantClear(PROPVARIANT *pvar);                          /* mingw has it in ole32.def but not in a .h */
++
++#define PropVariantInit(pvar) memset((pvar), 0, sizeof(PROPVARIANT))    /* macro not in mingw yet */
+ 
+ #ifdef INTERFACE
+ #undef INTERFACE
+@@ -61,22 +63,23 @@
+ };
+ 
+ #undef INTERFACE
+-typedef IPropertyStore *LPPROPERTYSTORE;
+-
+-DEFINE_GUID(IID_IPropertyStore, 0x886d8eeb, 0x8cf2, 0x4446, 0x8d, 0x02, 0xcd,
+-            0xba, 0x1d, 0xbd, 0xcf, 0x99);
+ 
+-#ifdef INITGUID
+-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY DECLSPEC_SELECTANY name = { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid }
+-#else
+-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY name
+-#endif
++const GUID IID_IPropertyStore =
++    { 0x886d8eeb, 0x8cf2, 0x4446, {0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99} };
+ 
+-DEFINE_PROPERTYKEY(PKEY_AppUserModel_ID, 0x9F4C2855, 0x9F79, 0x4B39, 0xA8, 0xD0,
+-                   0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3, 5);
++const PROPERTYKEY PKEY_AppUserModel_ID =
++    { {0x9f4c2855, 0x9f79, 0x4b39, {0xa8, 0xd0, 0xe1, 0xd4, 0x2d, 0xe1, 0xd5, 0xf3}}, 5 };
+ 
+ #endif /* !__MINGW64_VERSION_MAJOR */
+ 
++#ifdef XMING /* MinGW-w64 32-bit Xming compilation bodge for now...Colin */
++const GUID IID_IPropertyStore =
++    { 0x886d8eeb, 0x8cf2, 0x4446, {0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99} };
++
++const PROPERTYKEY PKEY_AppUserModel_ID =
++    { {0x9f4c2855, 0x9f79, 0x4b39, {0xa8, 0xd0, 0xe1, 0xd4, 0x2d, 0xe1, 0xd5, 0xf3}}, 5 };
++#endif
++
+ typedef HRESULT(__stdcall * SHGETPROPERTYSTOREFORWINDOWPROC) (HWND, REFIID,
+                                                               void **);
+ 

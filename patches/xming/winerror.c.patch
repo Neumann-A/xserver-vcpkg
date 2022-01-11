@@ -1,0 +1,97 @@
+--- ./hw/xwin/save_winerror.c	2017-08-23 13:43:33.821267151 +0100
++++ ./hw/xwin/winerror.c	2017-08-23 13:55:06.601499212 +0100
+@@ -63,6 +63,7 @@
+ void
+ OsVendorFatalError(const char *f, va_list args)
+ {
++    HANDLE hFile = NULL;
+     char errormsg[1024] = "";
+ 
+     /* Don't give duplicate warning if UseMsg was called */
+@@ -71,32 +72,43 @@
+ 
+     if (!g_fLogInited) {
+         g_fLogInited = TRUE;
+-        g_pszLogFile = LogInit(g_pszLogFile, ".old");
++        g_pszLogFile = LogInit(g_pszLogFile, NULL);
+     }
+-    LogClose(EXIT_ERR_ABORT);
+ 
+-    /* Format the error message */
+-    vsnprintf(errormsg, sizeof(errormsg), f, args);
++    if (g_pszLogFile)
++        hFile = CreateFile(g_pszLogFile,GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+ 
+-    /*
+-       Sometimes the error message needs a bit of cosmetic cleaning
+-       up for use in a dialog box...
+-     */
+-    {
+-        char *s;
+-
+-        while ((s = strstr(errormsg, "\n\t")) != NULL) {
+-            s[0] = ' ';
+-            s[1] = '\n';
++    if (!hFile || hFile == INVALID_HANDLE_VALUE)
++        winMessageBoxF("A fatal error has occurred and " PROJECT_NAME " will now exit.\n"
++                       "Cannot create or open the logfile %s.\n",
++                       MB_ICONERROR, (g_pszLogFile ? g_pszLogFile:""));
++    else {
++        if (g_pszLogFile) CloseHandle(hFile);
++        LogClose(EXIT_ERR_ABORT);
++
++        /* Format the error message */
++        vsnprintf(errormsg, sizeof(errormsg), f, args);
++
++        /*
++           Sometimes the error message needs a bit of cosmetic cleaning
++           up for use in a dialog box...
++        */
++        {
++            char *s;
++
++            while ((s = strstr(errormsg, "\n\t")) != NULL) {
++                s[0] = ' ';
++                s[1] = '\n';
++            }
+         }
+-    }
+ 
+-    winMessageBoxF("A fatal error has occurred and " PROJECT_NAME " will now exit.\n\n"
+-                   "%s\n\n"
+-                   "Please open %s for more information.\n",
+-                   MB_ICONERROR,
+-                   errormsg,
+-                   (g_pszLogFile ? g_pszLogFile : "the logfile"));
++        winMessageBoxF("A fatal error has occurred and " PROJECT_NAME " will now exit.\n\n"
++                       "%s\n\n"
++                       "Please open %s for more information.\n",
++                       MB_ICONERROR,
++                       errormsg,
++                       (g_pszLogFile ? g_pszLogFile : "the logfile"));
++    }
+ }
+ 
+ /*
+@@ -122,18 +134,12 @@
+ 
+ #define MESSAGEBOXF \
+ 	"%s\n" \
+-	"Vendor: %s\n" \
+-	"Release: %d.%d.%d.%d\n" \
+-	"Contact: %s\n" \
+-	"%s\n\n" \
+-	"XWin was started with the following command-line:\n\n" \
++	"%s was started with the following command line...\n" \
+ 	"%s\n"
+ 
+     size = asprintf(&pszMsgBox, MESSAGEBOXF,
+-                    pszErrorF, XVENDORNAME,
+-                    XORG_VERSION_MAJOR, XORG_VERSION_MINOR, XORG_VERSION_PATCH,
+-                    XORG_VERSION_SNAP,
+-                    BUILDERADDR, BUILDERSTRING, g_pszCommandLine);
++                    pszErrorF, PROJECT_NAME,
++                    g_pszCommandLine);
+ 
+     if (size == -1) {
+         pszMsgBox = NULL;

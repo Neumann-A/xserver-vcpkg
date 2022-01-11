@@ -1,0 +1,11 @@
+--- ./include/save_os.h	2018-03-23 15:47:55.285426517 +0000
++++ ./include/os.h	2018-03-23 15:54:08.198014878 +0000
+@@ -480,7 +480,7 @@
+ AccessUsingXdmcp(void);
+ 
+ extern _X_EXPORT void
+-DefineSelf(int /*fd */ );
++DefineSelf(int /*fd */, const int /*protocol*/ );
+ 
+ #ifdef XDMCP
+ extern _X_EXPORT void

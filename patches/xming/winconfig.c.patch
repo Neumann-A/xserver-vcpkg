@@ -1,0 +1,17 @@
+--- ./hw/xwin/save_winconfig.c	2016-03-10 13:31:30.766941773 +0000
++++ ./hw/xwin/winconfig.c	2016-03-10 13:26:20.871616813 +0000
+@@ -341,10 +341,10 @@
+                        pLayout->xkbvariant ? pLayout->xkbvariant : "none",
+                        pLayout->xkboptions ? pLayout->xkboptions : "none");
+ 
+-                g_winInfo.xkb.model = pLayout->xkbmodel;
+-                g_winInfo.xkb.layout = pLayout->xkblayout;
+-                g_winInfo.xkb.variant = pLayout->xkbvariant;
+-                g_winInfo.xkb.options = pLayout->xkboptions;
++                g_winInfo.xkb.model = (char*)pLayout->xkbmodel;
++                g_winInfo.xkb.layout = (char*)pLayout->xkblayout;
++                g_winInfo.xkb.variant = (char*)pLayout->xkbvariant;
++                g_winInfo.xkb.options = (char*)pLayout->xkboptions;
+ 
+                 if (deviceIdentifier == 0xa000) {
+                     winMsg(X_PROBED, "Windows keyboard layout device identifier indicates Macintosh, setting Model = \"macintosh\"");

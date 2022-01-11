@@ -1,0 +1,96 @@
+--- ./hw/xwin/save_winos.c	2015-05-15 04:58:46.378899902 +0100
++++ ./hw/xwin/winos.c	2015-06-04 20:17:44.058979732 +0100
+@@ -31,25 +31,27 @@
+ #endif
+ #include "win.h"
+ 
++void IsWow64(Bool* bIsWow64, const char* isWow);
++void winOS(void);
++
+ typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS)(HANDLE, PBOOL);
+ 
+-static const char*
+-IsWow64(void)
++void
++IsWow64(Bool* bIsWow64, const char* isWow)
+ {
+ #ifdef __x86_64__
+-    return " (64-bit)";
++    strcpy ((char*)isWow, " (64-bit)");
+ #else
+-    WINBOOL bIsWow64;
+     LPFN_ISWOW64PROCESS fnIsWow64Process =
+         (LPFN_ISWOW64PROCESS) GetProcAddress(GetModuleHandle(TEXT("kernel32")),
+                                              "IsWow64Process");
+     if (NULL != fnIsWow64Process) {
+-        if (fnIsWow64Process(GetCurrentProcess(), &bIsWow64))
+-            return bIsWow64 ? " (WoW64)" : " (32-bit)";
++        if (fnIsWow64Process(GetCurrentProcess(), bIsWow64))
++            strcpy ((char*)isWow, *bIsWow64 ? " (WoW64)" : " (32-bit)");
+     }
+-
+-    /* OS doesn't support IsWow64Process() */
+-    return "";
++    else
++        /* OS doesn't support IsWow64Process() */
++        strcpy ((char*)isWow, "");
+ #endif
+ }
+ 
+@@ -60,13 +62,53 @@
+ void
+ winOS(void)
+ {
++    Bool Supported = TRUE;
++    Bool bIsWow64 = FALSE;
+     OSVERSIONINFOEX osvi = {0};
++    char isWow[] = " (WoWUnknown)"; /* max size [14] */
+ 
+     /* Get operating system version information */
+     osvi.dwOSVersionInfoSize = sizeof(osvi);
+     GetVersionEx((LPOSVERSIONINFO)&osvi);
+ 
+-    ErrorF("OS: Windows NT %d.%d build %d%s\n",
+-           (int)osvi.dwMajorVersion, (int)osvi.dwMinorVersion,
+-           (int)osvi.dwBuildNumber, IsWow64());
++    if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 10) {
++        if (osvi.dwMinorVersion == 0)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "10" : "Server 10");
++        else
++            ErrorF("Version 10.%ld", osvi.dwMinorVersion);
++    }
++    else if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
++        if (osvi.dwMinorVersion == 3)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "8.1" : "Server 2012 R2");
++        else if (osvi.dwMinorVersion == 2)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "8" : "Server 2012");
++        else if (osvi.dwMinorVersion == 1)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "7" : "Server 2008 R2");
++        else if (osvi.dwMinorVersion == 0)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "Vista" : "Server 2008");
++        else
++            ErrorF("Version 6.%ld", osvi.dwMinorVersion);
++    }
++    else if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 5) {
++        if (osvi.dwMinorVersion == 2)
++            ErrorF((osvi.wProductType == VER_NT_WORKSTATION) ? "XP x64 Edition" :
++                   (GetSystemMetrics(SM_SERVERR2)) ? "Server 2003 R2" : "Server 2003");
++        else if (osvi.dwMinorVersion == 1)
++            ErrorF("XP");
++        else if (osvi.dwMinorVersion == 0) {
++            ErrorF("2000");
++            Supported = FALSE;
++        }
++    }
++    else {
++        ErrorF("Version %ld.%ld", osvi.dwMajorVersion, osvi.dwMinorVersion);
++        Supported = FALSE;
++    }
++
++    if (Supported) {
++        IsWow64(&bIsWow64, isWow);
++        ErrorF("%s\n", isWow);
++    }
++    else
++        ErrorF(" (not supported)\n");
+ }

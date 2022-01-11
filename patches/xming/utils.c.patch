@@ -1,0 +1,318 @@
+--- ./os/save_utils.c	2021-10-14 12:26:42.006234577 +0100
++++ ./os/utils.c	2021-10-14 12:27:41.973560430 +0100
+@@ -64,6 +64,7 @@
+ 
+ #if defined(WIN32) && !defined(__CYGWIN__)
+ #include <X11/Xwinsock.h>
++#include <ws2tcpip.h>
+ #endif
+ #include <X11/Xos.h>
+ #include <stdio.h>
+@@ -181,9 +182,9 @@
+ 
+ #include <errno.h>
+ 
+-Bool CoreDump;
++Bool CoreDump = FALSE;
+ 
+-Bool enableIndirectGLX = FALSE;
++Bool enableIndirectGLX = TRUE;
+ 
+ #ifdef PANORAMIX
+ Bool PanoramiXExtensionDisabledHack = FALSE;
+@@ -416,16 +417,31 @@
+     errno = olderrno;
+ }
+ 
+-#if (defined WIN32 && defined __MINGW32__) || defined(__CYGWIN__)
++#if (defined WIN32 && defined __MINGW32__)
++typedef long long (*tickcount64)(void);
++static unsigned long long
++get_tick_count(void) {
++    static int onlyonce = 1;
++    static tickcount64 isGetTickCount64 = NULL;
++
++    if (onlyonce) {
++        HMODULE hlib = LoadLibrary("kernel32.dll");
++        if (hlib)
++            isGetTickCount64 = (tickcount64)GetProcAddress(hlib, "GetTickCount64");
++        onlyonce = 0;
++    }
++    return isGetTickCount64 ? isGetTickCount64() : GetTickCount();
++}
++
+ CARD32
+ GetTimeInMillis(void)
+ {
+-    return GetTickCount();
++    return get_tick_count();
+ }
+ CARD64
+ GetTimeInMicros(void)
+ {
+-    return (CARD64) GetTickCount() * 1000;
++    return (CARD64) get_tick_count() * 1000;
+ }
+ #else
+ CARD32
+@@ -505,7 +521,13 @@
+ void
+ UseMsg(void)
+ {
++#ifdef __MINGW32__
++    ErrorF("Usage...\nXming [:display-number] [option ...]\n\n");
++    ErrorF(":display-number\n\tXming runs as the given display-number, which defaults to 0.\n");
++    ErrorF("\tTo run multiple instances, use unique display-numbers.\n\n");
++#else
+     ErrorF("use: X [:<display>] [option]\n");
++#endif
+     ErrorF("-a #                   default pointer acceleration (factor)\n");
+     ErrorF("-ac                    disable access control restrictions\n");
+     ErrorF("-audit int             set audit trail level\n");
+@@ -513,23 +535,27 @@
+     ErrorF("-br                    create root window with black background\n");
+     ErrorF("+bs                    enable any backing store support\n");
+     ErrorF("-bs                    disable any backing store support\n");
+-    ErrorF("-c                     turns off key-click\n");
+-    ErrorF("c #                    key-click volume (0-100)\n");
++/*    ErrorF("-c                     turns off key-click\n");
++    ErrorF("c #                    key-click volume (0-100)\n");*/
+     ErrorF("-cc int                default color visual class\n");
+     ErrorF("-nocursor              disable the cursor\n");
+-    ErrorF("-core                  generate core dump on fatal error\n");
+-    ErrorF("-displayfd fd          file descriptor to write display number to when ready to connect\n");
++/*    ErrorF("-core                  generate core dump on fatal error\n");
++    ErrorF("-displayfd fd          file descriptor to write display number to when ready to connect\n"); */
++#ifdef __MINGW32__
++    ErrorF("-dpi [auto|int]        screen resolution set to native or this dpi\n");
++#else
+     ErrorF("-dpi int               screen resolution in dots per inch\n");
++#endif
+ #ifdef DPMSExtension
+     ErrorF("-dpms                  disables VESA DPMS monitor control\n");
+ #endif
+     ErrorF
+         ("-deferglyphs [none|all|16] defer loading of [no|all|16-bit] glyphs\n");
+-    ErrorF("-f #                   bell base (0-100)\n");
++    ErrorF("-f 0                   beep off (no bell volume)\n");
+     ErrorF("-fp string             default font path\n");
+     ErrorF("-help                  prints message with these options\n");
+-    ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
+-    ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
++/*    ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
++    ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n"); */
+     ErrorF("-I                     ignore all remaining arguments\n");
+ #ifdef RLIMIT_DATA
+     ErrorF("-ld int                limit data space to N Kb\n");
+@@ -545,7 +571,7 @@
+ #endif
+     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
+     ErrorF("-nolisten string       don't listen on protocol\n");
+-    ErrorF("-listen string         listen on protocol\n");
++/*    ErrorF("-listen string         listen on protocol\n");*/
+     ErrorF("-noreset               don't reset after last client exists\n");
+     ErrorF("-background [none]     create root window with no background\n");
+     ErrorF("-reset                 reset after last client exists\n");
+@@ -555,25 +581,26 @@
+     ErrorF("-r                     turns off auto-repeat\n");
+     ErrorF("r                      turns on auto-repeat \n");
+     ErrorF("-render [default|mono|gray|color] set render color alloc policy\n");
+-    ErrorF("-retro                 start with classic stipple and cursor\n");
++    ErrorF("-retro                 start with classic stipple\n");
+     ErrorF("-s #                   screen-saver timeout (minutes)\n");
+-    ErrorF("-seat string           seat to run on\n");
++/*    ErrorF("-seat string           seat to run on\n");*/
+     ErrorF("-t #                   default pointer threshold (pixels/t)\n");
+     ErrorF("-terminate             terminate at server reset\n");
++    ErrorF("\tusing -once is better in XDMCP mode\n");
+     ErrorF("-tst                   disable testing extensions\n");
+-    ErrorF("ttyxx                  server started from init on /dev/ttyxx\n");
++/*    ErrorF("ttyxx                  server started from init on /dev/ttyxx\n");
+     ErrorF("v                      video blanking for screen-saver\n");
+-    ErrorF("-v                     screen-saver without video blanking\n");
++    ErrorF("-v                     screen-saver without video blanking\n");*/
+     ErrorF("-wr                    create root window with white background\n");
+-    ErrorF("-maxbigreqsize         set maximal bigrequest size \n");
++/*    ErrorF("-maxbigreqsize         set maximal bigrequest size \n");*/
+ #ifdef PANORAMIX
+     ErrorF("+xinerama              Enable XINERAMA extension\n");
+     ErrorF("-xinerama              Disable XINERAMA extension\n");
+ #endif
+-    ErrorF
++/*    ErrorF
+         ("-dumbSched             Disable smart scheduling, enable old behavior\n");
+     ErrorF("-schedInterval int     Set scheduler interval in msec\n");
+-    ErrorF("-sigstop               Enable SIGSTOP based startup\n");
++    ErrorF("-sigstop               Enable SIGSTOP based startup\n");*/
+     ErrorF("+extension name        Enable extension\n");
+     ErrorF("-extension name        Disable extension\n");
+ #ifdef XDMCP
+@@ -713,7 +740,7 @@
+             enableBackingStore = TRUE;
+         else if (strcmp(argv[i], "-bs") == 0)
+             disableBackingStore = TRUE;
+-        else if (strcmp(argv[i], "c") == 0) {
++/*      else if (strcmp(argv[i], "c") == 0) {
+             if (++i < argc)
+                 defaultKeyboardControl.click = atoi(argv[i]);
+             else
+@@ -721,32 +748,50 @@
+         }
+         else if (strcmp(argv[i], "-c") == 0) {
+             defaultKeyboardControl.click = 0;
+-        }
++        }*/
+         else if (strcmp(argv[i], "-cc") == 0) {
+             if (++i < argc)
+                 defaultColorVisualClass = atoi(argv[i]);
+             else
+                 UseMsg();
+         }
+-        else if (strcmp(argv[i], "-core") == 0) {
+ #if !defined(WIN32) || !defined(__MINGW32__)
++        else if (strcmp(argv[i], "-core") == 0) {
+             struct rlimit core_limit;
+ 
+             getrlimit(RLIMIT_CORE, &core_limit);
+             core_limit.rlim_cur = core_limit.rlim_max;
+             setrlimit(RLIMIT_CORE, &core_limit);
+-#endif
+             CoreDump = TRUE;
+         }
++#endif
+         else if (strcmp(argv[i], "-nocursor") == 0) {
+             EnableCursor = FALSE;
+         }
+         else if (strcmp(argv[i], "-dpi") == 0) {
+             if (++i < argc)
++#ifdef __MINGW32__
++	    {
++		if (strcmp(argv[i], "auto") == 0)
++		{
++		    HDC hdc = GetDC(NULL);
++		    if (hdc)
++		    {
++			int dpiY = GetDeviceCaps(hdc, LOGPIXELSY);
++			monitorResolution = dpiY;
++			ReleaseDC(NULL, hdc);
++		    }
++		}
++	        else if (isdigit(*argv[i])) /* Naively prevent a crash if not numeric */
++		    monitorResolution = atoi(argv[i]);
++	    }
++#else
+                 monitorResolution = atoi(argv[i]);
++#endif
+             else
+                 UseMsg();
+         }
++#ifndef __MINGW32__
+         else if (strcmp(argv[i], "-displayfd") == 0) {
+             if (++i < argc) {
+                 displayfd = atoi(argv[i]);
+@@ -757,6 +802,7 @@
+             else
+                 UseMsg();
+         }
++#endif
+ #ifdef DPMSExtension
+         else if (strcmp(argv[i], "dpms") == 0)
+             /* ignored for compatibility */ ;
+@@ -917,10 +963,10 @@
+         else if (strcmp(argv[i], "-tst") == 0) {
+             noTestExtensions = TRUE;
+         }
+-        else if (strcmp(argv[i], "v") == 0)
++/*      else if (strcmp(argv[i], "v") == 0)
+             defaultScreenSaverBlanking = PreferBlanking;
+         else if (strcmp(argv[i], "-v") == 0)
+-            defaultScreenSaverBlanking = DontPreferBlanking;
++            defaultScreenSaverBlanking = DontPreferBlanking;*/
+         else if (strcmp(argv[i], "-wr") == 0)
+             whiteRoot = TRUE;
+         else if (strcmp(argv[i], "-background") == 0) {
+@@ -974,7 +1020,6 @@
+         else if (strcmp(argv[i], "-dumbSched") == 0) {
+             SmartScheduleSignalEnable = FALSE;
+         }
+-#endif
+         else if (strcmp(argv[i], "-schedInterval") == 0) {
+             if (++i < argc) {
+                 SmartScheduleInterval = atoi(argv[i]);
+@@ -990,6 +1035,7 @@
+             else
+                 UseMsg();
+         }
++#endif
+         else if (strcmp(argv[i], "-render") == 0) {
+             if (++i < argc) {
+                 int policy = PictureParseCmapPolicy(argv[i]);
+@@ -1002,9 +1048,9 @@
+             else
+                 UseMsg();
+         }
+-        else if (strcmp(argv[i], "-sigstop") == 0) {
++/*      else if (strcmp(argv[i], "-sigstop") == 0) {
+             RunFromSigStopParent = TRUE;
+-        }
++        }*/
+         else if (strcmp(argv[i], "+extension") == 0) {
+             if (++i < argc) {
+                 if (!EnableDisableExtension(argv[i], TRUE))
+@@ -1170,10 +1216,10 @@
+     return ret;
+ }
+ 
++#if HAVE_SETITIMER
+ void
+ SmartScheduleStopTimer(void)
+ {
+-#if HAVE_SETITIMER
+     struct itimerval timer;
+ 
+     if (!SmartScheduleSignalEnable)
+@@ -1183,13 +1229,11 @@
+     timer.it_value.tv_sec = 0;
+     timer.it_value.tv_usec = 0;
+     (void) setitimer(ITIMER_REAL, &timer, 0);
+-#endif
+ }
+ 
+ void
+ SmartScheduleStartTimer(void)
+ {
+-#if HAVE_SETITIMER
+     struct itimerval timer;
+ 
+     if (!SmartScheduleSignalEnable)
+@@ -1199,10 +1243,8 @@
+     timer.it_value.tv_sec = 0;
+     timer.it_value.tv_usec = SmartScheduleInterval * 1000;
+     setitimer(ITIMER_REAL, &timer, 0);
+-#endif
+ }
+ 
+-#if HAVE_SETITIMER
+ static void
+ SmartScheduleTimer(int sig)
+ {
+@@ -1245,18 +1287,16 @@
+     ret = sigaction(SIGALRM, &act, 0);
+     return ret;
+ }
+-#endif
+ 
+ void
+ SmartScheduleInit(void)
+ {
+-#if HAVE_SETITIMER
+     if (SmartScheduleEnable() < 0) {
+         perror("sigaction for smart scheduler");
+         SmartScheduleSignalEnable = FALSE;
+     }
+-#endif
+ }
++#endif
+ 
+ #ifdef SIG_BLOCK
+ static sigset_t PreviousSignalMask;

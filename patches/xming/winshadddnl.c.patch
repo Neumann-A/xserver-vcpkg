@@ -1,0 +1,44 @@
+--- ./hw/xwin/save_winshadddnl.c	2017-08-23 13:38:44.977844079 +0100
++++ ./hw/xwin/winshadddnl.c	2017-08-23 14:22:22.264944608 +0100
+@@ -189,7 +189,7 @@
+  * that clips our blits to the unobscured client area of our display window.
+  */
+ 
+-Bool
++static Bool
+ winAllocateFBShadowDDNL(ScreenPtr pScreen)
+ {
+     winScreenPriv(pScreen);
+@@ -1013,8 +1013,9 @@
+                                      pScreenPriv->pddsShadow4,
+                                      &rcSrc, DDBLT_WAIT, NULL);
+     if (FAILED(ddrval)) {
+-        ErrorF("winRedrawScreenShadowDDNL - IDirectDrawSurface4_Blt () "
+-               "failed: %08x\n", (unsigned int) ddrval);
++        if (!(ddrval == DDERR_SURFACELOST && pScreenInfo->fFullScreen))
++             ErrorF("winRedrawScreenShadowDDNL - IDirectDrawSurface4_Blt () "
++                    "failed: %08x\n", (unsigned int) ddrval);
+     }
+ 
+     return TRUE;
+@@ -1157,9 +1158,10 @@
+         /* Pop the palette out of the primary surface */
+         ddrval = IDirectDrawSurface4_SetPalette(pScreenPriv->pddsPrimary4,
+                                                 NULL);
+-        if (FAILED(ddrval)) {
++        if (FAILED(ddrval) && ddrval != DDERR_SURFACELOST) {
+             ErrorF("winDestroyColormapShadowDDNL - Failed freeing the "
+-                   "default colormap DirectDraw palette.\n");
++                   "default colormap DirectDraw palette. %08x\n",
++                   (unsigned int) ddrval);
+             return FALSE;
+         }
+ 
+@@ -1201,6 +1203,7 @@
+         pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
+     pScreenPriv->pwinFinishScreenInit = winFinishScreenInitFB;
+     pScreenPriv->pwinBltExposedRegions = winBltExposedRegionsShadowDDNL;
++    pScreenPriv->pwinBltExposedWindowRegion = NULL;
+     pScreenPriv->pwinActivateApp = winActivateAppShadowDDNL;
+     pScreenPriv->pwinRedrawScreen = winRedrawScreenShadowDDNL;
+     pScreenPriv->pwinRealizeInstalledPalette

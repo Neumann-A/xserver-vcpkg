@@ -1,0 +1,12 @@
+--- ./os/save_xsha1.c	2020-06-01 22:11:33.518636868 +0100
++++ ./os/xsha1.c	2020-06-01 22:12:35.319483003 +0100
+@@ -110,7 +110,9 @@
+ 
+ #elif defined(HAVE_SHA1_IN_CRYPTOAPI)        /* Use CryptoAPI for SHA1 */
+ 
++#ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN
++#endif
+ #include <X11/Xwindows.h>
+ #include <wincrypt.h>
+ 

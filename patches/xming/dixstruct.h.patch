@@ -1,0 +1,50 @@
+--- ./include/save_dixstruct.h	2017-10-25 00:04:45.470039793 +0100
++++ ./include/dixstruct.h	2017-10-25 00:06:45.423488681 +0100
+@@ -85,7 +85,9 @@
+     unsigned int clientGone:1;
+     unsigned int closeDownMode:2;
+     unsigned int clientState:2;
++#ifdef HAVE_SETITIMER
+     signed char smart_priority;
++#endif
+     short noClientException;      /* this client died or needs to be killed */
+     int priority;
+     ReplySwapPtr pSwapReplyFunc;
+@@ -103,8 +105,10 @@
+     unsigned char xkbClientFlags;
+     KeyCode minKC, maxKC;
+ 
++#ifdef HAVE_SETITIMER
+     int smart_start_tick;
+     int smart_stop_tick;
++#endif
+ 
+     DeviceIntPtr clientPtr;
+     ClientIdPtr clientIds;
+@@ -123,15 +127,15 @@
+ /*
+  * Scheduling interface
+  */
++#if HAVE_SETITIMER
+ extern long SmartScheduleTime;
+ extern long SmartScheduleInterval;
+ extern long SmartScheduleSlice;
+ extern long SmartScheduleMaxSlice;
+-#if HAVE_SETITIMER
+ extern Bool SmartScheduleSignalEnable;
+-#else
++/* #else
+ #define SmartScheduleSignalEnable FALSE
+-#endif
++#endif */
+ extern void SmartScheduleStartTimer(void);
+ extern void SmartScheduleStopTimer(void);
+ 
+@@ -139,6 +143,7 @@
+ #define SMART_MIN_PRIORITY  (-20)
+ 
+ extern void SmartScheduleInit(void);
++#endif
+ 
+ /* This prototype is used pervasively in Xext, dix */
+ #define DISPATCH_PROC(func) int func(ClientPtr /* client */)

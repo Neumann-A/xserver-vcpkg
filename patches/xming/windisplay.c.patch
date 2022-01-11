@@ -1,0 +1,39 @@
+--- ./hw/xwin/save_windisplay.c	2014-09-12 14:54:22.493220765 +0100
++++ ./hw/xwin/windisplay.c	2014-09-12 16:01:12.016433320 +0100
+@@ -30,6 +30,8 @@
+ #endif
+ 
+ #include <opaque.h>             // for display
++#include <X11/Xwindows.h>
++#include "winglobals.h"
+ #include "windisplay.h"
+ #include "winmsg.h"
+ 
+@@ -45,20 +47,11 @@
+ void
+ winGetDisplayName(char *szDisplay, unsigned int screen)
+ {
+-    if (_XSERVTransIsListening("local")) {
+-        snprintf(szDisplay, 512, ":%s.%d", display, screen);
+-    }
+-    else if (_XSERVTransIsListening("inet")) {
+-        snprintf(szDisplay, 512, "127.0.0.1:%s.%d", display, screen);
+-    }
+-    else if (_XSERVTransIsListening("inet6")) {
+-        snprintf(szDisplay, 512, "::1:%s.%d", display, screen);
+-    }
+-    else {
+-        // this can't happen!
+-        ErrorF("winGetDisplay: Don't know what to use for DISPLAY\n");
+-        snprintf(szDisplay, 512, "localhost:%s.%d", display, screen);
+-    }
+-
+-    winDebug("winGetDisplay: DISPLAY=%s\n", szDisplay);
++    snprintf(szDisplay,
++             512,
++             "%s:%d.%d",
++             _XSERVTransIsListening("inet") ? ((xdm_from) ? xdm_from : "127.0.0.1")
++                 : (_XSERVTransIsListening("inet6") ? "[::1]" : "localhost"),
++             atoi(display),
++             screen);
+ }

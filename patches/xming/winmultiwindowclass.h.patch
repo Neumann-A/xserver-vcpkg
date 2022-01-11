@@ -1,0 +1,10 @@
+--- ./hw/xwin/save_winmultiwindowclass.h	2016-02-29 19:43:42.229705647 +0000
++++ ./hw/xwin/winmultiwindowclass.h	2016-02-29 19:40:01.359334802 +0000
+@@ -130,6 +130,6 @@
+  winMultiWindowGetWMName(WindowPtr pWin, char **wmName);
+ 
+ int
+- winMultiWindowGetTransientFor(WindowPtr pWin, Window *ppDaddy);
++ winMultiWindowGetTransientFor(WindowPtr pWin, Window *pDaddyId);
+ 
+ #endif

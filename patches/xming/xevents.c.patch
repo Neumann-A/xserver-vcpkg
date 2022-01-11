@@ -1,0 +1,145 @@
+--- ./hw/xwin/winclipboard/save_xevents.c	2020-04-08 13:01:17.386342136 +0100
++++ ./hw/xwin/winclipboard/xevents.c	2020-04-16 17:09:31.329780852 +0100
+@@ -34,6 +34,7 @@
+ #include <xwin-config.h>
+ #endif
+ 
++#include <malloc.h>
+ #include <limits.h>
+ #include <wchar.h>
+ 
+@@ -43,6 +44,8 @@
+ #include "winclipboard.h"
+ #include "internal.h"
+ 
++extern int g_iLogVerbose;
++
+ /*
+  * Constants
+  */
+@@ -198,13 +201,15 @@
+     xcb_atom_t xtpText_encoding;
+     int xtpText_nitems;
+ 
+-    BOOL fSetClipboardData = TRUE;
++    BOOL fSetClipboardData = FALSE;
+     char *pszReturnData = NULL;
+-    UINT codepage;
++    UINT codepage = 0;
+     wchar_t *pwszUnicodeStr = NULL;
+     HGLOBAL hGlobal = NULL;
+     char *pszGlobalData = NULL;
+ 
++    int iUnicodeLen;
++
+     /* Retrieve the selection data and delete the property */
+     xcb_get_property_cookie_t cookie = xcb_get_property(conn,
+                                                         TRUE,
+@@ -310,7 +315,7 @@
+     winClipboardUNIXtoDOS(&pszReturnData, strlen(pszReturnData));
+ 
+     /* Find out how much space needed when converted to UTF-16 */
+-    int iUnicodeLen = MultiByteToWideChar(codepage, 0,
++    iUnicodeLen = MultiByteToWideChar(codepage, 0,
+                                           pszReturnData, -1, NULL, 0);
+ 
+     /* NOTE: iUnicodeLen includes space for null terminator */
+@@ -361,10 +366,9 @@
+     pszGlobalData = NULL;
+ 
+     /* Push the selection data to the Windows clipboard */
+-    SetClipboardData(CF_UNICODETEXT, hGlobal);
++    if (SetClipboardData(CF_UNICODETEXT, hGlobal)) fSetClipboardData = TRUE;
+ 
+-    /* Flag that SetClipboardData has been called */
+-    fSetClipboardData = FALSE;
++    /* fSetClipboardData is TRUE if SetClipboardData successful */
+ 
+     /*
+      * NOTE: Do not try to free pszGlobalData, it is owned by
+@@ -376,7 +380,8 @@
+     free(pwszUnicodeStr);
+     if (hGlobal && pszGlobalData)
+         GlobalUnlock(hGlobal);
+-    if (fSetClipboardData) {
++    if (!fSetClipboardData) {
++        if (hGlobal) GlobalFree(hGlobal); /* Free the buffer if clipboard didn't take it */
+         SetClipboardData(CF_UNICODETEXT, NULL);
+         SetClipboardData(CF_TEXT, NULL);
+     }
+@@ -412,7 +417,7 @@
+         {
+             char *xtpText_value = NULL;
+             int xtpText_nitems;
+-            UINT codepage;
++            UINT codepage = 0;
+ 
+             xcb_selection_request_event_t *selection_request =  (xcb_selection_request_event_t *)event;
+         {
+@@ -437,6 +442,8 @@
+ 
+             /* Handle targets type of request */
+             if (selection_request->target == atomTargets) {
++                xcb_selection_notify_event_t eventSelection;
++
+                 xcb_atom_t atomTargetArr[] =
+                     {
+                      atomTargets,
+@@ -462,7 +469,6 @@
+                 }
+ 
+                 /* Setup selection notify xevent */
+-                xcb_selection_notify_event_t eventSelection;
+                 eventSelection.response_type = XCB_SELECTION_NOTIFY;
+                 eventSelection.requestor = selection_request->requestor;
+                 eventSelection.selection = selection_request->selection;
+@@ -546,6 +552,7 @@
+                 codepage = CP_UTF8; // code page identifier for utf8
+             }
+ 
++            {
+             /* Convert the UTF16 string to required encoding */
+             int iConvertDataLen = WideCharToMultiByte(codepage, 0,
+                                                       (LPCWSTR) pszGlobalData, -1,
+@@ -555,6 +562,7 @@
+             WideCharToMultiByte(codepage, 0,
+                                 (LPCWSTR) pszGlobalData, -1,
+                                 pszConvertData, iConvertDataLen, NULL, NULL);
++            }
+ 
+             /* Convert DOS string to UNIX string */
+             winClipboardDOStoUNIX(pszConvertData, strlen(pszConvertData));
+@@ -578,6 +586,9 @@
+                 }
+             }
+ 
++            {
++            xcb_selection_notify_event_t eventSelection;
++ 
+             /* Copy the clipboard text to the requesting window */
+             xcb_void_cookie_t cookie = xcb_change_property_checked(conn,
+                                       XCB_PROP_MODE_REPLACE,
+@@ -611,7 +622,6 @@
+             xtpText_value = NULL;
+ 
+             /* Setup selection notify event */
+-            xcb_selection_notify_event_t eventSelection;
+             eventSelection.response_type = XCB_SELECTION_NOTIFY;
+             eventSelection.requestor = selection_request->requestor;
+             eventSelection.selection = selection_request->selection;
+@@ -668,6 +678,7 @@
+                            "xcb_send_event() failed for abort event.\n");
+                 }
+             }
++            }
+ 
+             /* Close clipboard if it was opened */
+             if (fCloseClipboard) {
+@@ -681,6 +692,7 @@
+         {
+             xcb_selection_notify_event_t *selection_notify =  (xcb_selection_notify_event_t *)event;
+             winDebug("winClipboardFlushXEvents - SelectionNotify\n");
++            if (g_iLogVerbose >= 3)
+             {
+                 char *pszAtomName;
+                 pszAtomName = get_atom_name(conn, selection_notify->selection);

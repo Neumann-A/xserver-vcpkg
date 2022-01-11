@@ -1,0 +1,10 @@
+--- ./hw/xwin/save_winglobals.h	2020-04-16 13:07:18.171538517 +0100
++++ ./hw/xwin/winglobals.h	2020-04-08 13:02:06.714966632 +0100
+@@ -55,6 +55,7 @@
+ extern Bool g_fNoHelpMessageBox;
+ extern Bool g_fNativeGl;
+ extern Bool g_fHostInTitle;
++extern const char *xdm_from;
+ 
+ extern HWND g_hDlgDepthChange;
+ extern HWND g_hDlgExit;

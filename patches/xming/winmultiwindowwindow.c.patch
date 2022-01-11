@@ -1,0 +1,213 @@
+--- ./hw/xwin/save_winmultiwindowwindow.c	2019-06-28 20:28:11.043506341 +0100
++++ ./hw/xwin/winmultiwindowwindow.c	2019-06-28 17:12:21.255408897 +0100
+@@ -41,6 +41,9 @@
+ #include "winmultiwindowclass.h"
+ #include "winmultiwindowicons.h"
+ 
++extern void winSelectIcons(HICON *pIcon, HICON *pSmallIcon);
++extern void winDestroyIcon(HICON hIcon);
++
+ /*
+  * Prototypes for local functions
+  */
+@@ -85,7 +88,7 @@
+         wcx.hIconSm = hIconSmall;
+ 
+ #if CYGMULTIWINDOW_DEBUG
+-        ErrorF("winCreateWindowsWindow - Creating class: %s\n", WINDOW_CLASS_X);
++        ErrorF("winInitMultiWindowClass - Creating class: %s\n", WINDOW_CLASS_X);
+ #endif
+ 
+         atomXWinClass = RegisterClassEx(&wcx);
+@@ -257,14 +260,30 @@
+         ErrorF("winPositionWindowMultiWindow - Need to move\n");
+ #endif
+ 
++        /* Change the position and dimensions of the Windows window */
++        if (pWinPriv->fWglUsed) {
++            int iWidth = rcNew.right - rcNew.left;
++            int iHeight = rcNew.bottom - rcNew.top;
++            ScreenToClient(GetParent(hWnd), (LPPOINT)&rcNew);
++
+ #if CYGWINDOWING_DEBUG
+-        ErrorF("\tMoveWindow to (%d, %d) - %dx%d\n", (int)rcNew.left, (int)rcNew.top,
+-               (int)(rcNew.right - rcNew.left), (int)(rcNew.bottom - rcNew.top));
++            ErrorF("\tMoveWindow to (%d, %d) - %dx%d\n", (int)rcNew.left, (int)rcNew.top,
++                   iWidth, iHeight);
+ #endif
+-        /* Change the position and dimensions of the Windows window */
+-        MoveWindow(hWnd,
+-                   rcNew.left, rcNew.top,
+-                   rcNew.right - rcNew.left, rcNew.bottom - rcNew.top, TRUE);
++            MoveWindow(hWnd,
++                       rcNew.left, rcNew.top,
++                       iWidth, iHeight, TRUE);
++        }
++        else {
++#if CYGWINDOWING_DEBUG
++             ErrorF("\tMoveWindow to (%d, %d) - %dx%d\n", (int)rcNew.left, (int)rcNew.top,
++                    (int)(rcNew.right - rcNew.left), (int)(rcNew.bottom - rcNew.top));
++#endif
++             MoveWindow(hWnd,
++                        rcNew.left, rcNew.top,
++                        rcNew.right - rcNew.left, rcNew.bottom - rcNew.top,
++                        TRUE);
++        }
+     }
+     else {
+ #if CYGMULTIWINDOW_DEBUG
+@@ -519,8 +538,8 @@
+             }
+     }
+ 
+-    winDebug("winCreateWindowsWindow - %dx%d @ %dx%d\n", iWidth, iHeight, iX,
+-             iY);
++    winDebug("winCreateWindowsWindow - 1 - %dx%d @ %dx%d\n", iWidth,
++             iHeight, iX, iY);
+ 
+     if (winMultiWindowGetTransientFor(pWin, &daddyId)) {
+         if (daddyId) {
+@@ -533,17 +552,31 @@
+                 }
+         }
+     }
+-    else {
++    else if (!pWin->overrideRedirect) {
+         /* Default positions if none specified */
+         if (!winMultiWindowGetWMNormalHints(pWin, &hints))
+             hints.flags = 0;
+-        if (!(hints.flags & (USPosition | PPosition)) &&
+-            !pWin->overrideRedirect) {
++
++
++        if ((hints.flags & USPosition) ||
++            ((hints.flags & PPosition) &&
++             ((pWin->drawable.x - pWin->borderWidth != 0) ||
++              (pWin->drawable.y - pWin->borderWidth != 0)))) {
++            /*
++              Always respect user specified position, respect program
++              specified position if it's not the origin
++            */
++        }
++        else {
++            /* Use default position */
+             iX = CW_USEDEFAULT;
+             iY = CW_USEDEFAULT;
+         }
+     }
+ 
++    winDebug("winCreateWindowsWindow - 2 - %dx%d @ %dx%d\n", iWidth,
++             iHeight, iX, iY);
++
+     /* Make it WS_OVERLAPPED in create call since WS_POPUP doesn't support */
+     /* CW_USEDEFAULT, change back to popup after creation */
+     dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+@@ -565,28 +598,34 @@
+     iHeight = rc.bottom - rc.top;
+     iWidth = rc.right - rc.left;
+ 
+-    winDebug("winCreateWindowsWindow - %dx%d @ %dx%d\n", iWidth, iHeight, iX,
+-             iY);
++    winDebug("winCreateWindowsWindow - 3 - %dx%d @ %dx%d\n", iWidth,
++             iHeight, iX, iY);
+ 
+     /* Create the window */
+-    hWnd = CreateWindowExA(dwExStyle,   /* Extended styles */
+-                           WINDOW_CLASS_X,      /* Class name */
+-                           WINDOW_TITLE_X,      /* Window name */
+-                           dwStyle,     /* Styles */
+-                           iX,  /* Horizontal position */
+-                           iY,  /* Vertical position */
+-                           iWidth,      /* Right edge */
+-                           iHeight,     /* Bottom edge */
+-                           hFore,       /* Null or Parent window if transient */
+-                           (HMENU) NULL,        /* No menu */
+-                           GetModuleHandle(NULL),       /* Instance handle */
+-                           pWin);       /* ScreenPrivates */
++    hWnd = CreateWindowExA(dwExStyle,       /* Extended styles */
++                           WINDOW_CLASS_X,  /* Class name */
++                           WINDOW_TITLE_X,  /* Window name */
++                           dwStyle,         /* Styles */
++                           iX,              /* Horizontal position */
++                           iY,              /* Vertical position */
++                           iWidth,          /* Right edge */
++                           iHeight,         /* Bottom edge */
++                           hFore,           /* Null or Parent window if transient */
++                           (HMENU) NULL,    /* No menu */
++                           g_hInstance,     /* Instance handle */
++                           pWin);           /* ScreenPrivates */
+     if (hWnd == NULL) {
+         ErrorF("winCreateWindowsWindow - CreateWindowExA () failed: %d\n",
+                (int) GetLastError());
+     }
+     pWinPriv->hWnd = hWnd;
+ 
++    /* If we asked the native WM to place the window, synchronize the X window position.
++       Do this before the next SetWindowPos because this one is generating a WM_STYLECHANGED
++       message which is causing a window move, which is wrong if the X window does not
++       have the correct coordinates yet */
++    if (iX == CW_USEDEFAULT) winAdjustXWindow(pWin, hWnd);
++
+     /* Change style back to popup, already placed... */
+     SetWindowLongPtr(hWnd, GWL_STYLE,
+                      WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+@@ -594,9 +633,6 @@
+                  SWP_FRAMECHANGED | SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE |
+                  SWP_NOACTIVATE);
+ 
+-    /* Adjust the X window to match the window placement we actually got... */
+-    winAdjustXWindow(pWin, hWnd);
+-
+     /* Make sure it gets the proper system menu for a WS_POPUP, too */
+     GetSystemMenu(hWnd, TRUE);
+ 
+@@ -691,14 +727,43 @@
+         /* Display the window without activating it */
+         if (pWin->drawable.class != InputOnly)
+             ShowWindow(pWinPriv->hWnd, SW_SHOWNOACTIVATE);
+-
+-        /* Send first paint message */
+-        UpdateWindow(pWinPriv->hWnd);
+     }
+     else if (hWnd != NULL) {
+-        /* Destroy the Windows window if its parents are destroyed */
+-        winDestroyWindowsWindow(pWin);
+-        assert(pWinPriv->hWnd == NULL);
++        if (pWinPriv->fWglUsed) {
++            /* We do not need to destroy the window but to reparent it and move it to the
++               correct place when it is an opengl window */
++            int offsetx = 0;
++            int offsety = 0;
++            HWND hParentWnd;
++            WindowPtr pParent = pWin->parent;
++
++            while (pParent) {
++                winWindowPriv(pParent);
++                hParentWnd = pWinPriv->hWnd;
++                if (hParentWnd)
++                    break;
++                pParent = pParent->parent;
++            }
++            if (pParent) {
++                offsetx = pParent->drawable.x;
++                offsety = pParent->drawable.y;
++            }
++            if (hParentWnd == NULL)
++                winDestroyWindowsWindow (pWin);
++            else {
++                ErrorF("winUpdateWindowsWindow - window 0x%p changed parent and moved to 0x%p (%d, %d)\n",
++                       pWinPriv->hWnd, hParentWnd, pWin->drawable.x-offsetx, pWin->drawable.y-offsety);
++                SetParent(pWinPriv->hWnd, hParentWnd);
++                SetWindowPos(pWinPriv->hWnd, NULL, pWin->drawable.x-offsetx,
++                             pWin->drawable.y-offsety, 0, 0,
++                             SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
++            }
++        }
++        else {
++            /* Destroy the Windows window if its parents are destroyed */
++            winDestroyWindowsWindow(pWin);
++            assert (pWinPriv->hWnd == NULL);
++        }
+     }
+ 
+ #if CYGMULTIWINDOW_DEBUG

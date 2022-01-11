@@ -1,0 +1,14 @@
+--- ./hw/xwin/winclipboard/save_xwinclip.c	2020-04-16 13:07:18.171538517 +0100
++++ ./hw/xwin/winclipboard/xwinclip.c	2020-04-09 23:19:32.080560583 +0100
+@@ -41,6 +41,11 @@
+ 
+ #include "winclipboard.h"
+ 
++/* Dummy variables to keep compiler happy with Xming patches */
++#include <X11/Xlib-xcb.h>
++int g_iLogVerbose = 3;
++Window g_iClipboardWindow = None;
++
+ /*
+  * Main function
+  */

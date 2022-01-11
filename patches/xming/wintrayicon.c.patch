@@ -1,0 +1,55 @@
+--- ./hw/xwin/save_wintrayicon.c	2019-06-28 18:27:59.712161749 +0100
++++ ./hw/xwin/wintrayicon.c	2019-06-28 17:12:21.283409258 +0100
+@@ -47,6 +47,7 @@
+ {
+     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
+     NOTIFYICONDATA nid = { 0 };
++    HICON previousIcon = pScreenPriv->hiconNotifyIcon; 
+ 
+     nid.cbSize = sizeof(NOTIFYICONDATA);
+     nid.hWnd = pScreenPriv->hwndScreen;
+@@ -65,8 +66,19 @@
+              display, (int) pScreenInfo->dwScreen);
+ 
+     /* Add the tray icon */
+-    if (!Shell_NotifyIcon(NIM_ADD, &nid))
+-        ErrorF("winInitNotifyIcon - Shell_NotifyIcon Failed\n");
++    if (!Shell_NotifyIcon((previousIcon) ? NIM_MODIFY : NIM_ADD, &nid)) {
++        /* There may be a previous icon e.g. from Remote Desktop usage */
++        /* but if we then fail to modify the previous icon...could be that explorer.exe had crashed */
++        /* so just try to add the icon to the taskbar instead. */
++        if (NIM_MODIFY) {
++             if (!DestroyIcon(previousIcon))
++                 ErrorF("winInitNotifyIcon - DestroyIcon Failed\n");
++             if (!Shell_NotifyIcon(NIM_ADD, &nid))
++                 ErrorF("winInitNotifyIcon - Shell_NotifyIcon 1 Failed\n");
++        }
++        else
++            ErrorF("winInitNotifyIcon - Shell_NotifyIcon 2 Failed\n");
++    }
+ }
+ 
+ /*
+@@ -79,19 +91,13 @@
+     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
+     NOTIFYICONDATA nid = { 0 };
+ 
+-#if 0
+-    ErrorF("winDeleteNotifyIcon\n");
+-#endif
+-
+     nid.cbSize = sizeof(NOTIFYICONDATA);
+     nid.hWnd = pScreenPriv->hwndScreen;
+     nid.uID = pScreenInfo->dwScreen;
+ 
+-    /* Delete the tray icon */
+-    if (!Shell_NotifyIcon(NIM_DELETE, &nid)) {
+-        ErrorF("winDeleteNotifyIcon - Shell_NotifyIcon failed\n");
+-        return;
+-    }
++    /* Delete the tray icon and ignore Shell_NotifyIcon errors as
++       this function gets called many times on shutdown */
++    Shell_NotifyIcon(NIM_DELETE, &nid);
+ 
+     /* Free the icon that was loaded */
+     if (pScreenPriv->hiconNotifyIcon != NULL

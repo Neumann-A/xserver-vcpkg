@@ -1,0 +1,11 @@
+--- ./Xext/save_xres.c	2017-11-14 23:07:02.319591563 +0000
++++ ./Xext/xres.c	2017-11-14 23:08:14.564432425 +0000
+@@ -271,7 +271,7 @@
+ {
+     int *counts = (int *) cdata;
+ 
+-    counts[(type & TypeMask) - 1]++;
++    if ((type & TypeMask) != RT_NONE) counts[(type & TypeMask) - 1]++;
+ }
+ 
+ static CARD32

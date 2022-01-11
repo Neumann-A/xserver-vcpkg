@@ -1,0 +1,11 @@
+--- ./hw/xwin/save_winrandr.c	2019-06-29 02:45:16.812518905 +0100
++++ ./hw/xwin/winrandr.c	2019-06-28 20:51:03.288886444 +0100
+@@ -298,7 +298,7 @@
+        monitor size (we can have scrollbars :-), so set the
+        upper limit to the maximum coordinates X11 can use.
+      */
+-    RRScreenSetSizeRange(pScreen, 0, 0, 32768, 32768);
++    RRScreenSetSizeRange(pScreen, 0, 0, 32767, 32767);
+ 
+     return TRUE;
+ }

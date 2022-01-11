@@ -1,0 +1,20 @@
+--- ./hw/xwin/save_wincreatewnd.c	2019-09-19 16:25:56.901222396 +0100
++++ ./hw/xwin/wincreatewnd.c	2019-09-19 16:20:25.977253787 +0100
+@@ -101,7 +101,7 @@
+                              iHeight,   /* Bottom edge */
+                              (HWND) NULL,       /* No parent or owner window */
+                              (HMENU) NULL,      /* No menu */
+-                             GetModuleHandle(NULL),     /* Instance handle */
++                             g_hInstance,     /* Instance handle */
+                              pScreenPriv);      /* ScreenPrivates */
+ 
+     /* Hide the window */
+@@ -300,7 +300,7 @@
+                              iHeight,   /* Bottom edge */
+                              (HWND) NULL,       /* No parent or owner window */
+                              (HMENU) NULL,      /* No menu */
+-                             GetModuleHandle(NULL),     /* Instance handle */
++                             g_hInstance,     /* Instance handle */
+                              pScreenPriv);      /* ScreenPrivates */
+     if (*phwnd == NULL) {
+         ErrorF("winCreateBoundingWindowWindowed - CreateWindowEx () failed\n");

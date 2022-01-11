@@ -1,0 +1,51 @@
+--- ./hw/xwin/save_win.h	2020-04-08 13:01:17.378341269 +0100
++++ ./hw/xwin/win.h	2020-04-08 13:02:06.594965120 +0100
+@@ -75,7 +75,7 @@
+ /*
+  * Number of times to call Restore in an attempt to restore the primary surface
+  */
+-#define WIN_REGAIN_SURFACE_RETRIES		1
++#define WIN_REGAIN_SURFACE_RETRIES		2
+ 
+ /*
+  * Build a supported display depths mask by shifting one to the left
+@@ -517,8 +517,6 @@
+     ModifyPixmapHeaderProcPtr ModifyPixmapHeader;
+ 
+     winCursorRec cursor;
+-
+-    Bool fNativeGlActive;
+ } winPrivScreenRec;
+ 
+ typedef struct {
+@@ -675,7 +673,8 @@
+ 
+ void
+ 
+-winBlockHandler(ScreenPtr pScreen, void *pTimeout);
++winBlockHandler(ScreenPtr pScreen,
++                void *pTimeout, void *pReadMask);
+ 
+ /*
+  * winclipboardinit.c
+@@ -720,6 +719,9 @@
+ void
+  winDisplayAboutDialog(winPrivScreenPtr pScreenPriv);
+ 
++void
++ winCreateProcess (const char *exe, const char *file, const char *err, DWORD wShowWindow);
++
+ /*
+  * winengine.c
+  */
+@@ -857,7 +859,9 @@
+  */
+ 
+ void
+-winWakeupHandler(ScreenPtr pScreen, int iResult);
++
++winWakeupHandler(ScreenPtr pScreen,
++                 unsigned long ulResult, void *pReadmask);
+ 
+ /*
+  * winwindow.c

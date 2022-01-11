@@ -1,0 +1,34 @@
+--- ./dix/save_main.c	2019-11-01 14:04:04.915062207 +0000
++++ ./dix/main.c	2020-04-17 12:13:51.949167757 +0100
+@@ -119,6 +119,12 @@
+ 
+ extern void Dispatch(void);
+ 
++#ifdef __MINGW32__
++#include <X11/Xwindows.h>
++#include <pthread.h>
++extern void winInitializeModeKeyStates(void);
++#endif
++
+ #ifdef XQUARTZ
+ #include <pthread.h>
+ 
+@@ -130,6 +136,7 @@
+ 
+ CallbackListPtr RootWindowFinalizeCallback = NULL;
+ 
++int dix_main(int argc, char *argv[], char *envp[]);
+ int
+ dix_main(int argc, char *argv[], char *envp[])
+ {
+@@ -286,6 +293,10 @@
+ 
+         NotifyParentProcess();
+ 
++#ifdef __MINGW32__
++	winInitializeModeKeyStates();
++#endif
++
+         Dispatch();
+ 
+ #ifdef XQUARTZ

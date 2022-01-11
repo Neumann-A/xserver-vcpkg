@@ -1,0 +1,17 @@
+--- ./glx/save_render2swap.c	2016-05-03 12:55:09.557195594 +0100
++++ ./glx/render2swap.c	2016-05-03 12:58:40.063163430 +0100
+@@ -363,12 +363,12 @@
+             break;
+         case GL_SECONDARY_COLOR_ARRAY:
+             CALL_EnableClientState(GET_DISPATCH(), (GL_SECONDARY_COLOR_ARRAY));
+-            CALL_SecondaryColorPointerEXT(GET_DISPATCH(),
++            CALL_SecondaryColorPointer(GET_DISPATCH(),
+                                           (numVals, datatype, stride, pc));
+             break;
+         case GL_FOG_COORD_ARRAY:
+             CALL_EnableClientState(GET_DISPATCH(), (GL_FOG_COORD_ARRAY));
+-            CALL_FogCoordPointerEXT(GET_DISPATCH(), (datatype, stride, pc));
++            CALL_FogCoordPointer(GET_DISPATCH(), (datatype, stride, pc));
+             break;
+         default:
+             break;

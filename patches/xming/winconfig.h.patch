@@ -1,0 +1,11 @@
+--- ./hw/xwin/save_winconfig.h	2014-10-02 18:33:58.789817406 +0100
++++ ./hw/xwin/winconfig.h	2016-02-26 18:41:47.807501766 +0000
+@@ -140,7 +140,7 @@
+     char *id;
+     screenLayoutPtr screens;
+     GDevPtr inactives;
+-    IDevPtr inputs;
++    IDevPtr *inputs; /* NULL terminated */
+     void *options;
+ } serverLayoutRec, *serverLayoutPtr;
+ 

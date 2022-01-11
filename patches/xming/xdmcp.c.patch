@@ -1,0 +1,158 @@
+--- ./os/save_xdmcp.c	2019-11-01 14:47:43.148785437 +0000
++++ ./os/xdmcp.c	2019-11-01 15:11:38.787372484 +0000
+@@ -19,10 +19,7 @@
+ 
+ #ifdef WIN32
+ #include <X11/Xwinsock.h>
+-#define XSERV_t
+-#define TRANS_SERVER
+-#define TRANS_REOPEN
+-#include <X11/Xtrans/Xtrans.h>
++#include <ws2tcpip.h>
+ #endif
+ 
+ #include <X11/Xos.h>
+@@ -64,6 +61,8 @@
+ 
+ static const char *defaultDisplayClass = "MIT-unspecified";
+ 
++extern void match_interface(u_long u_lQuery);
++
+ static int xdmcpSocket, sessionSocket;
+ static xdmcp_states state;
+ 
+@@ -218,11 +217,18 @@
+ 
+ static unsigned short xdm_udp_port = XDM_UDP_PORT;
+ static Bool OneSession = FALSE;
++#ifdef __MINGW32__
++extern const char *xdm_from;
++#else
+ static const char *xdm_from = NULL;
++#endif
+ 
+ void
+ XdmcpUseMsg(void)
+ {
++#ifdef __MINGW32__
++    ErrorF("\nXDMCP Options...\n\n");
++#endif
+     ErrorF("-query host-name       contact named host for XDMCP\n");
+     ErrorF("-broadcast             broadcast for XDMCP\n");
+ #if defined(IPv6) && defined(AF_INET6)
+@@ -665,8 +671,8 @@
+     if (timeOutTime == 0)
+         return;
+     millisToGo = timeOutTime - GetTimeInMillis();
+-    if ((int) millisToGo < 0)
+-        millisToGo = 0;
++    if ((int) millisToGo <= 0)
++        millisToGo = 1;
+     AdjustWaitForDelay(wt, millisToGo);
+ }
+ 
+@@ -696,7 +702,7 @@
+         }
+ #endif
+     }
+-    else if (timeOutTime && (int) (GetTimeInMillis() - timeOutTime) >= 0) {
++    else if (0) {
+         if (state == XDM_RUN_SESSION) {
+             state = XDM_KEEPALIVE;
+             send_packet();
+@@ -960,11 +966,19 @@
+                         sizeof(soopts)) < 0)
+         XdmcpWarning("UDP set broadcast socket-option failed");
+ #endif                          /* SO_BROADCAST */
+-    if (xdmcpSocket >= 0 && xdm_from != NULL) {
+-        if (bind(xdmcpSocket, (struct sockaddr *) &FromAddress,
+-                 FromAddressLen) < 0) {
+-            FatalError("Xserver: failed to bind to -from address: %s\n",
+-                       xdm_from);
++    if (xdm_from) {
++        if (xdmcpSocket >= 0 && SOCKADDR_FAMILY(FromAddress) == AF_INET) {
++            if (bind(xdmcpSocket, (struct sockaddr *) &FromAddress,
++                     FromAddressLen) < 0) {
++                FatalError("Xserver: failed to bind to -from address: %s error %d\n",
++                           xdm_from, WSAGetLastError());
++            }
++        }
++        else if (xdmcpSocket6 >= 0 && SOCKADDR_FAMILY(FromAddress) == AF_INET6) {
++            if (bind(xdmcpSocket6, (struct sockaddr *)&FromAddress,
++                     FromAddressLen) < 0) {
++                FatalError("Xserver: failed to bind to -from address: %s error %d\n", xdm_from, WSAGetLastError());
++            }
+         }
+     }
+ }
+@@ -1026,18 +1040,18 @@
+         for (mcl = mcastlist; mcl != NULL; mcl = mcl->next) {
+             for (ai = mcl->ai; ai != NULL; ai = ai->ai_next) {
+                 if (ai->ai_family == AF_INET) {
+-                    unsigned char hopflag = (unsigned char) mcl->hops;
++                    int hopflag = mcl->hops;
+ 
+                     socketfd = xdmcpSocket;
+                     setsockopt(socketfd, IPPROTO_IP, IP_MULTICAST_TTL,
+-                               &hopflag, sizeof(hopflag));
++                               (char *)&hopflag, sizeof(hopflag));
+                 }
+                 else if (ai->ai_family == AF_INET6) {
+                     int hopflag6 = mcl->hops;
+ 
+                     socketfd = xdmcpSocket6;
+                     setsockopt(socketfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+-                               &hopflag6, sizeof(hopflag6));
++                               (char *)&hopflag6, sizeof(hopflag6));
+                 }
+                 else {
+                     continue;
+@@ -1344,7 +1358,7 @@
+         return;
+     if (XdmcpReadCARD8(&buffer, &SessionRunning) &&
+         XdmcpReadCARD32(&buffer, &AliveSessionID)) {
+-        if (SessionRunning && AliveSessionID == SessionID) {
++        if (/*SessionRunning && */ AliveSessionID == SessionID) {
+             state = XDM_RUN_SESSION;
+             timeOutTime = GetTimeInMillis() + XDM_DEF_DORMANCY * 1000;
+         }
+@@ -1385,6 +1399,10 @@
+     char *pport = portstr;
+     int gaierr;
+ 
++#if defined(WIN32) && defined(TCPCONN)
++    _XSERVTransWSAStartup();
++#endif
++
+     memset(&hints, 0, sizeof(hints));
+     hints.ai_socktype = socktype;
+ 
+@@ -1428,9 +1446,6 @@
+ #ifdef XTHREADS_NEEDS_BYNAMEPARAMS
+     _Xgethostbynameparams hparams;
+ #endif
+-#if defined(WIN32) && defined(TCPCONN)
+-    _XSERVTransWSAStartup();
+-#endif
+     if (!(hep = _XGethostbyname(namestr, hparams))) {
+         FatalError("Xserver: %s unknown host: %s\n", argtype, namestr);
+     }
+@@ -1450,6 +1465,8 @@
+ static void
+ get_manager_by_name(int argc, char **argv, int i)
+ {
++    PSOCKADDR_IN queryAddr = NULL;
++    u_long u_lqueryAddr = 0;
+ 
+     if ((i + 1) == argc) {
+         FatalError("Xserver: missing %s host name in command line\n", argv[i]);
+@@ -1461,6 +1478,9 @@
+                      , &mgrAddr, &mgrAddrFirst
+ #endif
+         );
++    queryAddr = (PSOCKADDR_IN)&ManagerAddress;
++    u_lqueryAddr = queryAddr->sin_addr.S_un.S_addr;
++    match_interface(u_lqueryAddr);
+ }
+ 
+ static void

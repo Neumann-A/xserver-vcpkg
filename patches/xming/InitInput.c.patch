@@ -1,0 +1,13 @@
+--- ./hw/xwin/save_InitInput.c	2018-09-29 03:21:25.724028951 +0100
++++ ./hw/xwin/InitInput.c	2018-09-29 03:33:03.372048359 +0100
+@@ -96,8 +96,8 @@
+ 
+     mieqInit();
+ 
+-    /* Initialize the mode key states */
+-    winInitializeModeKeyStates();
++    /* Initialize the mode key states...Colin do this later in main.c when the keyboard device has started */
++    /* winInitializeModeKeyStates(); */
+ 
+ #ifdef HAS_DEVWINDOWS
+     /* Only open the windows message queue device once */

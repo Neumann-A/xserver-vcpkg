@@ -1,0 +1,27 @@
+--- ./hw/xwin/save_wincursor.c	2017-08-23 13:25:49.500643198 +0100
++++ ./hw/xwin/wincursor.c	2017-08-23 13:55:06.601499212 +0100
+@@ -39,7 +39,9 @@
+ #include <cursorstr.h>
+ #include <mipointrst.h>
+ #include <servermd.h>
+-#include "misc.h"
++#ifndef min
++#define min(a, b) (((a) < (b)) ? (a) : (b))
++#endif
+ 
+ #define BRIGHTNESS(x) (x##Red * 0.299 + x##Green * 0.587 + x##Blue * 0.114)
+ 
+@@ -598,8 +600,11 @@
+     pPointPriv = (miPointerScreenPtr)
+         dixLookupPrivate(&pScreen->devPrivates, miPointerScreenKey);
+ 
+-    pScreenPriv->cursor.spriteFuncs = pPointPriv->spriteFuncs;
+-    pPointPriv->spriteFuncs = &winSpriteFuncsRec;
++    if (pPointPriv)
++    {
++        pScreenPriv->cursor.spriteFuncs = pPointPriv->spriteFuncs;
++        pPointPriv->spriteFuncs = &winSpriteFuncsRec;
++    }
+ 
+     pScreenPriv->cursor.handle = NULL;
+     pScreenPriv->cursor.visible = FALSE;

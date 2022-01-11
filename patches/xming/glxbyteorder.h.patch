@@ -1,0 +1,11 @@
+--- ./glx/save_glxbyteorder.h	2012-07-26 22:48:55.785972290 +0100
++++ ./glx/glxbyteorder.h	2012-09-16 00:01:49.359811649 +0100
+@@ -46,7 +46,7 @@
+ #define bswap_64 OSSwapInt64
+ #else
+ #define	bswap_16(value)  \
+- 	((((value) & 0xff) << 8) | ((value) >> 8))
++ 	((((value) & 0xff) << 8) | (((value) & 0xff00) >> 8))
+ 
+ #define	bswap_32(value)	\
+  	(((uint32_t)bswap_16((uint16_t)((value) & 0xffff)) << 16) | \

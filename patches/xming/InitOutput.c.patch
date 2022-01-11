@@ -1,0 +1,643 @@
+--- ./hw/xwin/save_InitOutput.c	2020-07-05 22:49:30.000000000 +0100
++++ ./hw/xwin/InitOutput.c	2021-03-30 07:48:24.727610340 +0100
+@@ -35,13 +35,20 @@
+ #include "winmsg.h"
+ #include "winconfig.h"
+ #include "winprefs.h"
++#include <shellapi.h>
++void IsWow64 (Bool* bIsWow64, const char* isWow);
+ #ifdef DPMSExtension
+ #include "dpmsproc.h"
+ #endif
++#include <locale.h>
+ #ifdef __CYGWIN__
+ #include <mntent.h>
+ #endif
+ #if defined(WIN32)
++#ifndef True
++#define True TRUE
++#define False FALSE
++#endif
+ #include "xkbsrv.h"
+ #endif
+ #ifdef RELOCATE_PROJECTROOT
+@@ -63,7 +70,6 @@
+ #include "glx_extinit.h"
+ #ifdef XWIN_GLX_WINDOWS
+ #include "glx/glwindows.h"
+-#include "dri/windowsdri.h"
+ #endif
+ #include "winauth.h"
+ 
+@@ -71,11 +77,19 @@
+  * References to external symbols
+  */
+ 
++extern int dix_main(int argc, char *argv[], char *envp[]);
++
+ /*
+  * Function prototypes
+  */
+ 
+ void
++ddxBeforeReset(void);
++
++static Bool
++ winCheckDisplayNumber(void);
++
++void
+  winLogCommandLine(int argc, char *argv[]);
+ 
+ void
+@@ -88,6 +102,8 @@
+ const char *winGetBaseDir(void);
+ #endif
+ 
++extern Bool XSupportsLocale(void);
++
+ /*
+  * For the depth 24 pixmap we default to 32 bits per pixel, but
+  * we change this pixmap format later if we detect that the display
+@@ -151,15 +167,6 @@
+ }
+ #endif
+ 
+-#if INPUTTHREAD
+-/** This function is called in Xserver/os/inputthread.c when starting
+-    the input thread. */
+-void
+-ddxInputThreadInit(void)
+-{
+-}
+-#endif
+-
+ int
+ main(int argc, char *argv[], char *envp[])
+ {
+@@ -214,7 +221,7 @@
+ #endif
+ 
+     if (!g_fLogInited) {
+-        g_pszLogFile = LogInit(g_pszLogFile, ".old");
++        g_pszLogFile = LogInit(g_pszLogFile, NULL);
+         g_fLogInited = TRUE;
+     }
+     LogClose(error);
+@@ -343,13 +350,44 @@
+ winGetBaseDir(void)
+ {
+     static BOOL inited = FALSE;
+-    static char buffer[MAX_PATH];
++    static char buffer[512];
+ 
+     if (!inited) {
+         char *fendptr;
+-        HMODULE module = GetModuleHandle(NULL);
+-        DWORD size = GetModuleFileName(module, buffer, sizeof(buffer));
++        DWORD size;
++
++        if (!g_hInstance) g_hInstance = GetModuleHandle(NULL);
++
++        if (getenv("ProgramFiles"))
++        {
++           FILE *stream;
++           char* stopper;
++           Bool bIsWow64 = FALSE;
++           char isWow[14]; /* max size [14] */
++           IsWow64(&bIsWow64, isWow);
++           if (bIsWow64 && getenv("ProgramFiles(x86)"))
++           {
++              strncpy (buffer, getenv("ProgramFiles(x86)"), 22);
++              buffer[22] = '\0';
++           }
++           else
++           {
++              strncpy (buffer, getenv("ProgramFiles"), 16);
++              buffer[16] = '\0';
++           }
++           strcat (buffer, "\\Xming");
++           stopper = strchr (buffer, '\0');
++           strcat (buffer, "\\Xming.exe");
++           if ((stream = fopen (buffer, "r")))
++           {
++              *stopper = '\0';
++              inited = TRUE;
++              fclose(stream);
++              return buffer;
++           }
++        }
+ 
++        size = GetModuleFileName(g_hInstance, buffer, sizeof(buffer));
+         if (sizeof(buffer) > 0)
+             buffer[sizeof(buffer) - 1] = 0;
+ 
+@@ -372,17 +410,29 @@
+ {
+     BOOL changed_fontpath = FALSE;
+     MessageType font_from = X_DEFAULT;
+-
++    char buffer[MAX_PATH];
+ #ifdef RELOCATE_PROJECTROOT
+     const char *basedir = winGetBaseDir();
+     size_t basedirlen = strlen(basedir);
++    SetCurrentDirectory(basedir);
+ #endif
+ 
+ #ifdef READ_FONTDIRS
+     {
+         /* Open fontpath configuration file */
++#ifdef __MINGW32__
++        static Bool once = False;
++        FILE* fontdirs;
++
++        snprintf(buffer, sizeof(buffer), "%s\\font-dirs", basedir);
++        buffer[sizeof(buffer)-1] = 0;
++        fontdirs = fopen(buffer, "rt");
++        if (once) fontdirs = NULL;
++        else once = True;
++#else
+         FILE *fontdirs = fopen(ETCX11DIR "/font-dirs", "rt");
+ 
++#endif
+         if (fontdirs != NULL) {
+             char buffer[256];
+             int needs_sep = TRUE;
+@@ -548,36 +598,45 @@
+     if (changed_fontpath)
+         winMsg(font_from, "FontPath set to \"%s\"\n", defaultFontPath);
+ 
++    /* Xming specific convenience variable */
++    {
++        snprintf(buffer, sizeof(buffer), "DISNO=%d",
++                atoi(display));
++        buffer[sizeof(buffer)-1] = 0;
++        putenv(buffer);
++    }
++
+ #ifdef RELOCATE_PROJECTROOT
+     if (getenv("XKEYSYMDB") == NULL) {
+-        char buffer[MAX_PATH];
+-
+         snprintf(buffer, sizeof(buffer), "XKEYSYMDB=%s\\XKeysymDB", basedir);
+         buffer[sizeof(buffer) - 1] = 0;
+         putenv(buffer);
+     }
+     if (getenv("XERRORDB") == NULL) {
+-        char buffer[MAX_PATH];
+-
+         snprintf(buffer, sizeof(buffer), "XERRORDB=%s\\XErrorDB", basedir);
+         buffer[sizeof(buffer) - 1] = 0;
+         putenv(buffer);
+     }
+     if (getenv("XLOCALEDIR") == NULL) {
+-        char buffer[MAX_PATH];
+-
+         snprintf(buffer, sizeof(buffer), "XLOCALEDIR=%s\\locale", basedir);
+         buffer[sizeof(buffer) - 1] = 0;
+         putenv(buffer);
+     }
++    if (getenv("XHOSTPREFIX") == NULL)
++    {
++        snprintf(buffer, sizeof(buffer), "XHOSTPREFIX=%s\\X",
++                basedir);
++        buffer[sizeof(buffer)-1] = 0;
++        putenv(buffer);
++    }
+     if (getenv("HOME") == NULL) {
+         char buffer[MAX_PATH + 5];
+ 
+-        strncpy(buffer, "HOME=", 5);
++        strncpy(buffer, "HOME=\0", 6);
+ 
+         /* query appdata directory */
+         if (SHGetFolderPathA
+-            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0,
++            (NULL, CSIDL_PROFILE | CSIDL_FLAG_CREATE, NULL, 0,
+              buffer + 5) == 0) {
+             putenv(buffer);
+         }
+@@ -591,10 +650,11 @@
+ 
+         if (size && size < sizeof(buffer)) {
+             snprintf(buffer + size, sizeof(buffer) - size,
+-                     "XWin.%s.log", display);
++                     "Xming.%d.log", atoi(display));
+             buffer[sizeof(buffer) - 1] = 0;
+             g_pszLogFile = buffer;
+-            winMsg(X_DEFAULT, "Logfile set to \"%s\"\n", g_pszLogFile);
++            GetLongPathName(buffer, buffer, MAX_PATH);
++            winMsg(X_DEFAULT, "Logfile set to \"%s\"\n", buffer);
+         }
+     }
+     {
+@@ -604,7 +664,7 @@
+         if (sizeof(xkbbasedir) > 0)
+             xkbbasedir[sizeof(xkbbasedir) - 1] = 0;
+         XkbBaseDirectory = xkbbasedir;
+-        XkbBinDirectory = basedir;
++        XkbBinDirectory = (char*)basedir;
+     }
+ #endif                          /* RELOCATE_PROJECTROOT */
+ }
+@@ -615,6 +675,9 @@
+     /* Re-initialize global variables on server reset */
+     winInitializeGlobals();
+ 
++    LogInit (NULL, NULL);
++    LogSetParameter (XLOG_VERBOSITY, g_iLogVerbose);
++
+     winFixupPaths();
+ 
+ #ifdef DDXOSVERRORF
+@@ -629,8 +692,7 @@
+          * avoid the second call
+          */
+         g_fLogInited = TRUE;
+-        g_pszLogFile = LogInit(g_pszLogFile, ".old");
+-
++        g_pszLogFile = LogInit(g_pszLogFile, NULL);
+     }
+     LogSetParameter(XLOG_FLUSH, 1);
+     LogSetParameter(XLOG_VERBOSITY, g_iLogVerbose);
+@@ -671,6 +733,13 @@
+                     static Bool reportOnce = TRUE;
+ 
+                     g_ScreenInfo[j].iE3BTimeout = WIN_DEFAULT_E3B_TIME;
++                    if (GetSystemMetrics(SM_REMOTESESSION)) {
++                        ErrorF("OsVendorInit - Xming was started on a Remote Session.\n");
++                        if (mouseButtons == 2) { /* Why does SM_CMOUSEBUTTONS report 2 when remote? */
++                            reportOnce = FALSE;
++                            g_ScreenInfo[j].iE3BTimeout = WIN_E3B_OFF;
++                        }
++                    }
+                     if (reportOnce) {
+                         reportOnce = FALSE;
+                         winMsg(X_PROBED,
+@@ -704,17 +773,19 @@
+ winUseMsg(void)
+ {
+     ErrorF("\n");
+-    ErrorF("\n");
+-    ErrorF(EXECUTABLE_NAME " Device Dependent Usage:\n");
++    ErrorF(PROJECT_NAME " Options...\n");
+     ErrorF("\n");
+ 
+-    ErrorF("-[no]clipboard\n"
+-           "\tEnable [disable] the clipboard integration. Default is enabled.\n");
++    ErrorF("-clipboard\n"
++           "\tEnables the integration between the X11 clipboard and\n"
++           "\tWindows clipboard. The default is disabled.\n");
+ 
+     ErrorF("-clipupdates num_boxes\n"
+            "\tUse a clipping region to constrain shadow update blits to\n"
+            "\tthe updated region when num_boxes, or more, are in the\n"
+-           "\tupdated region.\n");
++           "\tupdated region.  Diminished effect on current Windows\n"
++           "\tversions because they already group GDI operations together\n"
++           "\tin a batch, which has a similar effect.\n");
+ 
+     ErrorF("-[no]compositealpha\n"
+            "\tX windows with per-pixel alpha are composited into the Windows desktop.\n");
+@@ -734,8 +805,8 @@
+            "\twith a DirectDraw engine.\n");
+ 
+     ErrorF("-[no]emulate3buttons [timeout]\n"
+-           "\tEmulate 3 button mouse with an optional timeout in\n"
+-           "\tmilliseconds.\n");
++           "\tEmulate a 3 button mouse with an optional timeout in\n"
++           "\tmilliseconds.  The default timeout is 50 milliseconds.\n");
+ 
+ #ifdef XWIN_EMULATEPSEUDO
+     ErrorF("-emulatepseudo\n"
+@@ -750,16 +821,26 @@
+            "\tOverride the server's automatically selected engine type:\n"
+            "\t\t1 - Shadow GDI\n"
+            "\t\t4 - Shadow DirectDraw4 Non-Locking\n"
+-        );
++           "\tDo not use this parameter unless instructed to do so.\n");
+ 
+-    ErrorF("-fullscreen\n" "\tRun the server in fullscreen mode.\n");
++    ErrorF("-from local-address\n"
++           "\tSpecify the local address the server binds.\n"
++           "\tChanges the default from 127.0.0.1 for IPv4 in all Xming modes.\n"
++           "\tNote: this used to be an XDMCP mode only option.\n");
++
++    ErrorF("-fullscreen\n"
++           "\tRun the server in fullscreen mode with -depth and -refresh\n"
++           "\tset as required.\n");
+ 
+     ErrorF("-[no]hostintitle\n"
+            "\tIn multiwindow mode, add remote host names to window titles.\n");
+ 
+-    ErrorF("-icon icon_specifier\n" "\tSet screen window icon in windowed mode.\n");
++    ErrorF("-icon Icon_File\n" "\tSet the root window icon in one window mode.\n"
++           "\tIcon_File allows the 3 formats documented for Xmingrc.\n");
+ 
+-    ErrorF("-ignoreinput\n" "\tIgnore keyboard and mouse input.\n");
++    ErrorF("-ignoreinput\n"
++           "\tIgnore keyboard and mouse input.  This is usually only used for\n"
++           "\ttesting and debugging purposes.\n");
+ 
+ #ifdef XWIN_XF86CONFIG
+     ErrorF("-keyboard\n"
+@@ -767,16 +848,17 @@
+ #endif
+ 
+     ErrorF("-[no]keyhook\n"
+-           "\tGrab special Windows keypresses like Alt-Tab or the Menu "
+-           "key.\n");
++           "\tGrab special Windows key combinations like Alt-Tab or the Menu\n"
++           "\tkey.  These keys are discarded by default.\n");
+ 
+     ErrorF("-lesspointer\n"
+-           "\tHide the windows mouse pointer when it is over any\n"
+-           "\t" EXECUTABLE_NAME
+-           " window.  This prevents ghost cursors appearing when\n"
+-           "\tthe Windows cursor is drawn on top of the X cursor\n");
+-
+-    ErrorF("-logfile filename\n" "\tWrite log messages to <filename>.\n");
++           "\tHide the Windows mouse pointer when it is over any\n"
++           "\t" PROJECT_NAME " window.  This prevents ghost cursors appearing when\n"
++           "\tthe Windows cursor is drawn on top of the X cursor.\n");
++
++    ErrorF("-logfile filename\n"
++           "\tWrite log messages to <filename> instead of Xming.n.log,\n"
++           "\twhere n is the display-number of the X Server.\n");
+ 
+     ErrorF("-logverbose verbosity\n"
+            "\tSet the verbosity of log messages. [NOTE: Only a few messages\n"
+@@ -790,11 +872,13 @@
+            "\tUse the entire virtual screen if multiple\n"
+            "\tmonitors are present.\n");
+ 
+-    ErrorF("-multiwindow\n" "\tRun the server in multi-window mode.\n");
++    ErrorF("-multiwindow\n"
++           "\tRun the server in multiwindow mode.  Not to be used\n"
++           "\ttogether with -rootless or -fullscreen.\n");
+ 
+     ErrorF("-nodecoration\n"
+            "\tDo not draw a window border, title bar, etc.  Windowed\n"
+-           "\tmode only.\n");
++           "\tmode only i.e. ignored when -fullscreen specified.\n");
+ 
+     ErrorF("-[no]primary\n"
+            "\tWhen clipboard integration is enabled, map the X11 PRIMARY selection\n"
+@@ -809,11 +893,14 @@
+            "\tmode gives the window scrollbars as needed, 'randr' mode uses the RANR\n"
+            "\textension to resize the X screen.  'randr' is the default.\n");
+ 
+-    ErrorF("-rootless\n" "\tRun the server in rootless mode.\n");
+-
+-    ErrorF("-screen scr_num [width height [x y] | [[WxH[+X+Y]][@m]] ]\n"
+-           "\tEnable screen scr_num and optionally specify a width and\n"
+-           "\theight and initial position for that screen. Additionally\n"
++    ErrorF("-rootless\n"
++           "\tUse a transparent root window with an external window\n"
++           "\tmanager (such as openbox).  Not to be used with\n"
++           "\t-multiwindow or with -fullscreen.\n");
++
++    ErrorF("-screen scr_num [W H [X Y] | [[WxH[+X+Y]][@m]] ]\n"
++           "\tEnable screen scr_num and optionally specify a width [W] and\n"
++           "\theight [H] and initial position [X Y] for that screen. Additionally\n"
+            "\ta monitor number can be specified to start the server on,\n"
+            "\tat which point, all coordinates become relative to that\n"
+            "\tmonitor. Examples:\n"
+@@ -826,35 +913,46 @@
+            "\tcursor instead.\n");
+ 
+     ErrorF("-[no]trayicon\n"
+-           "\tDo not create a tray icon.  Default is to create one\n"
+-           "\ticon per screen.  You can globally disable tray icons with\n"
+-           "\t-notrayicon, then enable it for specific screens with\n"
+-           "\t-trayicon for those screens.\n");
+-
+-    ErrorF("-[no]unixkill\n" "\tCtrl+Alt+Backspace exits the X Server.\n");
++           "\tDo not create a notification area icon.  Default is to create\n"
++           "\tone icon per screen.  You can globally disable notification area\n"
++           "\ticons with -notrayicon, then enable them for specific screens\n"
++           "\twith -trayicon for those screens.\n");
++
++    ErrorF("-[no]unixkill\n"
++           "\tCtrl-Alt-Backspace exits the X Server. The Ctrl-Alt-Backspace\n"
++           "\tkey combo is disabled by default.\n");
++
++    ErrorF("-version\n"
++           "\tWrite version & help text to the log file and default editor\n"
++           "\twindow.\n");
+ 
+ #ifdef XWIN_GLX_WINDOWS
+     ErrorF("-[no]wgl\n"
+-           "\tEnable the GLX extension to use the native Windows WGL interface for hardware-accelerated OpenGL\n");
++           "\tEnable the GLX extension to use the native Windows\n"
++           "\tWGL interface for hardware-accelerated OpenGL.\n");
+ #endif
+ 
+-    ErrorF("-[no]winkill\n" "\tAlt+F4 exits the X Server.\n");
+-
++    ErrorF("-[no]winkill\n"
++           "\tAlt-F4 exits the X Server.  The Alt-F4 key combo is enabled\n"
++           "\tby default.\n");
++           
+     ErrorF("-xkblayout XKBLayout\n"
+-           "\tEquivalent to XKBLayout in XF86Config files.\n"
++           "\tSet the layout to use for XKB.  This defaults to a layout\n"
++           "\tmatching your current layout from Windows or us (i.e. USA)\n"
++           "\tif no matching layout was found.\n"
+            "\tFor example: -xkblayout de\n");
+ 
+     ErrorF("-xkbmodel XKBModel\n"
+-           "\tEquivalent to XKBModel in XF86Config files.\n");
++           "\tSet the model to use for XKB.  This defaults to pc105.\n");
+ 
+     ErrorF("-xkboptions XKBOptions\n"
+-           "\tEquivalent to XKBOptions in XF86Config files.\n");
++           "\tSet the options to use for XKB.  This defaults to not set.\n");
+ 
+     ErrorF("-xkbrules XKBRules\n"
+-           "\tEquivalent to XKBRules in XF86Config files.\n");
++           "\tSet the rules to use for XKB.  This defaults to xorg.\n");
+ 
+     ErrorF("-xkbvariant XKBVariant\n"
+-           "\tEquivalent to XKBVariant in XF86Config files.\n"
++           "\tSet the variant to use for XKB.  This defaults to not set.\n"
+            "\tFor example: -xkbvariant nodeadkeys\n");
+ }
+ 
+@@ -862,6 +960,12 @@
+ void
+ ddxUseMsg(void)
+ {
++    static Bool s_fBeenHere = FALSE;
++    char *ViewLogFile;
++
++    if (s_fBeenHere) return;
++    s_fBeenHere = TRUE;
++
+     /* Set a flag so that FatalError won't give duplicate warning message */
+     g_fSilentFatalError = TRUE;
+ 
+@@ -869,17 +973,43 @@
+ 
+     /* Log file will not be opened for UseMsg unless we open it now */
+     if (!g_fLogInited) {
+-        g_pszLogFile = LogInit(g_pszLogFile, ".old");
++    if (!g_fLogFileChanged)
++        {
++            char buffer[MAX_PATH];
++            DWORD size = GetTempPath(sizeof(buffer), buffer);
++            if (size && size < sizeof(buffer))
++            {
++                snprintf(buffer + size, sizeof(buffer) - size,
++                        "Xming.%d.log", atoi(display));
++                buffer[sizeof(buffer)-1] = 0;
++                g_pszLogFile = buffer;
++            }
++        }
++        g_pszLogFile = LogInit(g_pszLogFile, NULL);
+         g_fLogInited = TRUE;
+     }
+     LogClose(EXIT_NO_ERROR);
+ 
++    ViewLogFile = (char *)Win32TempDir();
++    strcat(ViewLogFile, "\\XmingViewLog.txt");
++    DeleteFile(ViewLogFile);
++    CopyFile(g_pszLogFile, ViewLogFile, FALSE);
++
+     /* Notify user where UseMsg text can be found. */
+     if (!g_fNoHelpMessageBox)
+-        winMessageBoxF("The " PROJECT_NAME " help text has been printed to "
+-                       "%s.\n"
+-                       "Please open %s to read the help text.\n",
+-                       MB_ICONINFORMATION, g_pszLogFile, g_pszLogFile);
++    {
++      char buffer[MAX_PATH];
++      if (GetLongPathName(g_pszLogFile, buffer, sizeof(buffer)))
++      {
++          ShellExecute(NULL, "open", ViewLogFile, NULL, NULL, SW_SHOWNORMAL);
++          winMessageBoxF ("Invalid usage\n\nThe " PROJECT_NAME " log + help text is being displayed and has also been written to file...\n%s\n",
++                          MB_ICONINFORMATION | MB_TOPMOST, buffer);
++      }
++      else
++          winMessageBoxF ("Invalid usage\n\nNo help file available\n",
++                          MB_ICONINFORMATION);
++    }
++    else ShellExecute(NULL, "open", ViewLogFile, NULL, NULL, SW_SHOWNORMAL);
+ }
+ 
+ /* See Porting Layer Definition - p. 20 */
+@@ -910,18 +1040,21 @@
+                    "Exiting.\n");
+     }
+ 
++    /* Check for duplicate invocation on same display number. */
++    if (serverGeneration == 1 && !winCheckDisplayNumber()) {
++        FatalError("InitOutput - Another X server is already running display-"
++                   "number :%d\n", atoi(display));
++    }
++
+ #ifdef XWIN_XF86CONFIG
+     /* Try to read the xorg.conf-style configuration file */
+     if (!winReadConfigfile())
+         winErrorFVerb(1, "InitOutput - Error reading config file\n");
+ #else
+-    winMsg(X_INFO, "xorg.conf is not supported\n");
+-    winMsg(X_INFO, "See http://x.cygwin.com/docs/faq/cygwin-x-faq.html "
+-           "for more information\n");
+     winConfigFiles();
+ #endif
+ 
+-    /* Load preferences from XWinrc file */
++    /* Load preferences from Xmingrc file */
+     LoadPreferences();
+ 
+     /* Setup global screen info parameters */
+@@ -945,7 +1078,7 @@
+     winPropertyStoreInit();
+ 
+     /* Store the instance handle */
+-    g_hInstance = GetModuleHandle(NULL);
++    if (!g_hInstance) g_hInstance = GetModuleHandle(NULL);
+ 
+     /* Create the messaging window */
+     if (serverGeneration == 1)
+@@ -1011,8 +1144,6 @@
+         }
+     }
+ 
+-    xorgGlxCreateVendor();
+-
+     /* Generate a cookie used by internal clients for authorization */
+     if (g_fXdmcpEnabled || g_fAuthEnabled)
+         winGenerateAuthorization();
+@@ -1022,3 +1153,71 @@
+     winDebug("InitOutput - Returning.\n");
+ #endif
+ }
++
++/*
++ * winCheckDisplayNumber - Check if another instance of Cygwin/X is
++ * already running on the same display number.  If no one exists,
++ * make a mutex to prevent new instances from running on the same display.
++ *
++ * return FALSE if the display number is already used.
++ */
++
++static Bool
++winCheckDisplayNumber(void)
++{
++    int nDisp;
++    HANDLE mutex;
++    char name[MAX_PATH];
++    const char *pszPrefix = 0;
++    OSVERSIONINFO osvi = { 0 };
++
++    /* Check display range */
++    nDisp = atoi(display);
++    if (nDisp < 0 || nDisp > 65535 - X_TCP_PORT) {
++        ErrorF("winCheckDisplayNumber - Bad display number: %d\n", nDisp);
++        return FALSE;
++    }
++
++    /* Set first character of mutex name to null */
++    name[0] = '\0';
++
++    /* Get operating system version information */
++    osvi.dwOSVersionInfoSize = sizeof(osvi);
++    GetVersionEx(&osvi);
++
++    /* Want a mutex shared among all terminals on NT > 4.0 */
++    if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion >= 5) {
++        pszPrefix = "Global\\";
++    }
++
++    /* Setup Cygwin/X specific part of name */
++    snprintf(name, sizeof(name), "%sCYGWINX_DISPLAY:%d", pszPrefix, nDisp);
++
++    /* Windows automatically releases the mutex when this process exits */
++    mutex = CreateMutex(NULL, FALSE, name);
++    if (!mutex) {
++        LPVOID lpMsgBuf;
++
++        /* Display a fancy error message */
++        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
++                      FORMAT_MESSAGE_FROM_SYSTEM |
++                      FORMAT_MESSAGE_IGNORE_INSERTS,
++                      NULL,
++                      GetLastError(),
++                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
++                      (LPTSTR) &lpMsgBuf, 0, NULL);
++        ErrorF("winCheckDisplayNumber - CreateMutex failed: %s\n",
++               (LPSTR) lpMsgBuf);
++        LocalFree(lpMsgBuf);
++
++        return FALSE;
++    }
++    if (GetLastError() == ERROR_ALREADY_EXISTS) {
++        ErrorF("winCheckDisplayNumber - "
++               "Xming or Cygwin/X is already running display-number :%d\n",
++               nDisp);
++        return FALSE;
++    }
++
++    return TRUE;
++}

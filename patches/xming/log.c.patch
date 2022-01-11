@@ -1,0 +1,102 @@
+--- ./os/save_log.c	2021-02-02 02:44:55.122621017 +0000
++++ ./os/log.c	2021-02-02 02:46:14.677667074 +0000
+@@ -91,6 +91,7 @@
+ 
+ #ifdef WIN32
+ #include <process.h>
++#include <X11/Xwindows.h>
+ #define getpid(x) _getpid(x)
+ #endif
+ 
+@@ -198,7 +199,15 @@
+     char *logFileName = NULL;
+ 
+     if (fname && *fname) {
+-        if (asprintf(&logFileName, fname, display) == -1)
++        if (strcmp(fname, "Xming.log") == 0) {
++            char buffer[MAX_PATH];
++            DWORD size = GetTempPath(sizeof(buffer), buffer);
++            snprintf(buffer + size, sizeof(buffer) - size, "Xming.%s.log", display);
++            buffer[sizeof(buffer)-1] = 0;
++            if (asprintf(&logFileName, buffer, display) == -1)
++                FatalError("Cannot allocate space for the log file name\n");
++        }
++        else if (asprintf(&logFileName, fname, display) == -1)
+             FatalError("Cannot allocate space for the log file name\n");
+ 
+         if (backup && *backup) {
+@@ -232,8 +241,8 @@
+         if (saveBuffer && bufferSize > 0) {
+             fwrite(saveBuffer, bufferPos, 1, logFile);
+             fflush(logFile);
+-#ifndef WIN32
+-            fsync(fileno(logFile));
++#ifdef __MINGW32__
++            _commit(fileno(logFile));
+ #endif
+         }
+     }
+@@ -525,7 +534,6 @@
+ static void
+ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
+ {
+-    static Bool newline = TRUE;
+     int ret;
+ 
+     if (verb < 0 || logVerbosity >= verb)
+@@ -534,21 +542,20 @@
+     if (verb < 0 || logFileVerbosity >= verb) {
+         if (inSignalContext && logFileFd >= 0) {
+             ret = write(logFileFd, buf, len);
+-#ifndef WIN32
++#ifdef __MINGW32__
+             if (logFlush && logSync)
+-                fsync(logFileFd);
++                _commit(logFileFd);
+ #endif
+         }
+         else if (!inSignalContext && logFile) {
+-            if (newline)
++            if (0)
+                 fprintf(logFile, "[%10.3f] ", GetTimeInMillis() / 1000.0);
+-            newline = end_line;
+             fwrite(buf, len, 1, logFile);
+             if (logFlush) {
+                 fflush(logFile);
+-#ifndef WIN32
++#ifdef __MINGW32__
+                 if (logSync)
+-                    fsync(fileno(logFile));
++                    _commit(fileno(logFile));
+ #endif
+             }
+         }
+@@ -575,7 +582,7 @@
+ void
+ LogVWrite(int verb, const char *f, va_list args)
+ {
+-    return LogVMessageVerb(X_NONE, verb, f, args);
++    LogVMessageVerb(X_NONE, verb, f, args);
+ }
+ 
+ void
+@@ -915,9 +922,9 @@
+     static Bool beenhere = FALSE;
+ 
+     if (beenhere)
+-        ErrorFSigSafe("\nFatalError re-entered, aborting\n");
++        ErrorFSigSafe("FatalError re-entered, aborting.\n");
+     else
+-        ErrorFSigSafe("\nFatal server error:\n");
++        ErrorFSigSafe("Fatal server error...\n");
+ 
+     va_start(args, f);
+ 
+@@ -936,7 +943,6 @@
+ #endif
+     VErrorFSigSafe(f, args);
+     va_end(args);
+-    ErrorFSigSafe("\n");
+     if (!beenhere)
+         OsVendorFatalError(f, args2);
+     va_end(args2);

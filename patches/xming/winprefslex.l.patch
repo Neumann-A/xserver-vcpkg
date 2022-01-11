@@ -1,0 +1,44 @@
+--- ./hw/xwin/save_winprefslex.l	2014-10-27 23:08:32.784017383 +0000
++++ ./hw/xwin/winprefslex.l	2014-10-27 22:57:19.201569645 +0000
+@@ -39,6 +39,9 @@
+ 
+ extern void ErrorF (const char* /*f*/, ...);
+ 
++int parse_file (FILE *fp);
++
++
+ /* Copy the parsed string, must be free()d in yacc parser */
+ static char *makestr(char *str)
+ {
+@@ -46,7 +49,7 @@
+   ptr = malloc(strlen(str)+1);
+   if (!ptr)
+     {
+-      ErrorF ("winMultiWindowLex:makestr() out of memory\n");
++      ErrorF ("LoadPreferences - makestr() out of memory\n");
+       exit (-1);
+     }
+   strcpy(ptr, str);
+@@ -77,6 +80,9 @@
+ NOTITLE                 { return NOTITLE; }
+ OUTLINE                 { return OUTLINE; }
+ NOFRAME                 { return NOFRAME; }
++TASKBAR                 { return TASKBAR; }
++NOTAB                   { return NOTAB; }
++NEWTAB                  { return NEWTAB; }
+ ROOTMENU                { return ROOTMENU; }
+ DEFAULTSYSMENU          { return DEFAULTSYSMENU; }
+ SYSMENU                 { return SYSMENU; }
+@@ -84,9 +90,12 @@
+ ATSTART                 { return ATSTART; }
+ ATEND                   { return ATEND; }
+ EXEC                    { return EXEC; }
++EXECD                   { return EXECD; }
+ ALWAYSONTOP             { return ALWAYSONTOP; }
+ DEBUG                   { return DEBUGOUTPUT; }
+ RELOAD                  { return RELOAD; }
++FINDER                  { return FINDER; }
++VIEWLOG                 { return VIEWLOG; }
+ TRAYICON                { return TRAYICON; }
+ FORCEEXIT		{ return FORCEEXIT; }
+ SILENTEXIT		{ return SILENTEXIT; }

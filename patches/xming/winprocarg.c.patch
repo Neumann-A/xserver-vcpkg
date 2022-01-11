@@ -1,0 +1,188 @@
+--- ./hw/xwin/save_winprocarg.c	2020-04-08 13:01:17.390342499 +0100
++++ ./hw/xwin/winprocarg.c	2020-04-08 13:02:06.578964913 +0100
+@@ -36,15 +36,25 @@
+ #endif
+ 
+ #include <../xfree86/common/xorgVersion.h>
++#include <../../../version.def>
+ #include "win.h"
+ #include "winconfig.h"
+ #include "winmsg.h"
+ #include "winmonitors.h"
+ #include "winprefs.h"
+-
++#include "git_sha1.h"
++#include <ft2build.h>
++#include FT_FREETYPE_H
+ #include "winclipboard/winclipboard.h"
+ 
+ /*
++ * References to external symbols
++ */
++
++extern void winOS(void);
++extern const char* pixman_version_string(void);
++
++/*
+  * Function prototypes
+  */
+ 
+@@ -83,11 +93,15 @@
+     dwHeight = GetSystemMetrics(SM_CYSCREEN);
+ 
+     winErrorFVerb(2,
+-                  "winInitializeScreenDefaults - primary monitor w %d h %d\n",
++                  "winInitializeScreenDefaults - w %d h %d\n",
+                   (int) dwWidth, (int) dwHeight);
+ 
+     /* Set a default DPI, if no '-dpi' option was used */
+     if (monitorResolution == 0) {
++#ifdef __MINGW32__ /* Xming sets native DPI with the '-dpi auto' option (in os/utils.c) */
++        monitorResolution = WIN_DEFAULT_DPI;
++    }
++#else
+         HDC hdc = GetDC(NULL);
+ 
+         if (hdc) {
+@@ -108,6 +122,7 @@
+             monitorResolution = WIN_DEFAULT_DPI;
+         }
+     }
++#endif
+ 
+     defaultScreenInfo.iMonitor = 1;
+     defaultScreenInfo.hMonitor = MonitorFromWindow(NULL, MONITOR_DEFAULTTOPRIMARY);
+@@ -155,8 +170,6 @@
+ static void
+ winInitializeScreen(int i)
+ {
+-    winErrorFVerb(3, "winInitializeScreen - %d\n", i);
+-
+     /* Initialize default screen values, if needed */
+     winInitializeScreenDefaults();
+ 
+@@ -260,8 +273,6 @@
+      * Look for the '-help' and similar options
+      */
+     if (IS_OPTION("-help") || IS_OPTION("-h") || IS_OPTION("--help")) {
+-        /* Reset logfile. We don't need that helpmessage in the logfile */
+-        g_pszLogFile = NULL;
+         g_fNoHelpMessageBox = TRUE;
+         UseMsg();
+         exit(0);
+@@ -269,9 +280,9 @@
+     }
+ 
+     if (IS_OPTION("-version") || IS_OPTION("--version")) {
+-        /* Reset logfile. We don't need that versioninfo in the logfile */
+-        g_pszLogFile = NULL;
+         winLogVersionInfo();
++        g_fNoHelpMessageBox = TRUE;
++        UseMsg();
+         exit(0);
+         return 1;
+     }
+@@ -678,7 +689,6 @@
+      * Look for the '-clipboard' argument
+      */
+     if (IS_OPTION("-clipboard")) {
+-        /* Now the default, we still accept the arg for backwards compatibility */
+         g_fClipboard = TRUE;
+ 
+         /* Indicate that we have processed this argument */
+@@ -686,16 +696,6 @@
+     }
+ 
+     /*
+-     * Look for the '-noclipboard' argument
+-     */
+-    if (IS_OPTION("-noclipboard")) {
+-        g_fClipboard = FALSE;
+-
+-        /* Indicate that we have processed this argument */
+-        return 1;
+-    }
+-
+-    /*
+      * Look for the '-primary' argument
+      */
+     if (IS_OPTION("-primary")) {
+@@ -921,7 +921,19 @@
+      * Look for the '-auth' argument
+      */
+     if (IS_OPTION("-auth")) {
++        HANDLE hFile;
++        char *pszFile;
++        CHECK_ARGS(1);
+         g_fAuthEnabled = TRUE;
++        pszFile = argv[++i];
++        hFile = CreateFile(pszFile,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
++        if (hFile == INVALID_HANDLE_VALUE)
++            winMessageBoxF("This authorization file for the -auth option could not be opened...\n"
++                           "\"%s\"\n"
++                           "You should use an \"Xauthority\" file in your HOME directory.\n"
++                           "\nIgnoring and continuing.\n",
++                           MB_ICONINFORMATION,
++                           pszFile);
+         return 0;               /* Let DIX parse this again */
+     }
+ 
+@@ -1154,8 +1166,8 @@
+         iCurrLen += strlen(argv[i]);
+     }
+ 
+-    ErrorF("XWin was started with the following command line:\n\n"
+-           "%s\n\n", g_pszCommandLine);
++    ErrorF("%s was started with the following command line...\n"
++           "%s\n", PROJECT_NAME, g_pszCommandLine);
+ }
+ 
+ /*
+@@ -1165,16 +1177,20 @@
+ void
+ winLogVersionInfo(void)
+ {
+-    static Bool s_fBeenHere = FALSE;
+-
+-    if (s_fBeenHere)
+-        return;
+-    s_fBeenHere = TRUE;
++    FT_Library library;
++    FT_Int amajor, aminor, apatch;
++    const int error = FT_Init_FreeType(&library);
+ 
+-    ErrorF("Welcome to the XWin X Server\n");
++    ErrorF("Welcome to the %s X Server\n", PROJECT_NAME);
+     ErrorF("Vendor: %s\n", XVENDORNAME);
+-    ErrorF("Release: %d.%d.%d.%d\n", XORG_VERSION_MAJOR,
+-           XORG_VERSION_MINOR, XORG_VERSION_PATCH, XORG_VERSION_SNAP);
++#ifdef XSERVER_GIT_SHA1
++    ErrorF("Release: %s (Date: %d Time: %d Git: %s)\n",
++           XW32_VERSION_STRING, BUILD_DATE, BUILD_TIME, XSERVER_GIT_SHA1);
++#else
++    ErrorF("Release: %s (Date: %d Time: %d)\n",
++           XW32_VERSION_STRING, BUILD_DATE, BUILD_TIME);
++#endif
++    ErrorF("OS: Windows "); /* Rest of line is output by winOS() */
+ #ifdef HAVE_SYS_UTSNAME_H
+     {
+         struct utsname name;
+@@ -1186,8 +1202,14 @@
+     }
+ #endif
+     winOS();
+-    if (strlen(BUILDERSTRING))
+-        ErrorF("%s\n", BUILDERSTRING);
+-    ErrorF("Contact: %s\n", BUILDERADDR);
+-    ErrorF("\n");
++    if (error)
++        ErrorF("winLogVersionInfo - Can't initialize freetype library\n");
++    FT_Library_Version(library, &amajor, &aminor, &apatch);
++    ErrorF("FreeType2: %d.%d.%d\n", amajor, aminor, apatch);
++    FT_Done_FreeType(library);
++    ErrorF("Pixman: %s\n", pixman_version_string());
++    ErrorF("Contact: %s\n\n", BUILDERADDR);
++    if (g_pszCommandLine)
++        ErrorF("%s was started with the following command line...\n"
++               "%s\n", PROJECT_NAME, g_pszCommandLine);
+ }

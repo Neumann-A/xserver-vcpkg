@@ -1,0 +1,40 @@
+--- ./hw/xwin/save_winglobals.c	2020-04-08 13:01:17.386342136 +0100
++++ ./hw/xwin/winglobals.c	2020-04-08 14:51:32.894760659 +0100
+@@ -66,7 +66,7 @@
+ #ifndef RELOCATE_PROJECTROOT
+ const char *g_pszLogFile = DEFAULT_LOGDIR "/XWin.%s.log";
+ #else
+-const char *g_pszLogFile = "XWin.log";
++const char *g_pszLogFile = "Xming.log";
+ Bool g_fLogFileChanged = FALSE;
+ #endif
+ int g_iLogVerbose = 2;
+@@ -77,9 +77,10 @@
+ Bool g_fKeyboardHookLL = FALSE;
+ Bool g_fNoHelpMessageBox = FALSE;
+ Bool g_fSoftwareCursor = FALSE;
+-Bool g_fNativeGl = TRUE;
++Bool g_fNativeGl = FALSE;
+ Bool g_fHostInTitle = TRUE;
+ pthread_mutex_t g_pmTerminating = PTHREAD_MUTEX_INITIALIZER;
++const char *xdm_from = NULL;
+ 
+ /*
+  * Wrapped DIX functions
+@@ -90,8 +91,9 @@
+  * Clipboard variables
+  */
+ 
+-Bool g_fClipboard = TRUE;
++Bool g_fClipboard = FALSE;
+ Bool g_fClipboardStarted = FALSE;
++Window g_iClipboardWindow = None;
+ 
+ /*
+  * Re-initialize global variables that are invalidated
+@@ -102,4 +104,5 @@
+ winInitializeGlobals(void)
+ {
+     g_dwCurrentThreadID = GetCurrentThreadId();
++    g_iClipboardWindow = None;
+ }

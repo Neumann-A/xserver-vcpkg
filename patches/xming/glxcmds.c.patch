@@ -1,0 +1,16 @@
+--- ./glx/save_glxcmds.c	2019-02-03 15:50:34.652849579 +0000
++++ ./glx/glxcmds.c	2019-02-03 15:44:57.281174521 +0000
+@@ -225,6 +225,13 @@
+     return context;
+ }
+ 
++void
++FlushContext(__GLXcontext * cx)
++{
++    CALL_Flush(GET_DISPATCH(), ());
++    cx->hasUnflushedCommands = GL_FALSE;
++}
++
+ /**
+  * Create a GL context with the given properties.  This routine is used
+  * to implement \c glXCreateContext, \c glXCreateNewContext, and

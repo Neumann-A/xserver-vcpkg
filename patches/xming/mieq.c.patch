@@ -1,0 +1,20 @@
+--- ./mi/save_mieq.c	2019-10-16 13:17:30.778367490 +0100
++++ ./mi/mieq.c	2019-10-16 13:20:00.208279918 +0100
+@@ -60,7 +60,7 @@
+ #endif
+ 
+ /* Maximum size should be initial size multiplied by a power of 2 */
+-#define QUEUE_INITIAL_SIZE                 512
++#define QUEUE_INITIAL_SIZE                1024
+ #define QUEUE_RESERVED_SIZE                 64
+ #define QUEUE_MAXIMUM_SIZE                4096
+ #define QUEUE_DROP_BACKTRACE_FREQUENCY     100
+@@ -288,7 +288,7 @@
+         else if (miEventQueue.dropped % QUEUE_DROP_BACKTRACE_FREQUENCY == 0 &&
+                  miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY <=
+                  QUEUE_DROP_BACKTRACE_MAX) {
+-            ErrorFSigSafe("[mi] EQ overflow continuing.  %zu events have been "
++            ErrorFSigSafe("[mi] EQ overflow continuing.  %u events have been "
+                          "dropped.\n", miEventQueue.dropped);
+             if (miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY ==
+                 QUEUE_DROP_BACKTRACE_MAX) {

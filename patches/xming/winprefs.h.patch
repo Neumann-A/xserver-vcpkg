@@ -1,0 +1,72 @@
+--- ./hw/xwin/save_winprefs.h	2019-09-19 16:25:56.901222396 +0100
++++ ./hw/xwin/winprefs.h	2019-09-19 16:20:25.845252222 +0100
+@@ -43,7 +43,7 @@
+ /* Xwindows redefines PATH_MAX to at least 1024 */
+ #include <X11/Xwindows.h>
+ 
+-#include "winwindow.h"
++typedef struct _winPrivScreenRec *winPrivScreenPtr;
+ 
+ #ifndef NAME_MAX
+ #define NAME_MAX PATH_MAX
+@@ -53,11 +53,14 @@
+ 
+ /* Supported commands in a MENU {} statement */
+ typedef enum MENUCOMMANDTYPE {
+-    CMD_EXEC,                   /* /bin/sh -c the parameter            */
++    CMD_EXEC,                   /* /bin/sh -c the parameter (Xming create process without console) */
++    CMD_EXECD,                  /* /bin/sh -c the parameter (Xming create process with console) */
+     CMD_MENU,                   /* Display a popup menu named param    */
+     CMD_SEPARATOR,              /* Menu separator                      */
+     CMD_ALWAYSONTOP,            /* Toggle always-on-top mode           */
+-    CMD_RELOAD                  /* Reparse the .XWINRC file            */
++    CMD_RELOAD,                 /* Reparse the Xmingrc file            */
++    CMD_FINDER,                 /* Run the XDMCP host finder           */
++    CMD_VIEWLOG                 /* Display the Xming log file          */
+ } MENUCOMMANDTYPE;
+ 
+ #define STYLE_NONE     (0L)     /* Dummy the first entry                      */
+@@ -69,6 +72,10 @@
+ #define STYLE_MINIMIZE (1L<<5)  /* Open a window minimized                    */
+ #define STYLE_BOTTOM   (1L<<6)  /* Open a window at the bottom of the Z order */
+ 
++#define TASKBAR_NONE   (0L)     /* Dummy the first entry                      */
++#define TASKBAR_NOTAB  (1L)     /* Force no taskbar icon                      */
++#define TASKBAR_NEWTAB (1L<<1)  /* Force new taskbar icon                     */
++
+ /* Where to place a system menu */
+ typedef enum MENUPOSITION {
+     AT_START,                   /* Place menu at the top of the system menu   */
+@@ -110,6 +117,12 @@
+     unsigned long type;         /* What should it do? */
+ } STYLEITEM;
+ 
++/* To redefine taskbar properties for certain window types */
++typedef struct TASKBARITEM {
++    char match[MENU_MAX+1];     /* What string to search for? */
++    unsigned long type;         /* What should it do? */
++} TASKBARITEM;
++
+ typedef struct WINPREFS {
+     /* Menu information */
+     MENUPARSED *menu;           /* Array of created menus */
+@@ -137,6 +150,9 @@
+     STYLEITEM *style;
+     int styleItems;
+ 
++    TASKBARITEM *taskbar;
++    int taskbarItems;
++
+     /* Force exit flag */
+     Bool fForceExit;
+ 
+@@ -172,6 +188,9 @@
+ unsigned long
+  winOverrideStyle(char *res_name, char *res_class, char *wmName);
+ 
++unsigned long
++ winOverrideTaskbar(char *res_name, char *res_class, char *wmName);
++
+ HICON winTaskbarIcon(void);
+ 
+ HICON winOverrideDefaultIcon(int size);

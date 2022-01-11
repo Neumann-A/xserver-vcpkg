@@ -1,0 +1,44 @@
+--- ./mi/save_miinitext.c	2021-04-08 05:31:26.662636891 +0100
++++ ./mi/miinitext.c	2021-04-08 05:34:07.304644260 +0100
+@@ -103,6 +103,10 @@
+ #include "micmap.h"
+ #include "globals.h"
+ 
++#ifdef __MINGW32__
++#include <X11/Xwindows.h>
++#endif
++
+ /* The following is only a small first step towards run-time
+  * configurable extensions.
+  */
+@@ -204,17 +208,30 @@
+     ExtensionToggle *ext;
+     int i;
+     Bool found = FALSE;
++#ifdef __MINGW32__
++    char buffer[256];
++#endif
+ 
+     for (i = 0; i < ARRAY_SIZE(ExtensionToggleList); i++) {
+         ext = &ExtensionToggleList[i];
+         if ((strcmp(name, ext->name) == 0) && (ext->disablePtr == NULL)) {
++#ifdef __MINGW32__
++            snprintf(buffer, 255, "[mi] Extension \"%s\" cannot be disabled.", name);
++            MessageBox(NULL, buffer, "Xming Initialisation", MB_OK | MB_ICONINFORMATION);
++#else
+             ErrorF("[mi] Extension \"%s\" can not be disabled\n", name);
++#endif
+             found = TRUE;
+             break;
+         }
+     }
+     if (found == FALSE)
++#ifdef __MINGW32__
++        snprintf(buffer, 255, "[mi] Extension \"%s\" is not recognized.", name);
++        MessageBox(NULL, buffer, "Xming Initialisation", MB_OK | MB_ICONINFORMATION);
++#else
+         ErrorF("[mi] Extension \"%s\" is not recognized\n", name);
++#endif
+     ErrorF("[mi] Only the following extensions can be run-time %s:\n",
+            enable ? "enabled" : "disabled");
+     for (i = 0; i < ARRAY_SIZE(ExtensionToggleList); i++) {

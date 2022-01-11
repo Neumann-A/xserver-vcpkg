@@ -1,0 +1,13 @@
+--- ./hw/xwin/save_winshadgdi.c	2019-06-28 18:56:23.589601366 +0100
++++ ./hw/xwin/winshadgdi.c	2019-06-28 17:03:51.377082205 +0100
+@@ -861,8 +861,8 @@
+                     ps.rcPaint.left + pWin->borderWidth,
+                     ps.rcPaint.top + pWin->borderWidth,
+                     SRCCOPY))
+-            ErrorF("winBltExposedWindowRegionShadowGDI - BitBlt failed: 0x%08x\n",
+-                   GetLastError());
++            ErrorF("winBltExposedWindowRegionShadowGDI - BitBlt failed: %08x\n",
++                   (unsigned int)GetLastError());
+ 
+         /* Release DC */
+         DeleteDC(hdcPixmap);

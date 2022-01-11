@@ -1,0 +1,20 @@
+--- ./hw/xwin/save_winmsg.h	2016-03-10 13:33:14.604048801 +0000
++++ ./hw/xwin/winmsg.h	2016-03-10 13:26:21.059618821 +0000
+@@ -31,7 +31,6 @@
+ #ifndef __WIN_MSG_H__
+ #define __WIN_MSG_H__
+ 
+-#include <X11/Xwindows.h>
+ #include <X11/Xfuncproto.h>
+ 
+ /*
+@@ -51,8 +50,7 @@
+ #define winMsg LogMessage
+ 
+ void
+-winDebug(const char *format, ...)
+-_X_ATTRIBUTE_PRINTF(1, 2);
++winDebug(const char *format, ...);
+ void
+ winTrace(const char *format, ...)
+ _X_ATTRIBUTE_PRINTF(1, 2);

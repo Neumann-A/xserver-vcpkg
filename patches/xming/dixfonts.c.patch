@@ -1,0 +1,11 @@
+--- ./dix/save_dixfonts.c	2015-10-19 18:48:05.240413047 +0100
++++ ./dix/dixfonts.c	2015-10-19 18:51:24.310531427 +0100
+@@ -1636,7 +1636,7 @@
+                     err = (*fpe_functions[fpe->type].init_fpe) (fpe);
+                 if (err != Successful) {
+                     if (persist) {
+-                        DebugF
++                        ErrorF
+                             ("[dix] Could not init font path element %s, removing from list!\n",
+                              fpe->name);
+                     }

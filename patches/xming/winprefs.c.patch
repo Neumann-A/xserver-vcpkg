@@ -1,0 +1,269 @@
+--- ./hw/xwin/save_winprefs.c	2020-07-05 22:49:30.000000000 +0100
++++ ./hw/xwin/winprefs.c	2021-03-30 07:47:28.156145480 +0100
+@@ -60,6 +60,10 @@
+ /* Currently in use command ID, incremented each new menu item created */
+ static int g_cmdid = STARTMENUID;
+ 
++extern void winInitGlobalIcons(void);
++
++extern void winDestroyIcon(HICON hIcon);
++
+ /*
+  * Creates or appends a menu from a MENUPARSED structure
+  */
+@@ -78,7 +82,7 @@
+ 
+     /* Didn't find a match, bummer */
+     if (i == pref.menuItems) {
+-        ErrorF("MakeMenu: Can't find menu %s\n", name);
++        ErrorF("MakeMenu - Can't find menu %s.\n", name);
+         return NULL;
+     }
+ 
+@@ -91,8 +95,8 @@
+     else {
+         hmenu = CreatePopupMenu();
+         if (!hmenu) {
+-            ErrorF("MakeMenu: Unable to CreatePopupMenu() %s\n", name);
+-            return NULL;
++            ErrorF("MakeMenu - Fatal error, unable to CreatePopupMenu() \"%s\", possible Xmingrc menu recursion.\n", name);
++            exit(1);
+         }
+         item = 0;
+     }
+@@ -105,8 +109,11 @@
+ 
+         switch (m->menuItem[i].cmd) {
+         case CMD_EXEC:
++        case CMD_EXECD:
+         case CMD_ALWAYSONTOP:
+         case CMD_RELOAD:
++        case CMD_FINDER:
++        case CMD_VIEWLOG:
+             InsertMenu(hmenu,
+                        item,
+                        MF_BYPOSITION | MF_ENABLED | MF_STRING,
+@@ -146,7 +153,7 @@
+     HICON hicon;
+ 
+     if (!hwnd) {
+-        ErrorF("ReloadEnumWindowsProc: hwnd==NULL!\n");
++        ErrorF("ReloadEnumWindowsProc - hwnd==NULL!\n");
+         return FALSE;
+     }
+ 
+@@ -170,13 +177,12 @@
+     else {
+         /* Send a message to WM thread telling it re-evaluate the icon for this window */
+         {
+-            winWMMessageRec wmMsg;
+-
+             WindowPtr pWin = GetProp(hwnd, WIN_WINDOW_PROP);
+ 
+             if (pWin) {
+                 winPrivWinPtr pWinPriv = winGetWindowPriv(pWin);
+                 winPrivScreenPtr s_pScreenPriv = pWinPriv->pScreenPriv;
++                winWMMessageRec wmMsg;
+ 
+                 wmMsg.msg = WM_WM_ICON_EVENT;
+                 wmMsg.hwndWindow = hwnd;
+@@ -336,29 +342,10 @@
+                     break;
+ #else
+                 case CMD_EXEC:
+-                {
+-                    /* Start process without console window */
+-                    STARTUPINFO start;
+-                    PROCESS_INFORMATION child;
+-
+-                    memset(&start, 0, sizeof(start));
+-                    start.cb = sizeof(start);
+-                    start.dwFlags = STARTF_USESHOWWINDOW;
+-                    start.wShowWindow = SW_HIDE;
+-
+-                    memset(&child, 0, sizeof(child));
+-
+-                    if (CreateProcess
+-                        (NULL, m->menuItem[j].param, NULL, NULL, FALSE, 0, NULL,
+-                         NULL, &start, &child)) {
+-                        CloseHandle(child.hThread);
+-                        CloseHandle(child.hProcess);
+-                    }
+-                    else
+-                        MessageBox(NULL, m->menuItem[j].param,
+-                                   "Mingrc Exec Command Error!",
+-                                   MB_OK | MB_ICONEXCLAMATION);
+-                }
++                    winCreateProcess(m->menuItem[j].param, NULL, "Xmingrc Exec", SW_HIDE);
++                    return TRUE;
++                case CMD_EXECD:
++                    winCreateProcess(m->menuItem[j].param, NULL, "Xmingrc Execd", SW_SHOWNORMAL);
+                     return TRUE;
+ #endif
+                 case CMD_ALWAYSONTOP:
+@@ -389,6 +376,22 @@
+                     ReloadPrefs(pScreenPriv);
+                     return TRUE;
+ 
++                case CMD_FINDER:
++                    winCreateProcess("XLaunch -find", NULL, "Finder", SW_SHOWNORMAL);
++                    return TRUE;
++
++                case CMD_VIEWLOG:
++                    {
++                        char *ViewLogFile;
++
++                        ViewLogFile = (char *)Win32TempDir();
++                        strcat(ViewLogFile, "\\XmingViewLog.txt");
++                        DeleteFile(ViewLogFile);
++                        CopyFile(g_pszLogFile, ViewLogFile, FALSE);
++                        ShellExecute(NULL, "open", ViewLogFile, NULL, NULL, SW_SHOWNORMAL);
++                        return TRUE;
++                    }
++
+                 default:
+                     return FALSE;
+                 }
+@@ -474,7 +477,7 @@
+     if (pref.defaultIconName[0]) {
+         hicon = LoadImageComma(pref.defaultIconName, pref.iconDirectory, size, size, 0);
+         if (hicon == NULL)
+-            ErrorF("winOverrideDefaultIcon: LoadImageComma(%s) failed\n",
++            ErrorF("winOverrideDefaultIcon - LoadImageComma(%s) failed.\n",
+                    pref.defaultIconName);
+ 
+         return hicon;
+@@ -542,7 +545,9 @@
+     }
+     else {
+         char *file = malloc(PATH_MAX + NAME_MAX + 2);
++#ifdef  __CYGWIN__
+         Bool convert = FALSE;
++#endif
+ 
+         if (!file)
+             return NULL;
+@@ -625,7 +630,7 @@
+ 
+             hicon = LoadImageComma(pref.icon[i].iconFile, pref.iconDirectory, 0, 0, LR_DEFAULTSIZE);
+             if (hicon == NULL)
+-                ErrorF("winOverrideIcon: LoadImageComma(%s) failed\n",
++                ErrorF("winOverrideIcon - LoadImageComma(%s) failed.\n",
+                        pref.icon[i].iconFile);
+ 
+             pref.icon[i].hicon = hicon;
+@@ -657,7 +662,7 @@
+ }
+ 
+ /*
+- * Open and parse the XWinrc config file @path.
++ * Open and parse the XWinrc or Xmingrc config file @path.
+  * If @path is NULL, use the built-in default.
+  */
+ static int
+@@ -682,14 +687,14 @@
+ #endif
+ 
+     if (!prefFile) {
+-        ErrorF("LoadPreferences: %s not found\n", path);
++        ErrorF("LoadPreferences - %s not found.\n", path);
+         return FALSE;
+     }
+ 
+-    ErrorF("LoadPreferences: Loading %s\n", path);
++    ErrorF("LoadPreferences - Loading %s\n", path);
+ 
+     if ((parse_file(prefFile)) != 0) {
+-        ErrorF("LoadPreferences: %s is badly formed!\n", path);
++        ErrorF("LoadPreferences - %s is badly formed!\n", path);
+         fclose(prefFile);
+         return FALSE;
+     }
+@@ -721,36 +726,43 @@
+     home = getenv("HOME");
+     if (home) {
+         strcpy(fname, home);
++#ifdef __MINGW32__
++        if (fname[strlen(fname) - 1] != '\\')
++            strcat(fname, "\\");
++        strcat(fname, "Xmingrc");
++#else
+         if (fname[strlen(fname) - 1] != '/')
+             strcat(fname, "/");
+         strcat(fname, ".XWinrc");
++#endif
+         parsed = winPrefsLoadPreferences(fname);
+     }
+ 
+     /* No home file found, check system default */
+     if (!parsed) {
+-        char buffer[MAX_PATH];
+-
+ #ifdef RELOCATE_PROJECTROOT
+-        snprintf(buffer, sizeof(buffer), "%s\\system.XWinrc", winGetBaseDir());
++        snprintf(fname, sizeof(fname), "%s\\Xmingrc", winGetBaseDir());
+ #else
+-        strncpy(buffer, SYSCONFDIR "/X11/system.XWinrc", sizeof(buffer));
++        strncpy(fname, SYSCONFDIR"/X11/system.XWinrc", sizeof(fname));
+ #endif
+-        buffer[sizeof(buffer) - 1] = 0;
+-        parsed = winPrefsLoadPreferences(buffer);
++        fname[sizeof(fname) - 1] = 0;
++        parsed = winPrefsLoadPreferences(fname);
+     }
+ 
+     /* Neither user nor system configuration found, or were badly formed */
+     if (!parsed) {
+-        ErrorF
+-            ("LoadPreferences: See \"man XWinrc\" to customize the XWin menu.\n");
++#ifdef __MINGW32__
++        ErrorF("LoadPreferences - See the Xmingrc Manual for how to customize the Xming menu.\n");
++#else
++        ErrorF("LoadPreferences: See \"man XWinrc\" to customize the XWin menu.\n");
+         parsed = winPrefsLoadPreferences(NULL);
++#endif
+     }
+ 
+     /* Setup a DISPLAY environment variable, need to allocate on heap */
+     /* because putenv doesn't copy the argument... */
+     winGetDisplayName(szDisplay, 0);
+-    szEnvDisplay = (char *) (malloc(strlen(szDisplay) + strlen("DISPLAY=") + 1));
++    szEnvDisplay = malloc(strlen(szDisplay) + strlen("DISPLAY=") + 1);
+     if (szEnvDisplay) {
+         snprintf(szEnvDisplay, 512, "DISPLAY=%s", szDisplay);
+         putenv(szEnvDisplay);
+@@ -759,7 +771,7 @@
+     /* Replace any "%display%" in menu commands with display string */
+     for (i = 0; i < pref.menuItems; i++) {
+         for (j = 0; j < pref.menu[i].menuItems; j++) {
+-            if (pref.menu[i].menuItem[j].cmd == CMD_EXEC) {
++            if (pref.menu[i].menuItem[j].cmd==CMD_EXEC || pref.menu[i].menuItem[j].cmd==CMD_EXECD) {
+                 srcParam = pref.menu[i].menuItem[j].param;
+                 dstParam = param;
+                 while (*srcParam) {
+@@ -803,3 +815,25 @@
+     /* Didn't find the style, fail gracefully */
+     return STYLE_NONE;
+ }
++
++
++/*
++ * Check for a match of the window class to one specified in the
++ * TASKBAR{} section in the prefs file
++ */
++unsigned long
++winOverrideTaskbar(char *res_name, char *res_class, char *wmName)
++{
++    int i;
++
++    for (i=0; i<pref.taskbarItems; i++) {
++        if ((res_name && !strcmp(pref.taskbar[i].match, res_name)) ||
++            (res_class && !strcmp(pref.taskbar[i].match, res_class)) ||
++            (wmName && strstr(wmName, pref.taskbar[i].match))) {
++            if (pref.taskbar[i].type) return pref.taskbar[i].type;
++        }
++    }
++
++    /* Didn't find a taskbar type */
++    return TASKBAR_NONE;
++}

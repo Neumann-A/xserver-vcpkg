@@ -1,0 +1,18 @@
+--- ./fb/save_wfbrename.h	2017-03-21 13:38:03.323764758 +0000
++++ ./fb/wfbrename.h	2017-03-21 13:46:19.109437091 +0000
+@@ -28,7 +28,6 @@
+ #define fbCopyNto1 wfbCopyNto1
+ #define fbCopyNtoN wfbCopyNtoN
+ #define fbCopyPlane wfbCopyPlane
+-#define fbCopyRegion wfbCopyRegion
+ #define fbCopyWindow wfbCopyWindow
+ #define fbCopyWindowProc wfbCopyWindowProc
+ #define fbCreateDefColormap wfbCreateDefColormap
+@@ -38,7 +37,6 @@
+ #define fbDestroyGlyphCache wfbDestroyGlyphCache
+ #define fbDestroyPixmap wfbDestroyPixmap
+ #define fbDestroyWindow wfbDestroyWindow
+-#define fbDoCopy wfbDoCopy
+ #define fbDots wfbDots
+ #define fbDots16 wfbDots16
+ #define fbDots32 wfbDots32
