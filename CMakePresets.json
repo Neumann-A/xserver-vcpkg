@@ -1,0 +1,179 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name" : "cmake-general",
+            "cacheVariables" : {
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "TRUE"
+            }
+        },
+        {
+            "name" :"vcpkg_settings",
+            "hidden" : true,
+            "cacheVariables": {
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports/lib;${sourceDir}/ports/apps",
+                "VCPKG_MANIFEST_DIR" : "${sourceDir}/vcpkg-manifest"
+            }
+        },
+        {
+            "name" :"win-vcpkg_settings",
+            "hidden" : true,
+            "inherits": ["vcpkg_settings" ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_HOST_TRIPLET": "x64-windows",
+                "VCPKG_INSTALLED_DIR": "${sourceDir}/build/vcpkg_installed"
+            }
+        },
+        {
+            "name" :"linux-vcpkg_settings",
+            "hidden" : true,
+            "inherits": ["vcpkg_settings" ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_HOST_TRIPLET": "x64-linux"
+            }
+        },
+        {
+            "name": "ninja-general",
+            "hidden" : true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "inherits": ["cmake-general"]
+        },
+        {
+            "name": "clang-cl",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER"   : "$penv{LLVMInstallDir}/bin/clang-cl.exe",
+                "CMAKE_CXX_COMPILER" : "$penv{LLVMInstallDir}/bin/clang-cl.exe"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+             },
+             "toolset": {
+                "value": "host=x64",
+                "strategy": "external"
+             },
+             "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                  "hostOS": [ "Windows" ],
+                  "intelliSenseMode" : "windows-clang-x64",
+                  "enableMicrosoftCodeAnalysis" : true
+                }
+            }
+        },
+        {
+            "name": "linux-ninja-release",
+            "displayName": "linux-ninja-release",
+            "description": "Ninja generator release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja/release",
+            "inherits": ["ninja-general" , "linux-vcpkg_settings" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "win-ninja-release",
+            "displayName": "win-ninja-release",
+            "description": "Ninja generator release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja/release",
+            "inherits": ["ninja-general" , "win-vcpkg_settings" , "clang-cl"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "win-ninja-debug",
+            "displayName": "win-ninja-debug",
+            "description": "Ninja generator debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja/debug",
+            "inherits": ["ninja-general" , "win-vcpkg_settings", "clang-cl" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "vs-llvm",
+            "displayName": "VS LLVM",
+            "description": "VS Generator with llvm toolset",
+            "generator": "Visual Studio 17 2022",
+            "toolset": "ClangCL,host=x64",
+            "binaryDir": "${sourceDir}/build/vs-llvm",
+            "inherits": ["CMakeJSON_Settings" , "win-vcpkg_settings" ],
+            "cacheVariables": {
+                "CMAKE_GENERATOR_INSTANCE": "$env{VS2022INSTALLDIR}",
+                "StoPhys_ARCH_LIST": "NONE;AVX2",
+                "SERAR_WITH_HDF5": "TRUE",
+                "SERAR_WITH_MATLAB": "TRUE",
+                "BUILD_TESTING" : "ON",
+                "STOPHYS_BUILD_TESTING" : "ON"
+            },
+            "environment": {
+                "LLVMInstallDir" : "$penv{LLVMInstallDir}",
+                "LLVMToolsVersion" : "13.0.0"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+             },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                  "hostOS": [ "Windows" ],
+                  "intelliSenseMode" : "windows-clang-x64",
+                  "intelliSenseOptions" : {
+                      "useCompilerDefaults" : true,
+                      "additionalCompilerArgs" : ""
+                  },
+                  "enableMicrosoftCodeAnalysis" : true
+                }
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name" : "vs-llvm-build",
+            "configurePreset" : "vs-llvm",
+            "hidden" : true
+        },
+        {
+            "name": "win-default-release",
+            "description": "",
+            "displayName": "win-default-release",
+            "configurePreset": "vs-llvm",
+            "configuration": "Release"
+        },
+        {
+            "name": "win-default-ninja_release",
+            "description": "win ninja release",
+            "displayName": "win-default-ninja_release",
+            "configurePreset": "win-ninja-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "win-default-ninja_debug",
+            "description": "win ninja debug",
+            "displayName": "win-default-ninja_debug",
+            "configurePreset": "win-ninja-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "linux-default-ninja_release",
+            "description": "linux ninja release",
+            "displayName": "linux-default-ninja_release",
+            "configurePreset": "linux-ninja-release",
+            "configuration": "Release"
+        }
+    ],
+    "testPresets": [
+    ]
+}
