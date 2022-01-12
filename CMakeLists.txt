@@ -16,4 +16,4 @@ endif()
 set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/ports/libs;${CMAKE_CURRENT_SOURCE_DIR}/ports/app" CACHE STRING "")
 set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-manifest" CACHE STRING "")
 
-project(xserver-vcpkg LANGUAGE None)
+project(xserver-vcpkg LANGUAGES NONE)
