@@ -11,8 +11,8 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
     REPO lib/libx11
-    REF  f906fe8e9769e4313294b68e61c402610ade69da #x11 v 1.7.2
-    SHA512 6f9e9e6a4cd3b68f53076e9e232c7e48d5cfc1c6cfacd44bb9262bd94fe601b0558355c1d3065d71fcfaa703071896a67a1140b69eef810e7a8bbbf3af638316
+    REF  4c96f3567a8d045ee57b886fddc9618b71282530 #x11 v 1.7.3.1
+    SHA512 15c55b6283aec363f6af5b549584d487ec5a8c0f74b95dc44674ff50764abe5b9fa216e2af3c5408faf12d17b04e9433f0ad66da6e32a0dfef0427ca131ef23b
     HEAD_REF master # branch name
     PATCHES cl.build.patch #patch name
             io_include.patch
