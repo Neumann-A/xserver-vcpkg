@@ -1,0 +1,165 @@
+diff --git a/posix/regex.c b/posix/regex.c
+index 7296be0f0..050955139 100644
+--- a/posix/regex.c
++++ b/posix/regex.c
+@@ -19,7 +19,7 @@
+ 
+ #define __STDC_WANT_IEC_60559_BFP_EXT__
+ 
+-#ifndef _LIBC
++#if !defined(_LIBC) && !defined(_MSC_VER) 
+ # include <libc-config.h>
+ 
+ # if __GNUC_PREREQ (4, 6)
+diff --git a/posix/regex.h b/posix/regex.h
+index 14fb1d836..bd5572016 100644
+--- a/posix/regex.h
++++ b/posix/regex.h
+@@ -21,7 +21,29 @@
+ #define _REGEX_H 1
+ 
+ #include <sys/types.h>
+-
++#ifndef __GNUC__
++# define __DLL_IMPORT__	__declspec(dllimport)
++# define __DLL_EXPORT__	__declspec(dllexport)
++#else
++# define __DLL_IMPORT__	__attribute__((dllimport)) extern
++# define __DLL_EXPORT__	__attribute__((dllexport)) extern
++#endif 
++
++#if (defined __WIN32__) || (defined _WIN32)
++# ifdef BUILD_REGEX_DLL
++#  define REGEX_DLL_IMPEXP	__DLL_EXPORT__
++# elif defined(REGEX_STATIC)
++#  define REGEX_DLL_IMPEXP	 extern
++# elif defined (USE_REGEX_DLL)
++#  define REGEX_DLL_IMPEXP	__DLL_IMPORT__
++# elif defined (USE_REGEX_STATIC)
++#  define REGEX_DLL_IMPEXP 	 extern
++# else /* assume USE_REGEX_DLL */
++#  define REGEX_DLL_IMPEXP	__DLL_IMPORT__
++# endif
++#else /* __WIN32__ */
++# define REGEX_DLL_IMPEXP	 extern
++#endif
+ /* Allow the use in C++ code.  */
+ #ifdef __cplusplus
+ extern "C" {
+@@ -208,7 +230,7 @@ typedef unsigned long int reg_syntax_t;
+    some interfaces).  When a regexp is compiled, the syntax used is
+    stored in the pattern buffer, so changing this does not affect
+    already-compiled regexps.  */
+-extern reg_syntax_t re_syntax_options;
++REGEX_DLL_IMPEXP reg_syntax_t re_syntax_options;
+ 
+ #ifdef __USE_GNU
+ /* Define combinations of the above bits for the standard possibilities.
+@@ -525,7 +547,7 @@ typedef struct
+ #ifdef __USE_GNU
+ /* Sets the current default syntax to SYNTAX, and return the old syntax.
+    You can also simply assign to the 're_syntax_options' variable.  */
+-extern reg_syntax_t re_set_syntax (reg_syntax_t __syntax);
++REGEX_DLL_IMPEXP reg_syntax_t re_set_syntax (reg_syntax_t __syntax);
+ 
+ /* Compile the regular expression PATTERN, with length LENGTH
+    and syntax given by the global 're_syntax_options', into the buffer
+@@ -535,7 +557,7 @@ extern reg_syntax_t re_set_syntax (reg_syntax_t __syntax);
+    Note that the translate table must either have been initialized by
+    'regcomp', with a malloc'ed value, or set to NULL before calling
+    'regfree'.  */
+-extern const char *re_compile_pattern (const char *__pattern, size_t __length,
++REGEX_DLL_IMPEXP const char *re_compile_pattern (const char *__pattern, size_t __length,
+ 				       struct re_pattern_buffer *__buffer)
+     __attr_access ((__read_only__, 1, 2));
+ 
+@@ -543,7 +565,7 @@ extern const char *re_compile_pattern (const char *__pattern, size_t __length,
+ /* Compile a fastmap for the compiled pattern in BUFFER; used to
+    accelerate searches.  Return 0 if successful and -2 if was an
+    internal error.  */
+-extern int re_compile_fastmap (struct re_pattern_buffer *__buffer);
++REGEX_DLL_IMPEXP int re_compile_fastmap (struct re_pattern_buffer *__buffer);
+ 
+ 
+ /* Search in the string STRING (with length LENGTH) for the pattern
+@@ -551,7 +573,7 @@ extern int re_compile_fastmap (struct re_pattern_buffer *__buffer);
+    characters.  Return the starting position of the match, -1 for no
+    match, or -2 for an internal error.  Also return register
+    information in REGS (if REGS and BUFFER->no_sub are nonzero).  */
+-extern regoff_t re_search (struct re_pattern_buffer *__buffer,
++REGEX_DLL_IMPEXP regoff_t re_search (struct re_pattern_buffer *__buffer,
+ 			   const char *__String, regoff_t __length,
+ 			   regoff_t __start, regoff_t __range,
+ 			   struct re_registers *__regs)
+@@ -560,7 +582,7 @@ extern regoff_t re_search (struct re_pattern_buffer *__buffer,
+ 
+ /* Like 're_search', but search in the concatenation of STRING1 and
+    STRING2.  Also, stop searching at index START + STOP.  */
+-extern regoff_t re_search_2 (struct re_pattern_buffer *__buffer,
++REGEX_DLL_IMPEXP regoff_t re_search_2 (struct re_pattern_buffer *__buffer,
+ 			     const char *__string1, regoff_t __length1,
+ 			     const char *__string2, regoff_t __length2,
+ 			     regoff_t __start, regoff_t __range,
+@@ -572,14 +594,14 @@ extern regoff_t re_search_2 (struct re_pattern_buffer *__buffer,
+ 
+ /* Like 're_search', but return how many characters in STRING the regexp
+    in BUFFER matched, starting at position START.  */
+-extern regoff_t re_match (struct re_pattern_buffer *__buffer,
++REGEX_DLL_IMPEXP regoff_t re_match (struct re_pattern_buffer *__buffer,
+ 			  const char *__String, regoff_t __length,
+ 			  regoff_t __start, struct re_registers *__regs)
+     __attr_access ((__read_only__, 2, 3));
+ 
+ 
+ /* Relates to 're_match' as 're_search_2' relates to 're_search'.  */
+-extern regoff_t re_match_2 (struct re_pattern_buffer *__buffer,
++REGEX_DLL_IMPEXP regoff_t re_match_2 (struct re_pattern_buffer *__buffer,
+ 			    const char *__string1, regoff_t __length1,
+ 			    const char *__string2, regoff_t __length2,
+ 			    regoff_t __start, struct re_registers *__regs,
+@@ -600,7 +622,7 @@ extern regoff_t re_match_2 (struct re_pattern_buffer *__buffer,
+    Unless this function is called, the first search or match using
+    BUFFER will allocate its own register data, without
+    freeing the old data.  */
+-extern void re_set_registers (struct re_pattern_buffer *__buffer,
++REGEX_DLL_IMPEXP void re_set_registers (struct re_pattern_buffer *__buffer,
+ 			      struct re_registers *__regs,
+ 			      __re_size_t __num_regs,
+ 			      regoff_t *__starts, regoff_t *__ends);
+@@ -608,8 +630,8 @@ extern void re_set_registers (struct re_pattern_buffer *__buffer,
+ 
+ #if defined _REGEX_RE_COMP || (defined _LIBC && defined __USE_MISC)
+ /* 4.2 bsd compatibility.  */
+-extern char *re_comp (const char *);
+-extern int re_exec (const char *);
++REGEX_DLL_IMPEXP char *re_comp (const char *);
++REGEX_DLL_IMPEXP int re_exec (const char *);
+ #endif
+ 
+ /* For plain 'restrict', use glibc's __restrict if defined.
+@@ -648,21 +670,21 @@ extern int re_exec (const char *);
+ #endif
+ 
+ /* POSIX compatibility.  */
+-extern int regcomp (regex_t *_Restrict_ __preg,
++REGEX_DLL_IMPEXP int regcomp (regex_t *_Restrict_ __preg,
+ 		    const char *_Restrict_ __pattern,
+ 		    int __cflags);
+ 
+-extern int regexec (const regex_t *_Restrict_ __preg,
++REGEX_DLL_IMPEXP int regexec (const regex_t *_Restrict_ __preg,
+ 		    const char *_Restrict_ __String, size_t __nmatch,
+ 		    regmatch_t __pmatch[_Restrict_arr_],
+ 		    int __eflags)
+     __attr_access ((__write_only__, 4, 3));
+ 
+-extern size_t regerror (int __errcode, const regex_t *_Restrict_ __preg,
++REGEX_DLL_IMPEXP size_t regerror (int __errcode, const regex_t *_Restrict_ __preg,
+ 			char *_Restrict_ __errbuf, size_t __errbuf_size)
+     __attr_access ((__write_only__, 3, 4));
+ 
+-extern void regfree (regex_t *__preg);
++REGEX_DLL_IMPEXP void regfree (regex_t *__preg);
+ 
+ 
+ #ifdef __cplusplus

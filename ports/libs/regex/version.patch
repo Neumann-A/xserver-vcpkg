@@ -1,0 +1,64 @@
+diff --git a/src/regex/2.7/regex-2.7/resource/regex-dll-res.rc b/src/regex/2.7/regex-2.7/resource/regex-dll-res.rc
+index a0abf3255..dab66840e 100644
+--- a/src/regex/2.7/regex-2.7/resource/regex-dll-res.rc
++++ b/src/regex/2.7/regex-2.7/resource/regex-dll-res.rc
+@@ -2,9 +2,9 @@
+ #include <windows.h>
+ #include <winver.h>
+   
+-#define VER_FILEVERSION 2,7,2853,21853
+-#define VER_FILEVERSION_STR "2.7.2853.21853"
+-#define VER_FILELTVERSION_STR "2:7:0"
++#define VER_FILEVERSION 2,34,2853,21853
++#define VER_FILEVERSION_STR "2.34.2853.21853"
++#define VER_FILELTVERSION_STR "2:34:0"
+ #define VER_LEGALCOPYRIGHT_STR "© 2007 Free Software Foundation <www.fsf.org>"
+ //#define VER_COMMENT_STR  ""	 
+ 
+@@ -17,8 +17,8 @@
+ #define VER_LEGALTRADEMARKS_STR "GnuWin32®, Regex®, regex2®"
+ 
+ #define VER_PRODUCTNAME_STR "Regex"
+-#define VER_PRODUCTVERSION 2,7,2853,21853
+-#define VER_PRODUCTVERSION_STR "2.7.2853.21853"
++#define VER_PRODUCTVERSION 2,34,2853,21853
++#define VER_PRODUCTVERSION_STR "2.34.2853.21853"
+ 
+ 
+ #define OFFICIAL 1
+diff --git a/src/regex/2.7/regex-2.7/resource/regex-dllversion.c b/src/regex/2.7/regex-2.7/resource/regex-dllversion.c
+index 9d842ff8e..462834b97 100644
+--- a/src/regex/2.7/regex-2.7/resource/regex-dllversion.c
++++ b/src/regex/2.7/regex-2.7/resource/regex-dllversion.c
+@@ -14,10 +14,10 @@ HRESULT DllGetVersion (DLLVERSIONINFO2 *pdvi)
+ 	if ( !pdvi || (pdvi->info1.cbSize != sizeof (*pdvi)) )
+ 		return (E_INVALIDARG);
+ 	pdvi->info1.dwMajorVersion = 2;
+-	pdvi->info1.dwMinorVersion = 7;
++	pdvi->info1.dwMinorVersion = 34;
+ 	pdvi->info1.dwBuildNumber = 2853;
+ 	pdvi->info1.dwPlatformID = DLLVER_PLATFORM_WINDOWS;
+ 	if (pdvi->info1.cbSize == sizeof (DLLVERSIONINFO2))
+-		pdvi->ullVersion = MAKEDLLVERULL (2, 7, 2853, 21853);
++		pdvi->ullVersion = MAKEDLLVERULL (2, 34, 2853, 21853);
+ 	return S_OK;
+ }
+diff --git a/src/regex/2.7/regex-2.7-src/configure.ac b/src/regex/2.7/regex-2.7-src/configure.ac
+index eb1ab8402..bcede21a1 100644
+--- a/src/regex/2.7/regex-2.7-src/configure.ac
++++ b/src/regex/2.7/regex-2.7-src/configure.ac
+@@ -2,11 +2,11 @@
+ # Process this file with autoconf to produce a configure script.
+ 
+ AC_PREREQ(2.61)
+-AC_INIT(regex,2.7,gnuwin32@users.sourceforge.net)
++AC_INIT(regex,2.34,gnuwin32@users.sourceforge.net)
+ AC_CONFIG_SRCDIR([src/regex.c])
+ AC_CONFIG_HEADER([config.h])
+ 
+-AM_INIT_AUTOMAKE(regex,2.7)
++AM_INIT_AUTOMAKE(regex,2.34)
+ 
+ # Checks for programs.
+ AC_PROG_CC
+ 

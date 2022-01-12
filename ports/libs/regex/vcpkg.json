@@ -1,0 +1,7 @@
+{
+  "name": "regex",
+  "version-string": "2.34",
+  "description": "Regex: searches for and matches text strings ",
+  "homepage": "http://gnuwin32.sourceforge.net/packages/regex.htm",
+  "supports": "windows"
+}
