@@ -3,6 +3,17 @@ if(NOT X_VCPKG_FORCE_VCPKG_X_LIBRARIES AND NOT VCPKG_TARGET_IS_WINDOWS)
     set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
 else()
 
+if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
+    set(PATCHES 
+            vcxserver-xw32defs.patch
+            windows-long64.patch
+            windows-io.patch
+            windows_mean_and_lean.patch
+            windows-none.patch
+            windows-include-guards.patch
+        )
+endif()
+
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
@@ -11,10 +22,8 @@ vcpkg_from_gitlab(
     SHA512 5d2b6096e7f6ec6a3414f4370da583f6660fbd287474e8b4cd3e51ccc35514181352d3b0b9cd4b8d6e30de7b54f4ce01a9fbf17be75cf8de18aa28e9f774b8c4
     HEAD_REF master # branch name
     PATCHES 
-        windows-long64.patch
-        windows-io.patch
-        windows_mean_and_lean.patch
-        windows-none.patch
+        upstream-1.patch
+        ${PATCHES}
 )
 
 vcpkg_configure_meson(SOURCE_PATH "${SOURCE_PATH}"
