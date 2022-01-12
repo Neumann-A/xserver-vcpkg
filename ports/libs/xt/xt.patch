@@ -1,0 +1,33 @@
+diff --git a/src/Initialize.c b/src/Initialize.c
+index 67c444571..d73158114 100644
+--- a/src/Initialize.c
++++ b/src/Initialize.c
+@@ -259,6 +259,14 @@ asm(".section .trampoline, \"dwx\" \n\
+ _y: .quad __XtInherit     \n\
+     .text                 \n");
+ #else
++void
++_XtInherit(void)
++{
++    extern void __XtInherit();
++
++    __XtInherit();
++}
++#define _XtInherit __XtInherit
+ //NEEDS external assembly
+ //__asm {".section .trampoline, \"dwx\" \n\
+ // .globl _XtInherit        \n\
+diff --git a/src/Shell.c b/src/Shell.c
+index 07713cc25..fcf10a5e2 100644
+--- a/src/Shell.c
++++ b/src/Shell.c
+@@ -87,7 +87,9 @@ in this Software without prior written authorization from The Open Group.
+ #include <X11/ICE/ICElib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif
+ 
+ #ifdef EDITRES
+ #include <X11/Xmu/Editres.h>

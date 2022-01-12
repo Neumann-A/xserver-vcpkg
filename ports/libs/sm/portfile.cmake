@@ -2,16 +2,15 @@ if(NOT X_VCPKG_FORCE_VCPKG_X_LIBRARIES AND NOT VCPKG_TARGET_IS_WINDOWS)
     message(STATUS "Utils and libraries provided by '${PORT}' should be provided by your system! Install the required packages or force vcpkg libraries by setting X_VCPKG_FORCE_VCPKG_X_LIBRARIES")
     set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
 else()
-# Does not support cl due to one singular asm instruction. 
+
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO lib/libxt
-    REF edd70bdfbbd16247e3d9564ca51d864f82626eb7 # 1.2.1
-    SHA512  c49876253dfd187e7d56a098d3d992157daefa2c25ee732eaae5818ee04513bedd807d2f265085db2e82c0b1821e152a88fb4998c0002f6ac57204543fe18566
+    REPO lib/libsm
+    REF a52c79544fcd6b5e2242b9122dfaa34be07aebb2 # 1.2.3
+    SHA512  379e450d90e61d80d4fea8449a582b3eee3968bef137022053cb3bd51fa2815d8fccc43ff11e3b593c4a67ad64e93209c25111a20ac88e38c1f663cd274f5d56
     HEAD_REF master # branch name
-    PATCHES windows_build.patch # Still needs a fix for the asm on x64
-            xt.patch
+    PATCHES windows.patch
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
@@ -19,11 +18,6 @@ set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
 vcpkg_configure_make(
     SOURCE_PATH "${SOURCE_PATH}"
     AUTOCONFIG
-    OPTIONS 
-        --with-xfile-search-path=X11
-        --with-appdefaultdir=share/X11/app-defaults
-        --enable-malloc0returnsnull=yes
-        xorg_cv_malloc0_returns_null=yes
 )
 
 vcpkg_install_make()
