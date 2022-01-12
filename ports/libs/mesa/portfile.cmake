@@ -13,6 +13,7 @@ set(PATCHES
     # radv-msvc-llvm13-2.patch
     # Fix d3d10sw MSVC build
     d3d10sw.patch
+    directx-headers.patch
 )
 
 vcpkg_check_linkage(ONLY_DYNAMIC_CRT)
@@ -121,7 +122,7 @@ list(APPEND MESA_OPTIONS -Dlibunwind=disabled)
 list(APPEND MESA_OPTIONS -Dlmsensors=disabled)
 list(APPEND MESA_OPTIONS -Dvalgrind=disabled)
 list(APPEND MESA_OPTIONS -Dglvnd=false)
-list(APPEND MESA_OPTIONS -Dglx=gallium-xlib) #gallium-xlib) # dri) # requires x11
+#list(APPEND MESA_OPTIONS -Dglx=gallium-xlib) #gallium-xlib) # dri) # requires x11
 list(APPEND MESA_OPTIONS -Dgbm=disabled)
 list(APPEND MESA_OPTIONS -Dosmesa=true)
 
@@ -136,7 +137,7 @@ endif()
 string(APPEND GALLIUM_DRIVERS 'swrast')
 if("llvm" IN_LIST FEATURES)
     list(APPEND MESA_OPTIONS -Dllvm=enabled)
-    #string(APPEND GALLIUM_DRIVERS ",'swr'") # SWR always requires llvm
+    string(APPEND GALLIUM_DRIVERS ",'swr'") # SWR always requires llvm
 else()
     list(APPEND MESA_OPTIONS -Dllvm=disabled)
 endif()
@@ -170,7 +171,7 @@ endif()
 list(APPEND MESA_OPTIONS -Dshared-glapi=enabled)  #shared GLAPI required when building two or more of the following APIs - opengl, gles1 gles2
 
 if(VCPKG_TARGET_IS_WINDOWS)
-    list(APPEND MESA_OPTIONS "-Dplatforms=['windows', 'x11']")
+    list(APPEND MESA_OPTIONS "-Dplatforms=['windows']") #'x11'
     list(APPEND MESA_OPTIONS -Dmicrosoft-clc=disabled)
 endif()
 

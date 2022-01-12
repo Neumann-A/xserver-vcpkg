@@ -98,6 +98,18 @@
           "default-features": false
         }
       ]
+    },
+    "platform-x11" : {
+      "description": "Build for the x11 platform",
+      "dependencies": [
+        "xlib",
+        "xfixes",
+        "xext"
+      ]
+    },
+    "platform-win" : {
+      "description": "Build for the windows platform",
+      "dependencies": [  ]
     }
   }
 }
