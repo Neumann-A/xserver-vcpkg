@@ -1,0 +1,1581 @@
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/XKBlib.h b/vcxsrv-code/libx11/include/X11/XKBlib.h
+index 3b1dc76..dd532b2 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/XKBlib.h
++++ b/vcxsrv-code/libx11/include/X11/XKBlib.h
+@@ -29,9 +29,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ 
+ #include <X11/Xlib.h>
+ #include <X11/extensions/XKBstr.h>
+-#if !defined(Status)
+-	typedef int Status;
+-#endif
++
+ typedef struct _XkbAnyEvent {
+ 	int 		type;		/* XkbAnyEvent */
+ 	unsigned long 	serial;		/* # of last req processed by server */
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xlib.h b/vcxsrv-code/libx11/include/X11/Xlib.h
+index 5faf83b..c6c63a3 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xlib.h
++++ b/vcxsrv-code/libx11/include/X11/Xlib.h
+@@ -79,8 +79,8 @@ _Xmblen(
+ 
+ typedef char *XPointer;
+ 
+-#define Bool int
+-#define Status int
++typedef int Bool;
++typedef int Status;
+ #define True 1
+ #define False 0
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xlibint.h b/vcxsrv-code/libx11/include/X11/Xlibint.h
+index b4acfbe..dba98f7 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xlibint.h
++++ b/vcxsrv-code/libx11/include/X11/Xlibint.h
+@@ -383,32 +383,32 @@ struct _XLockPtrs {
+ 	);
+ };
+ 
+-#if defined(WIN32) && !defined(_XLIBINT_)
+-#define _XCreateMutex_fn (*_XCreateMutex_fn_p)
+-#define _XFreeMutex_fn (*_XFreeMutex_fn_p)
+-#define _XLockMutex_fn (*_XLockMutex_fn_p)
+-#define _XUnlockMutex_fn (*_XUnlockMutex_fn_p)
+-#define _Xglobal_lock (*_Xglobal_lock_p)
+-#define X_LOCK_EXTERN __declspec(dllimport) extern
++#ifdef WIN32
++#ifdef LIB11_DLL
++#define X11_EXTERN __declspec(dllexport) extern
++#else
++#define X11_EXTERN __declspec(dllimport) extern
++#endif
+ #else
+-#define X_LOCK_EXTERN extern
++#define X11_EXTERN extern
+ #endif
+ 
++
+ /* in XlibInt.c */
+-X_LOCK_EXTERN void (*_XCreateMutex_fn)(
++X11_EXTERN void (*_XCreateMutex_fn)(
+     LockInfoPtr /* lock */
+ );
+-X_LOCK_EXTERN void (*_XFreeMutex_fn)(
++X11_EXTERN void (*_XFreeMutex_fn)(
+     LockInfoPtr /* lock */
+ );
+-X_LOCK_EXTERN void (*_XLockMutex_fn)(
++X11_EXTERN void (*_XLockMutex_fn)(
+     LockInfoPtr	/* lock */
+ #if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
+     , char * /* file */
+     , int /* line */
+ #endif
+ );
+-X_LOCK_EXTERN void (*_XUnlockMutex_fn)(
++X11_EXTERN void (*_XUnlockMutex_fn)(
+     LockInfoPtr	/* lock */
+ #if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
+     , char * /* file */
+@@ -416,7 +416,7 @@ X_LOCK_EXTERN void (*_XUnlockMutex_fn)(
+ #endif
+ );
+ 
+-X_LOCK_EXTERN LockInfoPtr _Xglobal_lock;
++X11_EXTERN LockInfoPtr _Xglobal_lock;
+ 
+ #if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
+ #define LockDisplay(d)	     if ((d)->lock_fns) (*(d)->lock_fns->lock_display)((d),__FILE__,__LINE__)
+@@ -935,10 +935,10 @@ extern int _XError(
+ extern int _XIOError(
+     Display*	/* dpy */
+ );
+-extern int (*_XIOErrorFunction)(
++X11_EXTERN int (*_XIOErrorFunction)(
+     Display*	/* dpy */
+ );
+-extern int (*_XErrorFunction)(
++X11_EXTERN int (*_XErrorFunction)(
+     Display*		/* dpy */,
+     XErrorEvent*	/* error_event */
+ );
+@@ -1347,19 +1347,11 @@ extern int _XOpenFile(
+     int			/* flags */
+ );
+ 
+-#ifdef _MSC_VER
+-    extern int _XOpenFileMode(
+-    _Xconst char*	/* path */,
+-    int			/* flags */,
+-    int              /* mode */
+-);
+-#else
+-    extern int _XOpenFileMode(
++extern int _XOpenFileMode(
+     _Xconst char*	/* path */,
+     int			/* flags */,
+     mode_t              /* mode */
+ );
+-#endif
+ 
+ extern void* _XFopenFile(
+     _Xconst char*	/* path */,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xregion.h b/vcxsrv-code/libx11/include/X11/Xregion.h
+index cf10f86..70caa1a 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xregion.h
++++ b/vcxsrv-code/libx11/include/X11/Xregion.h
+@@ -58,8 +58,10 @@ typedef struct {
+ 
+ #define TRUE 1
+ #define FALSE 0
++#ifndef MAXSHORT
+ #define MAXSHORT 32767
+ #define MINSHORT -MAXSHORT
++#endif
+ #ifndef MAX
+ #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+ #endif
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xresource.h b/vcxsrv-code/libx11/include/X11/Xresource.h
+index 87aac88..031d837 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/include/X11/Xresource.h
++++ b/vcxsrv-code/libx11/include/X11/Xresource.h
+@@ -81,7 +81,7 @@ extern char *Xpermalloc(
+  *
+  ****************************************************************/
+ 
+-typedef int       XrmQuark, *XrmQuarkList;
++typedef intptr_t       XrmQuark, *XrmQuarkList;
+ #define NULLQUARK ((XrmQuark) 0)
+ 
+ typedef char *XrmString;
+@@ -267,7 +267,7 @@ extern XrmDatabase XrmGetFileDatabase(
+     _Xconst char*	/* filename */
+ );
+ 
+-extern int XrmCombineFileDatabase(
++extern Status XrmCombineFileDatabase(
+     _Xconst char* 	/* filename */,
+     XrmDatabase*	/* target */,
+     Bool		/* override */
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imDefIc.c b/vcxsrv-code/libx11/modules/im/ximcp/imDefIc.c
+index d552aa9..290e34a 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imDefIc.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imDefIc.c
+@@ -1341,7 +1341,7 @@ _XimGetInputStyle(
+ 
+     for (p = arg; p && p->name; p++) {
+ 	if (!(strcmp(p->name, XNInputStyle))) {
+-	    *input_style = (XIMStyle)p->value;
++	    *input_style = (XIMStyle)(intptr_t)p->value;
+ 	    return True;
+ 	}
+     }
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imInt.c b/vcxsrv-code/libx11/modules/im/ximcp/imInt.c
+index bb393e0..5c95e81 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imInt.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imInt.c
+@@ -29,6 +29,7 @@ PERFORMANCE OF THIS SOFTWARE.
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
++#include <unistd.h>
+ #include <X11/Xatom.h>
+ #include <X11/Xlib.h>
+ #include <X11/Xmd.h>
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imLcLkup.c b/vcxsrv-code/libx11/modules/im/ximcp/imLcLkup.c
+index 37e5824..e9c4de5 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imLcLkup.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imLcLkup.c
+@@ -61,18 +61,11 @@ _XimLocalMbLookupString(XIC xic, XKeyEvent *ev, char *buffer, int bytes,
+ 	    ||(ic->private.local.brl_committed != 0))) {
+ 	if (ic->private.local.brl_committed != 0) { /* Braille Event */
+ 	    unsigned char pattern = ic->private.local.brl_committed;
+-#ifndef _MSC_VER
+-	    char mb2[XLC_PUBLIC(ic->core.im->core.lcd, mb_cur_max)];
+-#else
+-        char *mb2 = (char*)malloc(XLC_PUBLIC(ic->core.im->core.lcd, mb_cur_max)*sizeof(char));
+-#endif
++	    char *mb2=alloca(XLC_PUBLIC(ic->core.im->core.lcd, mb_cur_max));
+ 	    ret = _Xlcwctomb(ic->core.im->core.lcd, mb2, BRL_UC_ROW | pattern);
+ 	    if(ret > bytes) {
+-            if(status) *status = XBufferOverflow;
+-#ifdef _MSC_VER
+-            free(mb2);
+-#endif
+-            return(ret);
++		if(status) *status = XBufferOverflow;
++		return(ret);
+ 	    }
+ 	    if(keysym) *keysym = XK_braille_blank | pattern;
+ 	    if(ret > 0) {
+@@ -89,9 +82,6 @@ _XimLocalMbLookupString(XIC xic, XKeyEvent *ev, char *buffer, int bytes,
+ 		    if(status) *status = XLookupNone;
+ 		}
+ 	    }
+-#ifdef _MSC_VER
+-        free(mb2);
+-#endif
+ 	} else { /* Composed Event */
+ 	    ret = strlen(&mb[b[ic->private.local.composed].mb]);
+ 	    if(ret > bytes) {
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imRm.c b/vcxsrv-code/libx11/modules/im/ximcp/imRm.c
+index cb9e1b2..6f54064 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imRm.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imRm.c
+@@ -34,6 +34,7 @@ PERFORMANCE OF THIS SOFTWARE.
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include <X11/Xlib.h>
+ #include "Xlibint.h"
+ #include "Xlcint.h"
+@@ -491,7 +492,7 @@ _XimDefaultFocusWindow(
+     Xic			 ic = (Xic)parm;
+     Window		*out;
+ 
+-    if(ic->core.client_window == (Window)NULL) {
++    if(ic->core.client_window == (Window)(intptr_t)NULL) {
+ 	return True;
+     }
+ 
+@@ -601,7 +602,7 @@ _XimDefaultArea(
+     XRectangle		 area;
+     XRectangle		*out;
+ 
+-    if(ic->core.focus_window == (Window)NULL) {
++    if(ic->core.focus_window == (Window)(intptr_t)NULL) {
+ 	return True;
+     }
+     if(XGetGeometry(im->core.display, (Drawable)ic->core.focus_window,
+@@ -632,7 +633,7 @@ _XimDefaultColormap(
+     XWindowAttributes	 win_attr;
+     Colormap		*out;
+ 
+-    if(ic->core.client_window == (Window)NULL) {
++    if(ic->core.client_window == (Window)(intptr_t)NULL) {
+ 	return True;
+     }
+     if(XGetWindowAttributes(im->core.display, ic->core.client_window,
+@@ -836,7 +837,7 @@ _XimEncodeStyle(
+     XIMStyle		*out;
+ 
+     out = (XIMStyle *)((char *)top + info->offset);
+-    *out = (XIMStyle)val;
++    *out = (XIMStyle)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -849,7 +850,7 @@ _XimEncodeWindow(
+     Window		*out;
+ 
+     out = (Window *)((char *)top + info->offset);
+-    *out = (Window)val;
++    *out = (Window)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -874,7 +875,7 @@ _XimEncodeResetState(
+     XIMResetState	*out;
+ 
+     out = (XIMResetState *)((char *)top + info->offset);
+-    *out = (XIMResetState)val;
++    *out = (XIMResetState)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -930,7 +931,7 @@ _XimEncodeHotKetState(
+     XIMHotKeyState	*out;
+ 
+     out = (XIMHotKeyState *)((char *)top + info->offset);
+-    *out = (XIMHotKeyState)val;
++    *out = (XIMHotKeyState)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -969,7 +970,7 @@ _XimEncodeColormap(
+     Colormap		*out;
+ 
+     out = (Colormap *)((char *)top + info->offset);
+-    *out = (Colormap)val;
++    *out = (Colormap)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -982,7 +983,7 @@ _XimEncodeStdColormap(
+     Atom		*out;
+ 
+     out = (Atom *)((char *)top + info->offset);
+-    *out = (Atom)val;
++    *out = (Atom)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -995,7 +996,7 @@ _XimEncodeLong(
+     unsigned long	*out;
+ 
+     out = (unsigned long *)((char *)top + info->offset);
+-    *out = (unsigned long)val;
++    *out = (unsigned long)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -1008,7 +1009,7 @@ _XimEncodeBgPixmap(
+     Pixmap		*out;
+ 
+     out = (Pixmap *)((char *)top + info->offset);
+-    *out = (Pixmap)val;
++    *out = (Pixmap)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -1034,7 +1035,7 @@ _XimEncodeLineSpace(
+     int			*out;
+ 
+     out = (int *)((char *)top + info->offset);
+-    *out = (long)val;
++    *out = (long)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -1047,7 +1048,7 @@ _XimEncodeCursor(
+     Cursor		*out;
+ 
+     out = (Cursor *)((char *)top + info->offset);
+-    *out = (Cursor)val;
++    *out = (Cursor)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -1060,7 +1061,7 @@ _XimEncodePreeditState(
+     XIMPreeditState	*out;
+ 
+     out = (XIMPreeditState *)((char *)top + info->offset);
+-    *out = (XIMPreeditState)val;
++    *out = (XIMPreeditState)(intptr_t)val;
+     return True;
+ }
+ 
+@@ -2782,7 +2783,7 @@ _XimEncodeLocalTopValue(
+     XIMArg		*p = (XIMArg *)val;
+ 
+     if (res->xrm_name == XrmStringToQuark(XNClientWindow)) {
+-	ic->core.client_window = (Window)p->value;
++	ic->core.client_window = (Window)(intptr_t)p->value;
+ 	if (ic->core.focus_window == (Window)0)
+ 	    ic->core.focus_window = ic->core.client_window;
+ 	if (flag) {
+@@ -2796,14 +2797,14 @@ _XimEncodeLocalTopValue(
+ 	        _XUnregisterFilter(ic->core.im->core.display,
+ 			ic->core.focus_window, _XimLocalFilter, (XPointer)ic);
+ 	    }
+-	    ic->core.focus_window = (Window)p->value;
++	    ic->core.focus_window = (Window)(intptr_t)p->value;
+ 	    if (flag) {
+ 	        _XRegisterFilterByType(ic->core.im->core.display,
+ 			ic->core.focus_window, KeyPress, KeyRelease,
+ 			_XimLocalFilter, (XPointer)ic);
+ 	    }
+ 	} else
+-	    ic->core.focus_window = (Window)p->value;
++	    ic->core.focus_window = (Window)(intptr_t)p->value;
+     }
+     return True;
+ }
+@@ -2822,7 +2823,7 @@ _XimEncodeLocalPreeditValue(
+ 
+ 	if (!(XGetRGBColormaps(ic->core.im->core.display,
+ 				ic->core.focus_window, &colormap_ret,
+-				&count, (Atom)p->value)))
++				&count, (Atom)(intptr_t)p->value)))
+ 	    return False;
+ 
+ 	Xfree(colormap_ret);
+@@ -2844,7 +2845,7 @@ _XimEncodeLocalStatusValue(
+ 
+ 	if (!(XGetRGBColormaps(ic->core.im->core.display,
+ 				ic->core.focus_window, &colormap_ret,
+-				&count, (Atom)p->value)))
++				&count, (Atom)(intptr_t)p->value)))
+ 	    return False;
+ 
+ 	Xfree(colormap_ret);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imRmAttr.c b/vcxsrv-code/libx11/modules/im/ximcp/imRmAttr.c
+index 709e64a..7faff81 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imRmAttr.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imRmAttr.c
+@@ -604,7 +604,7 @@ _XimValueToAttribute(
+ 	    return False;
+ 	}
+ 
+-	*((CARD8 *)buf) = (CARD8)(long)value;
++	*((CARD8 *)buf) = (CARD8)(intptr_t)value;
+ 	*len = ret_len;
+ 	break;
+ 
+@@ -615,7 +615,7 @@ _XimValueToAttribute(
+ 	    return False;
+ 	}
+ 
+-	*((CARD16 *)buf) = (CARD16)(long)value;
++	*((CARD16 *)buf) = (CARD16)(intptr_t)value;
+ 	*len = ret_len;
+ 	break;
+ 
+@@ -628,7 +628,7 @@ _XimValueToAttribute(
+ 	    return False;
+ 	}
+ 
+-	*((CARD32 *)buf) = (CARD32)(long)value;
++	*((CARD32 *)buf) = (CARD32)(intptr_t)value;
+ 	*len = ret_len;
+ 	break;
+ 
+@@ -944,7 +944,7 @@ _XimEncodeTopValue(
+     XIMArg		*p)
+ {
+     if (res->xrm_name == XrmStringToQuark(XNClientWindow)) {
+-	ic->core.client_window = (Window)p->value;
++	ic->core.client_window = (Window)(intptr_t)p->value;
+ 	if (ic->core.focus_window == (Window)0)
+ 	    ic->core.focus_window = ic->core.client_window;
+ 	_XimRegisterFilter(ic);
+@@ -952,10 +952,10 @@ _XimEncodeTopValue(
+     } else if (res->xrm_name == XrmStringToQuark(XNFocusWindow)) {
+ 	if (ic->core.client_window) {
+ 	    _XimUnregisterFilter(ic);
+-	    ic->core.focus_window = (Window)p->value;
++	    ic->core.focus_window = (Window)(intptr_t)p->value;
+ 	    _XimRegisterFilter(ic);
+ 	} else /* client_window not yet */
+-	    ic->core.focus_window = (Window)p->value;
++	    ic->core.focus_window = (Window)(intptr_t)p->value;
+     }
+     return True;
+ }
+@@ -972,7 +972,7 @@ _XimEncodePreeditValue(
+ 
+ 	if (!(XGetRGBColormaps(ic->core.im->core.display,
+ 				ic->core.focus_window, &colormap_ret,
+-				&count, (Atom)p->value)))
++				&count, (Atom)(intptr_t)p->value)))
+ 	    return False;
+ 
+ 	XFree(colormap_ret);
+@@ -1023,7 +1023,7 @@ _XimEncodeStatusValue(
+ 
+ 	if (!(XGetRGBColormaps(ic->core.im->core.display,
+ 				ic->core.focus_window, &colormap_ret,
+-				&count, (Atom)p->value)))
++				&count, (Atom)(intptr_t)p->value)))
+ 	    return False;
+ 
+ 	XFree(colormap_ret);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imTrans.c b/vcxsrv-code/libx11/modules/im/ximcp/imTrans.c
+index 232f816..d590b6a 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/im/ximcp/imTrans.c
++++ b/vcxsrv-code/libx11/modules/im/ximcp/imTrans.c
+@@ -53,19 +53,17 @@ PERFORMANCE OF THIS SOFTWARE.
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include <X11/Xatom.h>
+ #include <X11/Xmd.h>
+ #include "Xlibint.h"
++#include <X11/Xwindows.h>
+ #include <X11/Xtrans/Xtrans.h>
+ #include "Xlcint.h"
+ #include "Ximint.h"
+ #include "XimTrans.h"
+ #include "XimTrInt.h"
+ 
+-#ifdef WIN32
+-#include <X11/Xwindows.h>
+-#endif
+-
+ 
+ #ifndef XIM_CONNECTION_RETRIES
+ #define XIM_CONNECTION_RETRIES 5
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/om/generic/omGeneric.c b/vcxsrv-code/libx11/modules/om/generic/omGeneric.c
+index 406cec9..65c1b48 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/modules/om/generic/omGeneric.c
++++ b/vcxsrv-code/libx11/modules/om/generic/omGeneric.c
+@@ -56,6 +56,7 @@
+ #include <X11/Xos.h>
+ #include <X11/Xatom.h>
+ #include <stdio.h>
++#include <unistd.h>
+ #include <string.h>
+ #include <ctype.h>
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/nls/locale.alias.pre b/vcxsrv-code/libx11/nls/locale.alias.pre
+index c39a29d..cf40082 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/nls/locale.alias.pre
++++ b/vcxsrv-code/libx11/nls/locale.alias.pre
+@@ -1187,7 +1187,6 @@ XCOMM The following locale names are used in HPUX 9.x
+ american.iso88591:				en_US.ISO8859-1
+ arabic.iso88596:				ar_AA.ISO8859-6
+ bokmal:						nb_NO.ISO8859-1
+-bokmål:						nb_NO.ISO8859-1
+ bulgarian:					bg_BG.CP1251
+ c-french.iso88591:				fr_CA.ISO8859-1
+ catalan:					ca_ES.ISO8859-1
+@@ -1206,7 +1205,6 @@ english.iso88591:				en_EN.ISO8859-1
+ estonian:					et_EE.ISO8859-1
+ finnish:					fi_FI.ISO8859-1
+ finnish.iso88591:				fi_FI.ISO8859-1
+-français:					fr_FR.ISO8859-1
+ french:						fr_FR.ISO8859-1
+ french.iso88591:				fr_CH.ISO8859-1
+ galego:						gl_ES.ISO8859-1
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ClDisplay.c b/vcxsrv-code/libx11/src/ClDisplay.c
+index dafb76a..aa904e5 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ClDisplay.c
++++ b/vcxsrv-code/libx11/src/ClDisplay.c
+@@ -55,7 +55,7 @@ XCloseDisplay (
+ 		    register Screen *sp = &dpy->screens[i];
+ 		    XFreeGC (dpy, sp->default_gc);
+ 	    }
+-	    if (dpy->cursor_font != 0) {
++	    if (dpy->cursor_font != None) {
+ 		XUnloadFont (dpy, dpy->cursor_font);
+ 	    }
+ 	    XSync(dpy, 1);  /* throw away pending events, catch errors */
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ConvSel.c b/vcxsrv-code/libx11/src/ConvSel.c
+index fb6e8e3..2dece58 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ConvSel.c
++++ b/vcxsrv-code/libx11/src/ConvSel.c
+@@ -49,5 +49,5 @@ XConvertSelection(
+     req->time = time;
+     UnlockDisplay(dpy);
+     SyncHandle();
+-    return 1;
++    return Success;
+ }
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrBFData.c b/vcxsrv-code/libx11/src/CrBFData.c
+index 6708a9b..b5c4c30 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrBFData.c
++++ b/vcxsrv-code/libx11/src/CrBFData.c
+@@ -60,18 +60,18 @@ Pixmap XCreateBitmapFromData(
+         return (Pixmap) None;
+     } else {
+         XImage ximage = {
+-            .height = height,
+-            .width = width,
+-            .depth = 1,
+-            .bits_per_pixel = 1,
+-            .xoffset = 0,
+-            .format = XYPixmap,
+-            .data = (char *) data,
+-            .byte_order = LSBFirst,
+-            .bitmap_unit = 8,
+-            .bitmap_bit_order = LSBFirst,
+-            .bitmap_pad = 8,
+-            .bytes_per_line = (width + 7) / 8,
++            /*.width =*/ width,
++            /*.height =*/ height,
++            /*.xoffset =*/ 0,
++            /*.format =*/ XYPixmap,
++            /*.data =*/ (char *) data,
++            /*.byte_order =*/ LSBFirst,
++            /*.bitmap_unit =*/ 8,
++            /*.bitmap_bit_order =*/ LSBFirst,
++            /*.bitmap_pad =*/ 8,
++            /*.depth =*/ 1,
++            /*.bytes_per_line =*/ (width + 7) / 8,
++            /*.bits_per_pixel =*/ 1
+         };
+         XPutImage(display, pix, gc, &ximage, 0, 0, 0, 0, width, height);
+         XFreeGC(display, gc);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrGlCur.c b/vcxsrv-code/libx11/src/CrGlCur.c
+index 460660f..510ff5d 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrGlCur.c
++++ b/vcxsrv-code/libx11/src/CrGlCur.c
+@@ -51,8 +51,14 @@ in this Software without prior written authorization from The Open Group.
+ #if defined(hpux)
+ typedef shl_t	XModuleType;
+ #else
++#ifdef _MSC_VER
++#include <X11/XWindows.h>
++typedef HANDLE XModuleType;
++#define dlsym GetProcAddress
++#else
+ typedef void *XModuleType;
+ #endif
++#endif
+ 
+ #ifndef LIBXCURSOR
+ #define LIBXCURSOR "libXcursor.so.1"
+@@ -70,8 +76,12 @@ open_library (void)
+     {
+ #if defined(hpux)
+ 	module = shl_load(library, BIND_DEFERRED, 0L);
++#else
++#ifdef _MSC_VER
++	module =  LoadLibrary(library);
+ #else
+ 	module =  dlopen(library, RTLD_LAZY);
++#endif
+ #endif
+ 	if (module)
+ 	    return module;
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrPFBData.c b/vcxsrv-code/libx11/src/CrPFBData.c
+index 17d551b..a736b9b 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrPFBData.c
++++ b/vcxsrv-code/libx11/src/CrPFBData.c
+@@ -60,8 +60,10 @@ Pixmap XCreatePixmapFromBitmapData(
+ {
+     Pixmap pix = XCreatePixmap(display, d, width, height, depth);
+     XGCValues gcv = {
+-        .foreground = fg,
+-        .background = bg
++        /*.function =*/ 0,
++        /*.plane_mask =*/ 0,
++        /*.foreground =*/ fg,
++        /*.background =*/ bg
+     };
+     GC gc = XCreateGC(display, pix, GCForeground|GCBackground, &gcv);
+     if (gc == NULL) {
+@@ -69,18 +71,18 @@ Pixmap XCreatePixmapFromBitmapData(
+         return (Pixmap) None;
+     } else {
+         XImage ximage = {
+-            .height = height,
+-            .width = width,
+-            .depth = 1,
+-            .bits_per_pixel = 1,
+-            .xoffset = 0,
+-            .format = XYBitmap,
+-            .data = data,
+-            .byte_order = LSBFirst,
+-            .bitmap_unit = 8,
+-            .bitmap_bit_order = LSBFirst,
+-            .bitmap_pad = 8,
+-            .bytes_per_line = (width + 7) / 8
++            /*.width =*/ width,
++            /*.height =*/ height,
++            /*.xoffset =*/ 0,
++            /*.format =*/ XYBitmap,
++            /*.data =*/ data,
++            /*.byte_order =*/ LSBFirst,
++            /*.bitmap_unit =*/ 8,
++            /*.bitmap_bit_order =*/ LSBFirst,
++            /*.bitmap_pad =*/ 8,
++            /*.depth =*/ 1,
++            /*.bytes_per_line =*/ (width + 7) / 8,
++            /*.bits_per_pixel =*/ 1
+         };
+         XPutImage(display, pix, gc, &ximage, 0, 0, 0, 0, width, height);
+         XFreeGC(display, gc);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrWindow.c b/vcxsrv-code/libx11/src/CrWindow.c
+index 7b54601..84101ff 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/CrWindow.c
++++ b/vcxsrv-code/libx11/src/CrWindow.c
+@@ -29,6 +29,10 @@ in this Software without prior written authorization from The Open Group.
+ #endif
+ #include "Xlibint.h"
+ 
++#ifdef _MSC_VER
++#undef CreateWindow
++#endif
++
+ Window XCreateSimpleWindow(
+     register Display *dpy,
+     Window parent,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ErrDes.c b/vcxsrv-code/libx11/src/ErrDes.c
+index aa62e22..29f5a30 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ErrDes.c
++++ b/vcxsrv-code/libx11/src/ErrDes.c
+@@ -55,6 +55,7 @@ SOFTWARE.
+ #include <X11/Xos.h>
+ #include "Xresource.h"
+ #include <stdio.h>
++#include <unistd.h>
+ 
+ #ifndef ERRORDB
+ #ifndef XERRORDB
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/FSWrap.c b/vcxsrv-code/libx11/src/FSWrap.c
+index 064de50..3469ed1 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/FSWrap.c
++++ b/vcxsrv-code/libx11/src/FSWrap.c
+@@ -63,9 +63,9 @@ from The Open Group.
+ #include "Xlcint.h"
+ #include <ctype.h>
+ #include <X11/Xos.h>
++#include <unistd.h>
+ #include "reallocarray.h"
+ 
+-
+ #define	XMAXLIST	256
+ 
+ char **
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetAtomNm.c b/vcxsrv-code/libx11/src/GetAtomNm.c
+index 41ec3ba..bab6f59 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetAtomNm.c
++++ b/vcxsrv-code/libx11/src/GetAtomNm.c
+@@ -24,6 +24,8 @@ in this Software without prior written authorization from The Open Group.
+ 
+ */
+ 
++#include <unistd.h>
++
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetDflt.c b/vcxsrv-code/libx11/src/GetDflt.c
+index c9222a2..c6e1b25 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetDflt.c
++++ b/vcxsrv-code/libx11/src/GetDflt.c
+@@ -63,6 +63,7 @@ SOFTWARE.
+ #include <X11/Xos_r.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include <ctype.h>
+ 
+ 
+@@ -137,9 +138,13 @@ InitDefaults(
+      * ~/.Xdefaults.  Next, if there is an XENVIRONMENT environment variable,
+      * then load that file.
+      */
+-
++     
+     if (dpy->xdefaults == NULL) {
++	#ifdef _MSC_VER
++	const char *slashDotXdefaults = ".Xdefaults";
++	#else
+ 	const char *slashDotXdefaults = "/.Xdefaults";
++	#endif
+ 
+ 	(void) GetHomeDir (fname, (int) (PATH_MAX - strlen (slashDotXdefaults) - 1));
+ 	(void) strcat (fname, slashDotXdefaults);
+@@ -149,7 +154,11 @@ InitDefaults(
+     }
+ 
+     if (!(xenv = getenv ("XENVIRONMENT"))) {
++	#ifdef _MSC_VER
++	const char *slashDotXdefaultsDash = ".Xdefaults-";
++	#else
+ 	const char *slashDotXdefaultsDash = "/.Xdefaults-";
++	#endif
+ 	int len;
+ 
+ 	(void) GetHomeDir (fname, (int) (PATH_MAX - strlen (slashDotXdefaultsDash) - 1));
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetProp.c b/vcxsrv-code/libx11/src/GetProp.c
+index 9eb422e..88ec282 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/GetProp.c
++++ b/vcxsrv-code/libx11/src/GetProp.c
+@@ -64,7 +64,7 @@ XGetWindowProperty(
+     req->delete = delete;
+     req->longOffset = offset;
+     req->longLength = length;
+-    error.sequenceNumber = dpy->request;
++    error.sequenceNumber = (CARD16)(dpy->request&0xffff);
+ 
+     if (!_XReply (dpy, (xReply *) &reply, 0, xFalse)) {
+ 	UnlockDisplay(dpy);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/Host.c b/vcxsrv-code/libx11/src/Host.c
+index e2b7d57..cf95e18 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/Host.c
++++ b/vcxsrv-code/libx11/src/Host.c
+@@ -64,6 +64,10 @@ X Window System is a trademark of The Open Group.
+ #endif
+ #include "Xlibint.h"
+ 
++#ifdef _MSC_VER
++#define inline __inline
++#endif
++
+ static inline int
+ changehost (Display *dpy, XHostAddress *host, BYTE mode)
+ {
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/InitExt.c b/vcxsrv-code/libx11/src/InitExt.c
+index 4de46f1..1ad183b 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/InitExt.c
++++ b/vcxsrv-code/libx11/src/InitExt.c
+@@ -32,6 +32,7 @@ from The Open Group.
+ #include <X11/Xlibint.h>
+ #include <X11/Xos.h>
+ #include <stdio.h>
++#include <unistd.h>
+ 
+ /*
+  * This routine is used to link a extension in so it will be called
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/KeysymStr.c b/vcxsrv-code/libx11/src/KeysymStr.c
+index 8fe1bd6..fc9e25f 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/KeysymStr.c
++++ b/vcxsrv-code/libx11/src/KeysymStr.c
+@@ -34,6 +34,7 @@ in this Software without prior written authorization from The Open Group.
+ #include "Xresinternal.h"
+ 
+ #include <stdio.h> /* sprintf */
++#include <unistd.h> /* snprintf */
+ 
+ #define NEEDVTABLE
+ #include "ks_tables.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/OpenDis.c b/vcxsrv-code/libx11/src/OpenDis.c
+index c58de1d..7247ee4 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/OpenDis.c
++++ b/vcxsrv-code/libx11/src/OpenDis.c
+@@ -32,6 +32,7 @@ in this Software without prior written authorization from The Open Group.
+ #include <X11/Xatom.h>
+ #include <X11/Xresource.h>
+ #include <stdio.h>
++#include <unistd.h>
+ #include "Xintconn.h"
+ 
+ #ifdef XKB
+@@ -160,7 +161,7 @@ XOpenDisplay (
+ 	}
+ 	dpy->resource_id	= 0;
+ 	dpy->db 		= (struct _XrmHashBucketRec *)NULL;
+-	dpy->cursor_font	= 0;
++	dpy->cursor_font	= None;
+ 	dpy->flags		= 0;
+ 	dpy->async_handlers	= NULL;
+ 	dpy->screens		= NULL;
+@@ -547,7 +548,7 @@ XOpenDisplay (
+ 		    _XReadPad (dpy, dpy->xdefaults, reply.nItems);
+ 		    dpy->xdefaults[reply.nItems] = '\0';
+ 		}
+-		else if (reply.propertyType != 0)
++		else if (reply.propertyType != None)
+ 		    _XEatDataWords(dpy, reply.length);
+ 	    }
+ 	}
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ParseCmd.c b/vcxsrv-code/libx11/src/ParseCmd.c
+index 6771908..09f4f57 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/ParseCmd.c
++++ b/vcxsrv-code/libx11/src/ParseCmd.c
+@@ -199,7 +199,7 @@ XrmParseCommand(
+ 
+ 		case XrmoptionSkipNArgs:
+ 		    {
+-			register int j = 1 + (long) options[i].value;
++			register int j = 1 + (int)(intptr_t) options[i].value;
+ 
+ 			if (j > myargc) j = myargc;
+ 			for (; j > 0; j--) {
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/QuColors.c b/vcxsrv-code/libx11/src/QuColors.c
+index 10cf182..d892ef9 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/QuColors.c
++++ b/vcxsrv-code/libx11/src/QuColors.c
+@@ -74,8 +74,8 @@ _XQueryColors(
+ 
+ int
+ XQueryColors(
+-    register Display * const dpy,
+-    const Colormap cmap,
++    register Display * dpy,
++    Colormap cmap,
+     XColor *defs, 		/* RETURN */
+     int ncolors)
+ {
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/RdBitF.c b/vcxsrv-code/libx11/src/RdBitF.c
+index 6213040..290648d 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/RdBitF.c
++++ b/vcxsrv-code/libx11/src/RdBitF.c
+@@ -54,22 +54,23 @@ from The Open Group.
+ #define MAX_SIZE 255
+ 
+ /* shared data for the image read/parse logic */
+-static const short hexTable[256] = {
+-    ['0'] = 0,  ['1'] = 1,
+-    ['2'] = 2,  ['3'] = 3,
+-    ['4'] = 4,  ['5'] = 5,
+-    ['6'] = 6,  ['7'] = 7,
+-    ['8'] = 8,  ['9'] = 9,
+-    ['A'] = 10, ['B'] = 11,
+-    ['C'] = 12, ['D'] = 13,
+-    ['E'] = 14, ['F'] = 15,
+-    ['a'] = 10, ['b'] = 11,
+-    ['c'] = 12, ['d'] = 13,
+-    ['e'] = 14, ['f'] = 15,
+-
+-    [' '] = -1, [','] = -1,
+-    ['}'] = -1, ['\n'] = -1,
+-    ['\t'] = -1
++static const signed char hexTable[256] = {
++    0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  ,-1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  0,  0,  0
++  , 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  0,  0,  0,  0,  0,  0
++  , 0, 10, 11, 12, 13, 14, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0, 10, 11, 12, 13, 14, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
++  , 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+ };
+ 
+ /*
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/SetLocale.c b/vcxsrv-code/libx11/src/SetLocale.c
+index 81f4a7c..cb52f11 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/SetLocale.c
++++ b/vcxsrv-code/libx11/src/SetLocale.c
+@@ -63,11 +63,12 @@ from The Open Group.
+ #include <X11/Xlocale.h>
+ #include <X11/Xos.h>
+ #include "XlcPubI.h"
++#include <unistd.h>
+ 
+ #define MAXLOCALE	64	/* buffer size of locale name */
+ 
+ 
+-#if defined(__APPLE__) || defined(__CYGWIN__)
++#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+ char *
+ _Xsetlocale(
+     int           category,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/StrKeysym.c b/vcxsrv-code/libx11/src/StrKeysym.c
+index be77a93..6967bcc 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/StrKeysym.c
++++ b/vcxsrv-code/libx11/src/StrKeysym.c
+@@ -39,12 +39,14 @@ in this Software without prior written authorization from The Open Group.
+ 
+ #ifndef KEYSYMDB
+ #ifndef XKEYSYMDB
+-#define KEYSYMDB "/usr/lib/X11/XKeysymDB"
++#define KEYSYMDB "XKeysymDB"
+ #else
+ #define KEYSYMDB XKEYSYMDB
+ #endif
+ #endif
+ 
++#include <unistd.h>
++
+ static Bool initialized;
+ static XrmDatabase keysymdb;
+ static XrmQuark Qkeysym[2];
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/Window.c b/vcxsrv-code/libx11/src/Window.c
+index e643f21..ab70e12 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/Window.c
++++ b/vcxsrv-code/libx11/src/Window.c
+@@ -29,6 +29,10 @@ in this Software without prior written authorization from The Open Group.
+ #endif
+ #include "Xlibint.h"
+ 
++#ifdef _MSC_VER
++#undef CreateWindow
++#endif
++
+ void _XProcessWindowAttributes (
+     Display *dpy,
+     xChangeWindowAttributesReq *req,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/XlibInt.c b/vcxsrv-code/libx11/src/XlibInt.c
+index 31b6511..63f2da9 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/XlibInt.c
++++ b/vcxsrv-code/libx11/src/XlibInt.c
+@@ -33,6 +33,7 @@ from The Open Group.
+ 
+ #ifdef WIN32
+ #define _XLIBINT_
++#include <X11\Xw32defs.h>
+ #endif
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+@@ -43,9 +44,9 @@ from The Open Group.
+ #include <X11/Xpoll.h>
+ #include <assert.h>
+ #include <stdio.h>
++#include <unistd.h>
+ #ifdef WIN32
+ #include <direct.h>
+-#include <io.h>
+ #endif
+ 
+ /* Needed for FIONREAD on Solaris */
+@@ -61,8 +62,6 @@ from The Open Group.
+ /* Needed for ioctl() on Solaris */
+ #ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+-#else
+-    #define F_OK 0
+ #endif
+ 
+ #ifdef XTHREADS
+@@ -135,6 +134,19 @@ xthread_t (*_Xthread_self_fn)(void) = NULL;
+ 
+ #define POLLFD_CACHE_SIZE 5
+ 
++#if _WIN32_WINNT < _WIN32_WINNT_VISTA
++struct pollfd {
++
++    SOCKET  fd;
++    SHORT   events;
++    SHORT   revents;
++
++};
++#define POLLRDNORM  0x0100
++#define POLLRDBAND  0x0200
++#define POLLIN      (POLLRDNORM | POLLRDBAND)
++#endif
++
+ /* initialize the struct array passed to poll() below */
+ Bool _XPollfdCacheInit(
+     Display *dpy)
+@@ -188,6 +200,11 @@ void _XPollfdCacheDel(
+ #endif
+ }
+ 
++#ifdef _MSC_VER
++#undef min
++#define min __min
++#endif
++
+ static int sync_hazard(Display *dpy)
+ {
+     /*
+@@ -987,7 +1004,7 @@ _XWireToEvent(
+ 	      case KeymapNotify:
+ 		{
+ 			register XKeymapEvent *ev = (XKeymapEvent *) re;
+-			ev->window	= 0;
++			ev->window	= None;
+ 			memcpy(&ev->key_vector[1],
+ 			       (char *)((xKeymapEvent *) event)->map,
+ 			       sizeof (((xKeymapEvent *) event)->map));
+@@ -1937,11 +1954,7 @@ int _XOpenFile(path, flags)
+ int _XOpenFileMode(path, flags, mode)
+     _Xconst char* path;
+     int flags;
+-#ifndef _MSC_VER
+     mode_t mode;
+-#else
+-    int mode;
+-#endif
+ {
+     char buf[MAX_PATH];
+     char* bufp = NULL;
+@@ -1949,11 +1962,7 @@ int _XOpenFileMode(path, flags, mode)
+     UINT olderror = SetErrorMode (SEM_FAILCRITICALERRORS);
+ 
+     if (AccessFile (path, buf, MAX_PATH, &bufp))
+-#ifndef _MSC_VER
+ 	ret = open (bufp, flags, mode);
+-#else
+-    ret = _open (bufp, flags, mode);
+-#endif
+ 
+     (void) SetErrorMode (olderror);
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/locking.c b/vcxsrv-code/libx11/src/locking.c
+index b47f68c..ea5000e 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/locking.c
++++ b/vcxsrv-code/libx11/src/locking.c
+@@ -585,7 +585,7 @@ xthread_t (*_x11_thr_self)() = __x11_thr_self;
+ #endif
+ 
+ 
+-int XInitThreads(void)
++Status XInitThreads(void)
+ {
+     if (_Xglobal_lock)
+ 	return 1;
+@@ -644,7 +644,7 @@ int XInitThreads(void)
+ }
+ 
+ #else /* XTHREADS */
+-int XInitThreads(void)
++Status XInitThreads(void)
+ {
+     return 0;
+ }
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/util/makekeys.c b/vcxsrv-code/libx11/src/util/makekeys.c
+index 4896cc5..3f4a8d0 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/util/makekeys.c
++++ b/vcxsrv-code/libx11/src/util/makekeys.c
+@@ -34,6 +34,7 @@ from The Open Group.
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <unistd.h>
+ #include <string.h>
+ #include <stdint.h>
+ #include <inttypes.h>
+@@ -177,7 +178,7 @@ main(int argc, char *argv[])
+     num_found = 0;
+     for (z = ksnum; z < KTNUM; z++) {
+ 	max_rehash = 0;
+-	for (name = tab, i = z; --i >= 0;)
++	for (name = &tab[0], i = z; --i >= 0;)
+ 		*name++ = 0;
+ 	for (i = 0; i < ksnum; i++) {
+ 	    name = info[i].name;
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xcb_io.c b/vcxsrv-code/libx11/src/xcb_io.c
+index dff441f..4725973 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xcb_io.c
++++ b/vcxsrv-code/libx11/src/xcb_io.c
+@@ -23,6 +23,9 @@
+ #ifdef HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+ #endif
++#include <sys/time.h>
++
++#include <X11/Xtrans/Xtrans.h>
+ 
+ #define xcb_fail_assert(_message, _var) { \
+ 	unsigned int _var = 1; \
+@@ -142,7 +145,7 @@ static Bool check_internal_connections(Display *dpy)
+ static PendingRequest *append_pending_request(Display *dpy, uint64_t sequence)
+ {
+ 	PendingRequest *node = malloc(sizeof(PendingRequest));
+-	assert(node);
++	assert(node!=NULL);
+ 	node->next = NULL;
+ 	node->sequence = sequence;
+ 	node->reply_waiter = 0;
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKB.c b/vcxsrv-code/libx11/src/xkb/XKB.c
+index 055eb36..d36ef8f 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKB.c
++++ b/vcxsrv-code/libx11/src/xkb/XKB.c
+@@ -28,6 +28,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++
++#ifdef XKB_IN_SERVER
++#define XkbVirtualModsToReal    SrvXkbVirtualModsToReal
++#endif
++
+ #include "Xlibint.h"
+ #include <X11/extensions/XKBproto.h>
+ #include "XKBlibint.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBBind.c b/vcxsrv-code/libx11/src/xkb/XKBBind.c
+index 8da18a7..5e6773a 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBBind.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBBind.c
+@@ -31,6 +31,34 @@ from The Open Group.
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
++
++#ifdef XKB_IN_SERVER
++#define XkbAllocClientMap   SrvXkbAllocClientMap
++#define XkbAllocServerMap   SrvXkbAllocServerMap
++#define XkbChangeTypesOfKey   SrvXkbChangeTypesOfKey
++#define XkbCopyKeyTypes     SrvXkbCopyKeyTypes
++#define XkbFreeClientMap    SrvXkbFreeClientMap
++#define XkbFreeServerMap    SrvXkbFreeServerMap
++#define XkbKeyTypesForCoreSymbols SrvXkbKeyTypesForCoreSymbols
++#define XkbApplyCompatMapToKey    SrvXkbApplyCompatMapToKey
++#define XkbResizeKeyActions   SrvXkbResizeKeyActions
++#define XkbResizeKeySyms    SrvXkbResizeKeySyms
++#define XkbResizeKeyType    SrvXkbResizeKeyType
++#define XkbAllocCompatMap   SrvXkbAllocCompatMap
++#define XkbAllocControls    SrvXkbAllocControls
++#define XkbAllocIndicatorMaps   SrvXkbAllocIndicatorMaps
++#define XkbAllocKeyboard    SrvXkbAllocKeyboard
++#define XkbAllocNames     SrvXkbAllocNames
++#define XkbFreeCompatMap    SrvXkbFreeCompatMap
++#define XkbFreeKeyboard     SrvXkbFreeKeyboard
++#define XkbFreeNames      SrvXkbFreeNames
++#define XkbLatchModifiers   SrvXkbLatchModifiers
++#define XkbLatchGroup     SrvXkbLatchGroup
++#define XkbVirtualModsToReal    SrvXkbVirtualModsToReal
++#define XkbChangeKeycodeRange   SrvXkbChangeKeycodeRange
++#define XkbApplyVirtualModChanges SrvXkbApplyVirtualModChanges
++#endif
++
+ #include "XKBlib.h"
+ #include <X11/Xlibint.h>
+ #include <X11/Xutil.h>
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGAlloc.c b/vcxsrv-code/libx11/src/xkb/XKBGAlloc.c
+index 3a257c0..390a4dd 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGAlloc.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBGAlloc.c
+@@ -28,8 +28,10 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include <config.h>
+ #endif
+ 
+-
+ #include <stdio.h>
++#include <unistd.h>
++
++
+ #include "Xlibint.h"
+ #include "XKBlibint.h"
+ #include "X11/extensions/XKBgeom.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGeom.c b/vcxsrv-code/libx11/src/xkb/XKBGeom.c
+index be7537b..933ab94 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGeom.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBGeom.c
+@@ -37,12 +37,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include <X11/extensions/XKBproto.h>
+ #include "XKBlibint.h"
+ 
+-#ifndef MINSHORT
+ #define	MINSHORT	-32768
+-#endif
+-#ifndef MAXSHORT
+ #define	MAXSHORT	32767
+-#endif
+ 
+ /***====================================================================***/
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGetMap.c b/vcxsrv-code/libx11/src/xkb/XKBGetMap.c
+index 2891d21..af8b358 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBGetMap.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBGetMap.c
+@@ -28,6 +28,34 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
++
++#ifdef XKB_IN_SERVER
++#define XkbAllocClientMap   SrvXkbAllocClientMap
++#define XkbAllocServerMap   SrvXkbAllocServerMap
++#define XkbChangeTypesOfKey   SrvXkbChangeTypesOfKey
++#define XkbCopyKeyTypes     SrvXkbCopyKeyTypes
++#define XkbFreeClientMap    SrvXkbFreeClientMap
++#define XkbFreeServerMap    SrvXkbFreeServerMap
++#define XkbKeyTypesForCoreSymbols SrvXkbKeyTypesForCoreSymbols
++#define XkbApplyCompatMapToKey    SrvXkbApplyCompatMapToKey
++#define XkbResizeKeyActions   SrvXkbResizeKeyActions
++#define XkbResizeKeySyms    SrvXkbResizeKeySyms
++#define XkbResizeKeyType    SrvXkbResizeKeyType
++#define XkbAllocCompatMap   SrvXkbAllocCompatMap
++#define XkbAllocControls    SrvXkbAllocControls
++#define XkbAllocIndicatorMaps   SrvXkbAllocIndicatorMaps
++#define XkbAllocKeyboard    SrvXkbAllocKeyboard
++#define XkbAllocNames     SrvXkbAllocNames
++#define XkbFreeCompatMap    SrvXkbFreeCompatMap
++#define XkbFreeKeyboard     SrvXkbFreeKeyboard
++#define XkbFreeNames      SrvXkbFreeNames
++#define XkbLatchModifiers   SrvXkbLatchModifiers
++#define XkbLatchGroup     SrvXkbLatchGroup
++#define XkbVirtualModsToReal    SrvXkbVirtualModsToReal
++#define XkbChangeKeycodeRange   SrvXkbChangeKeycodeRange
++#define XkbApplyVirtualModChanges SrvXkbApplyVirtualModChanges
++#endif
++
+ #include "Xlibint.h"
+ #include <X11/extensions/XKBproto.h>
+ #include "XKBlibint.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBMisc.c b/vcxsrv-code/libx11/src/xkb/XKBMisc.c
+index 880a616..0ca4528 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBMisc.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBMisc.c
+@@ -35,6 +35,9 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include <X11/keysym.h>
+ #include "XKBlibint.h"
+ 
++#ifdef XKB_IN_SERVER
++#define XkbVirtualModsToReal    SrvXkbVirtualModsToReal
++#endif
+ 
+ /***====================================================================***/
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBSetGeom.c b/vcxsrv-code/libx11/src/xkb/XKBSetGeom.c
+index 2400c9d..daac4b6 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBSetGeom.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBSetGeom.c
+@@ -36,12 +36,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include "X11/extensions/XKBgeom.h"
+ #include <X11/extensions/XKBproto.h>
+ 
+-#ifndef MINSHORT
+ #define	MINSHORT	-32768
+-#endif
+-#ifndef MAXSHORT
+ #define	MAXSHORT	32767
+-#endif
+ 
+ /***====================================================================***/
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBUse.c b/vcxsrv-code/libx11/src/xkb/XKBUse.c
+index ab5027b..f6d8e5e 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xkb/XKBUse.c
++++ b/vcxsrv-code/libx11/src/xkb/XKBUse.c
+@@ -29,6 +29,34 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #endif
+ #include <stdio.h>
+ #include <ctype.h>
++
++#ifdef XKB_IN_SERVER
++#define XkbAllocClientMap   SrvXkbAllocClientMap
++#define XkbAllocServerMap   SrvXkbAllocServerMap
++#define XkbChangeTypesOfKey   SrvXkbChangeTypesOfKey
++#define XkbCopyKeyTypes     SrvXkbCopyKeyTypes
++#define XkbFreeClientMap    SrvXkbFreeClientMap
++#define XkbFreeServerMap    SrvXkbFreeServerMap
++#define XkbKeyTypesForCoreSymbols SrvXkbKeyTypesForCoreSymbols
++#define XkbApplyCompatMapToKey    SrvXkbApplyCompatMapToKey
++#define XkbResizeKeyActions   SrvXkbResizeKeyActions
++#define XkbResizeKeySyms    SrvXkbResizeKeySyms
++#define XkbResizeKeyType    SrvXkbResizeKeyType
++#define XkbAllocCompatMap   SrvXkbAllocCompatMap
++#define XkbAllocControls    SrvXkbAllocControls
++#define XkbAllocIndicatorMaps   SrvXkbAllocIndicatorMaps
++#define XkbAllocKeyboard    SrvXkbAllocKeyboard
++#define XkbAllocNames     SrvXkbAllocNames
++#define XkbFreeCompatMap    SrvXkbFreeCompatMap
++#define XkbFreeKeyboard     SrvXkbFreeKeyboard
++#define XkbFreeNames      SrvXkbFreeNames
++#define XkbLatchModifiers   SrvXkbLatchModifiers
++#define XkbLatchGroup     SrvXkbLatchGroup
++#define XkbVirtualModsToReal    SrvXkbVirtualModsToReal
++#define XkbChangeKeycodeRange   SrvXkbChangeKeycodeRange
++#define XkbApplyVirtualModChanges SrvXkbApplyVirtualModChanges
++#endif
++
+ #include "Xlibint.h"
+ #include <X11/extensions/XKBproto.h>
+ #include "XKBlibint.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/IMWrap.c b/vcxsrv-code/libx11/src/xlibi18n/IMWrap.c
+index a7c1d98..ec94a7c 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/IMWrap.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/IMWrap.c
+@@ -89,12 +89,12 @@ _XCopyToArg(XPointer src, XPointer *dst, unsigned int size)
+ 	} u;
+ 	if (size <= sizeof(XPointer)) {
+ 	    memcpy((char *)&u, (char *)src, (int)size);
+-	    if (size == sizeof(long))	       *dst = (XPointer)u.longval;
++	    if (size == sizeof(long))	       *dst = (XPointer)(intptr_t)u.longval;
+ #ifdef LONG64
+-	    else if (size == sizeof(int))      *dst = (XPointer)(long)u.intval;
++	    else if (size == sizeof(int))      *dst = (XPointer)(intptr_t)u.intval;
+ #endif
+-	    else if (size == sizeof(short))    *dst = (XPointer)(long)u.shortval;
+-	    else if (size == sizeof(char))     *dst = (XPointer)(long)u.charval;
++	    else if (size == sizeof(short))    *dst = (XPointer)(intptr_t)u.shortval;
++	    else if (size == sizeof(char))     *dst = (XPointer)(intptr_t)u.charval;
+ 	    else if (size == sizeof(char*))    *dst = (XPointer)u.charptr;
+ 	    else if (size == sizeof(XPointer)) *dst = (XPointer)u.ptr;
+ 	    else memcpy( (char*)dst, (char*)src, (int)size );
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XDefaultIMIF.c b/vcxsrv-code/libx11/src/xlibi18n/XDefaultIMIF.c
+index 74e7975..d1d9134 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XDefaultIMIF.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/XDefaultIMIF.c
+@@ -64,6 +64,7 @@ Sun Microsystems, Inc. or its licensors is granted.
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include "Xlibint.h"
+ #include "Xlcint.h"
+ #include "XlcGeneric.h"
+@@ -285,11 +286,11 @@ _SetICValueData(XIC ic, XIMArg *values, XICOp_t mode)
+     for (p = values; p != NULL && p->name != NULL; p++) {
+ 	if(strcmp(p->name, XNInputStyle) == 0) {
+ 	    if (mode == CREATE_IC)
+-		ic->core.input_style = (XIMStyle)p->value;
++		ic->core.input_style = (XIMStyle)(intptr_t)p->value;
+ 	} else if (strcmp(p->name, XNClientWindow) == 0) {
+-	    ic->core.client_window = (Window)p->value ;
++	    ic->core.client_window = (Window)(intptr_t)p->value ;
+ 	} else if (strcmp(p->name, XNFocusWindow) == 0) {
+-	    ic->core.focus_window = (Window)p->value ;
++	    ic->core.focus_window = (Window)(intptr_t)p->value ;
+ 	} else if (strcmp(p->name, XNPreeditAttributes) == 0
+ 		   || strcmp(p->name, XNStatusAttributes) == 0) {
+             return_name = _SetICValueData(ic, (XIMArg*)p->value, mode);
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XDefaultOMIF.c b/vcxsrv-code/libx11/src/xlibi18n/XDefaultOMIF.c
+index 01d7006..fcdac53 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XDefaultOMIF.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/XDefaultOMIF.c
+@@ -69,14 +69,8 @@ Sun Microsystems, Inc. or its licensors is granted.
+ #include <X11/Xos.h>
+ #include <X11/Xatom.h>
+ #include <stdio.h>
+-
+-#if !defined(ssize_t)
+-    #ifdef _WIN64
+-    #define ssize_t long long
+-    #else
+-    #define ssize_t long
+-    #endif
+-#endif
++#include <unistd.h>
++#include <stdint.h>
+ 
+ #define MAXFONTS		100
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XimProto.h b/vcxsrv-code/libx11/src/xlibi18n/XimProto.h
+index cc7eda3..eab1d29 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/XimProto.h
++++ b/vcxsrv-code/libx11/src/xlibi18n/XimProto.h
+@@ -143,6 +143,13 @@ PERFORMANCE OF THIS SOFTWARE.
+ /*
+  * byte order
+  */
++#ifdef BIGENDIAN
++#undef BIGENDIAN
++#endif
++#ifdef LITTLEENDIAN
++#undef LITTLEENDIAN
++#endif
++
+ #define BIGENDIAN	(CARD8)0x42	/* MSB first */
+ #define LITTLEENDIAN	(CARD8)0x6c	/* LSB first */
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcDB.c b/vcxsrv-code/libx11/src/xlibi18n/lcDB.c
+index 839b0b1..4819e91 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcDB.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcDB.c
+@@ -49,6 +49,8 @@
+ 
+ #endif	/* NOT_X_ENV */
+ 
++#include <stdint.h>
++
+ /* specifying NOT_X_ENV allows users to just use
+    the database parsing routine. */
+ /* For UDC/VW */
+@@ -64,14 +66,7 @@
+ #endif
+ 
+ #include <stdio.h>
+-
+-#if !defined(ssize_t)
+-    #ifdef _WIN64
+-    #define ssize_t long long
+-    #else
+-    #define ssize_t long
+-    #endif
+-#endif
++#include <unistd.h>
+ 
+ typedef struct _DatabaseRec {
+     char *category;
+@@ -1012,18 +1007,18 @@ PrintDatabase(
+     Database p = db;
+     int i = 0, j;
+ 
+-    printf("***\n*** BEGIN Database\n***\n");
++    fprintf(stderr, "***\n*** BEGIN Database\n***\n");
+     while (p) {
+-	printf("%3d: ", i++);
+-	printf("%s, %s, ", p->category, p->name);
+-	printf("\t[%d: ", p->value_num);
++		fprintf(stderr, "%3d: ", i++);
++		fprintf(stderr, "%s, %s, ", p->category, p->name);
++		fprintf(stderr, "\t[%d: ", p->value_num);
+ 	for (j = 0; j < p->value_num; ++j) {
+-	    printf("%s, ", p->value[j]);
++		fprintf(stderr, "%s, ", p->value[j]);
+ 	}
+-	printf("]\n");
++	fprintf(stderr, "]\n");
+ 	p = p->next;
+     }
+-    printf("***\n*** END   Database\n***\n");
++	fprintf(stderr, "***\n*** END   Database\n***\n");
+ }
+ #endif
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcDynamic.c b/vcxsrv-code/libx11/src/xlibi18n/lcDynamic.c
+index 3821bff..a50aa70 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcDynamic.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcDynamic.c
+@@ -51,7 +51,7 @@ from The Open Group.
+ #include "Xlcint.h"
+ 
+ #ifndef XLOCALEDIR
+-#define XLOCALEDIR "/usr/lib/X11/locale"
++#define XLOCALEDIR "locale"
+ #endif
+ 
+ #define LCLIBNAME    "xi18n.so"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcFile.c b/vcxsrv-code/libx11/src/xlibi18n/lcFile.c
+index 25cabd5..819ac89 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcFile.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcFile.c
+@@ -32,10 +32,7 @@
+ #include "Xlibint.h"
+ #include "XlcPubI.h"
+ #include <X11/Xos.h>
+-#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+-#else
+-#endif
+ 
+ /************************************************************************/
+ 
+@@ -195,7 +192,7 @@ _XlcParsePath(
+ }
+ 
+ #ifndef XLOCALEDIR
+-#define XLOCALEDIR "/usr/lib/X11/locale"
++#define XLOCALEDIR "locale"
+ #endif
+ 
+ void
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcGeneric.c b/vcxsrv-code/libx11/src/xlibi18n/lcGeneric.c
+index 1f3f60b..f5b73d3 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcGeneric.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcGeneric.c
+@@ -32,6 +32,7 @@
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include "Xlibint.h"
+ #include "XlcGeneric.h"
+ #include "reallocarray.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcPubWrap.c b/vcxsrv-code/libx11/src/xlibi18n/lcPubWrap.c
+index 3119918..56b00e6 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcPubWrap.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcPubWrap.c
+@@ -28,6 +28,7 @@
+ #endif
+ #include "Xlibint.h"
+ #include "XlcPubI.h"
++#include <unistd.h>
+ 
+ char *
+ _XGetLCValues(XLCd lcd, ...)
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcPublic.c b/vcxsrv-code/libx11/src/xlibi18n/lcPublic.c
+index 1cbc212..eee6f96 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcPublic.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcPublic.c
+@@ -27,6 +27,7 @@
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include "Xlibint.h"
+ #include "XlcPubI.h"
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcUTF8.c b/vcxsrv-code/libx11/src/xlibi18n/lcUTF8.c
+index b18f77e..2867220 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcUTF8.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcUTF8.c
+@@ -75,6 +75,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include <config.h>
+ #endif
+ #include <stdio.h>
++#include <unistd.h>
+ #include "Xlibint.h"
+ #include "XlcPubI.h"
+ #include "XlcGeneric.h"
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcWrap.c b/vcxsrv-code/libx11/src/xlibi18n/lcWrap.c
+index c78ae44..7d1877b 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xlib/src/8b71282530-b2db433f28.clean/src/xlibi18n/lcWrap.c
++++ b/vcxsrv-code/libx11/src/xlibi18n/lcWrap.c
+@@ -474,15 +474,15 @@ _XlcCopyFromArg(
+     int size)
+ {
+     if (size == sizeof(long))
+-	*((long *) dst) = (long) src;
++	*((long *) dst) = (long)(intptr_t) src;
+ #ifdef LONG64
+     else if (size == sizeof(int))
+ 	*((int *) dst) = (int)(long) src;
+ #endif
+     else if (size == sizeof(short))
+-	*((short *) dst) = (short)(long) src;
++	*((short *) dst) = (short)(intptr_t) src;
+     else if (size == sizeof(char))
+-	*((char *) dst) = (char)(long) src;
++	*((char *) dst) = (char)(intptr_t) src;
+     else if (size == sizeof(XPointer))
+ 	*((XPointer *) dst) = (XPointer) src;
+     else if (size > sizeof(XPointer))

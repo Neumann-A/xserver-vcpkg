@@ -1,0 +1,1075 @@
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CallbackI.h b/vcxsrv-code/X11/CallbackI.h
+index 5d958f4..5adb54e 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CallbackI.h
++++ b/vcxsrv-code/X11/CallbackI.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Composite.h b/vcxsrv-code/X11/Composite.h
+index d33234f..e845fea 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Composite.h
++++ b/vcxsrv-code/X11/Composite.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CompositeP.h b/vcxsrv-code/X11/CompositeP.h
+index b1b8559..b51dcd3 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CompositeP.h
++++ b/vcxsrv-code/X11/CompositeP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+@@ -54,7 +54,7 @@ _XFUNCPROTOBEGIN
+ 
+ /************************************************************************
+  *
+- * Additional instance fields for widgets of (sub)class 'Composite'
++ * Additional instance fields for widgets of (sub)class 'Composite' 
+  *
+  ************************************************************************/
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ConstrainP.h b/vcxsrv-code/X11/ConstrainP.h
+index 40ff9b9..53c01c1 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ConstrainP.h
++++ b/vcxsrv-code/X11/ConstrainP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Constraint.h b/vcxsrv-code/X11/Constraint.h
+index 20abead..f04155c 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Constraint.h
++++ b/vcxsrv-code/X11/Constraint.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ConvertI.h b/vcxsrv-code/X11/ConvertI.h
+index 8fdfe18..b66b3c0 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ConvertI.h
++++ b/vcxsrv-code/X11/ConvertI.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+@@ -74,7 +74,7 @@ extern void _XtTableAddConverter(
+     XrmRepresentation    	/* from_type */,
+     XrmRepresentation    	/* to_type */,
+     XtTypeConverter      	/* converter */,
+-    XtConvertArgRec const *     /* convert_args */,
++    XtConvertArgList     	/* convert_args */,
+     Cardinal             	/* num_args */,
+     _XtBoolean              	/* new_style */,
+     XtCacheType	    		/* cache_type */,
+@@ -93,8 +93,4 @@ extern Boolean _XtConvert(
+ 
+ void _XtConvertInitialize(void);
+ 
+-#ifdef DEBUG
+-void _XtConverterCacheStats(void);
+-#endif
+-
+ _XFUNCPROTOEND
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Core.h b/vcxsrv-code/X11/Core.h
+index 08a86f6..4303aff 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Core.h
++++ b/vcxsrv-code/X11/Core.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CoreP.h b/vcxsrv-code/X11/CoreP.h
+index a4cb16e..989ba16 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CoreP.h
++++ b/vcxsrv-code/X11/CoreP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CreateI.h b/vcxsrv-code/X11/CreateI.h
+index 6b47c7c..e00ba65 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/CreateI.h
++++ b/vcxsrv-code/X11/CreateI.h
+@@ -28,13 +28,13 @@ _XFUNCPROTOBEGIN
+ extern Widget _XtVaOpenApplication(XtAppContext *app_context_return,
+ 			_Xconst char* application_class,
+ 			XrmOptionDescList options, Cardinal num_options,
+-			int *argc_in_out, _XtString *argv_in_out,
++			int *argc_in_out, String *argv_in_out,
+ 			String *fallback_resources, WidgetClass widget_class,
+ 			va_list var_args);
+ extern Widget _XtVaAppInitialize(XtAppContext *app_context_return,
+ 			_Xconst char* application_class,
+ 			XrmOptionDescList options, Cardinal num_options,
+-			int *argc_in_out, _XtString *argv_in_out,
++			int *argc_in_out, String *argv_in_out,
+ 			String *fallback_resources, va_list var_args);
+ 
+ _XFUNCPROTOEND
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/EventI.h b/vcxsrv-code/X11/EventI.h
+index 4aae5af..0b95b07 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/EventI.h
++++ b/vcxsrv-code/X11/EventI.h
+@@ -45,9 +45,9 @@ SOFTWARE.
+ 
+ ******************************************************************/
+ 
+-/*
++/* 
+  * Event.h - exported types and functions for toolkit event handler
+- *
++ * 
+  * Author:	Charles Haynes
+  * 		Digital Equipment Corporation
+  * 		Western Software Laboratory
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/InitialI.h b/vcxsrv-code/X11/InitialI.h
+index f64a68d..28b34d7 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/InitialI.h
++++ b/vcxsrv-code/X11/InitialI.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+@@ -117,7 +117,7 @@ typedef struct _WorkProcRec {
+ } WorkProcRec;
+ 
+ 
+-typedef struct
++typedef struct 
+ {
+ #ifndef USE_POLL
+   	fd_set rmask;
+@@ -185,7 +185,7 @@ typedef struct _XtAppStruct {
+     Widget in_phase2_destroy;
+     LangProcRec langProcRec;
+     struct _TMBindCacheRec * free_bindings;
+-    _XtString display_name_tried;
++    String display_name_tried;
+     Display **dpy_destroy_list;
+     int dpy_destroy_count;
+     Boolean exit_flag;
+@@ -209,7 +209,7 @@ extern void _XtHeapFree(Heap* heap);
+ extern char *_XtHeapMalloc(
+     Heap*	/* heap */,
+     Cardinal	/* size */,
+-    const char */* file */,
++    char *	/* file */,
+     int		/* line */
+ );
+ 
+@@ -250,7 +250,7 @@ _XtAppInit(
+     XrmOptionDescRec*	/* options */,
+     Cardinal		/* num_options */,
+     int*		/* argc_in_out */,
+-    _XtString**		/* argv_in_out */,
++    String**		/* argv_in_out */,
+     String*		/* fallback_resources */
+ );
+ 
+@@ -384,7 +384,7 @@ extern void _XtDisplayInitialize(
+     XrmOptionDescRec*	/* urlist */,
+     Cardinal 		/* num_urs */,
+     int*		/* argc */,
+-    _XtString* 		/* argv */
++    char** 		/* argv */
+ );
+ 
+ extern void _XtCacheFlushTag(
+@@ -419,9 +419,9 @@ extern void _XtFreeWWTable(
+     XtPerDisplay pd
+ );
+ 
+-extern String _XtGetUserName(_XtString dest, int len);
++extern String _XtGetUserName(String dest, int len);
+ extern XrmDatabase _XtPreparseCommandLine(XrmOptionDescRec *urlist,
+-			Cardinal num_urs, int argc, _XtString *argv,
++			Cardinal num_urs, int argc, String *argv,
+ 			String *applName, String *displayName,
+ 			String *language);
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Intrinsic.h b/vcxsrv-code/X11/Intrinsic.h
+index 559697a..0c2e451 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Intrinsic.h
++++ b/vcxsrv-code/X11/Intrinsic.h
+@@ -50,10 +50,6 @@ in this Software without prior written authorization from The Open Group.
+ #ifndef _XtIntrinsic_h
+ #define _XtIntrinsic_h
+ 
+-#ifdef WIN32
+-#define _WILLWINSOCK_
+-#endif
+-
+ #include	<X11/Xlib.h>
+ #include	<X11/Xutil.h>
+ #include	<X11/Xresource.h>
+@@ -65,18 +61,9 @@ in this Software without prior written authorization from The Open Group.
+ #include <string.h>		/* for XtNewString */
+ #endif /* XT_BC else */
+ 
+-#define XtSpecificationRelease 7
++#define XtSpecificationRelease 6
+ 
+-/*
+- * As used in its function interface, the String type of libXt can be readonly.
+- * But compiling libXt with this feature may require some internal changes,
+- * e.g., casts and occasionally using a plain "char*".
+- */
+-#ifdef _CONST_X_STRING
+-typedef const char *String;
+-#else
+ typedef char *String;
+-#endif
+ 
+ /* We do this in order to get "const" declarations to work right.  We
+  * use _XtString instead of String so that C++ applications can
+@@ -126,10 +113,10 @@ typedef struct _XtEventRec *XtEventTable;
+ 
+ typedef struct _XtAppStruct *XtAppContext;
+ typedef unsigned long	XtValueMask;
+-typedef unsigned long	XtIntervalId;
+-typedef unsigned long	XtInputId;
+-typedef unsigned long	XtWorkProcId;
+-typedef unsigned long	XtSignalId;
++typedef uintptr_t	XtIntervalId;
++typedef uintptr_t XtInputId;
++typedef	uintptr_t XtWorkProcId;
++typedef uintptr_t XtSignalId;
+ typedef unsigned int	XtGeometryMask;
+ typedef unsigned long	XtGCMask;   /* Mask of values that are used by widget*/
+ typedef unsigned long	Pixel;	    /* Index into colormap		*/
+@@ -161,7 +148,7 @@ typedef int		XtCacheType;
+  *
+  ****************************************************************/
+ typedef char		Boolean;
+-typedef long		XtArgVal;
++typedef intptr_t	XtArgVal;
+ typedef unsigned char	XtEnum;
+ 
+ typedef unsigned int	Cardinal;
+@@ -273,7 +260,7 @@ typedef void (*XtActionHookProc)(
+     Cardinal*		/* num_params */
+ );
+ 
+-typedef unsigned long XtBlockHookId;
++typedef uintptr_t XtBlockHookId;
+ 
+ typedef void (*XtBlockHookProc)(
+     XtPointer		/* client_data */
+@@ -409,7 +396,7 @@ typedef Boolean (*XtWorkProc)(
+ 
+ typedef struct {
+     char match;
+-    _XtString substitution;
++    String substitution;
+ } SubstitutionRec, *Substitution;
+ 
+ typedef Boolean (*XtFilePredicate)(
+@@ -1001,7 +988,7 @@ extern void XtRemoveTimeOut(
+ 
+ extern XtInputId XtAddInput( /* obsolete */
+     int 		/* source */,
+-    XtPointer 		/* condition */,
++    XtInputMask 		/* condition */,
+     XtInputCallbackProc /* proc */,
+     XtPointer 		/* closure */
+ );
+@@ -1009,7 +996,7 @@ extern XtInputId XtAddInput( /* obsolete */
+ extern XtInputId XtAppAddInput(
+     XtAppContext       	/* app_context */,
+     int 		/* source */,
+-    XtPointer 		/* condition */,
++    XtInputMask 		/* condition */,
+     XtInputCallbackProc /* proc */,
+     XtPointer 		/* closure */
+ );
+@@ -1450,7 +1437,7 @@ extern void XtDisplayInitialize(
+     XrmOptionDescRec* 	/* options */,
+     Cardinal 		/* num_options */,
+     int*		/* argc */,
+-    _XtString*		/* argv */
++    char**		/* argv */
+ );
+ 
+ extern Widget XtOpenApplication(
+@@ -1459,7 +1446,7 @@ extern Widget XtOpenApplication(
+     XrmOptionDescList 	/* options */,
+     Cardinal 		/* num_options */,
+     int*		/* argc_in_out */,
+-    _XtString*		/* argv_in_out */,
++    String*		/* argv_in_out */,
+     String*		/* fallback_resources */,
+     WidgetClass		/* widget_class */,
+     ArgList 		/* args */,
+@@ -1472,7 +1459,7 @@ extern Widget XtVaOpenApplication(
+     XrmOptionDescList	/* options */,
+     Cardinal		/* num_options */,
+     int*		/* argc_in_out */,
+-    _XtString*		/* argv_in_out */,
++    String*		/* argv_in_out */,
+     String*		/* fallback_resources */,
+     WidgetClass		/* widget_class */,
+     ...
+@@ -1484,7 +1471,7 @@ extern Widget XtAppInitialize( /* obsolete */
+     XrmOptionDescList 	/* options */,
+     Cardinal 		/* num_options */,
+     int*		/* argc_in_out */,
+-    _XtString*		/* argv_in_out */,
++    String*		/* argv_in_out */,
+     String*		/* fallback_resources */,
+     ArgList 		/* args */,
+     Cardinal 		/* num_args */
+@@ -1496,7 +1483,7 @@ extern Widget XtVaAppInitialize( /* obsolete */
+     XrmOptionDescList	/* options */,
+     Cardinal		/* num_options */,
+     int*		/* argc_in_out */,
+-    _XtString*		/* argv_in_out */,
++    String*		/* argv_in_out */,
+     String*		/* fallback_resources */,
+     ...
+ ) _X_SENTINEL(0);
+@@ -1507,7 +1494,7 @@ extern Widget XtInitialize( /* obsolete */
+     XrmOptionDescRec* 	/* options */,
+     Cardinal 		/* num_options */,
+     int*		/* argc */,
+-    _XtString*		/* argv */
++    char**		/* argv */
+ );
+ 
+ extern Display *XtOpenDisplay(
+@@ -1518,7 +1505,7 @@ extern Display *XtOpenDisplay(
+     XrmOptionDescRec*	/* options */,
+     Cardinal 		/* num_options */,
+     int*		/* argc */,
+-    _XtString*		/* argv */
++    char**		/* argv */
+ );
+ 
+ extern XtAppContext XtCreateApplicationContext(
+@@ -1716,11 +1703,11 @@ void XtSessionReturnToken(
+ 
+ extern XtErrorMsgHandler XtAppSetErrorMsgHandler(
+     XtAppContext 	/* app_context */,
+-    XtErrorMsgHandler 	/* handler */ _X_NORETURN
++    XtErrorMsgHandler 	/* handler */
+ );
+ 
+ extern void XtSetErrorMsgHandler( /* obsolete */
+-    XtErrorMsgHandler 	/* handler */ _X_NORETURN
++    XtErrorMsgHandler 	/* handler */
+ );
+ 
+ extern XtErrorMsgHandler XtAppSetWarningMsgHandler(
+@@ -1740,7 +1727,7 @@ extern void XtAppErrorMsg(
+     _Xconst _XtString	/* default */,
+     String*		/* params */,
+     Cardinal*		/* num_params */
+-) _X_NORETURN;
++);
+ 
+ extern void XtErrorMsg( /* obsolete */
+     _Xconst _XtString 	/* name */,
+@@ -1749,7 +1736,7 @@ extern void XtErrorMsg( /* obsolete */
+     _Xconst _XtString	/* default */,
+     String*		/* params */,
+     Cardinal*		/* num_params */
+-) _X_NORETURN;
++);
+ 
+ extern void XtAppWarningMsg(
+     XtAppContext 	/* app_context */,
+@@ -1772,11 +1759,11 @@ extern void XtWarningMsg( /* obsolete */
+ 
+ extern XtErrorHandler XtAppSetErrorHandler(
+     XtAppContext 	/* app_context */,
+-    XtErrorHandler 	/* handler */ _X_NORETURN
++    XtErrorHandler 	/* handler */
+ );
+ 
+ extern void XtSetErrorHandler( /* obsolete */
+-    XtErrorHandler 	/* handler */ _X_NORETURN
++    XtErrorHandler 	/* handler */
+ );
+ 
+ extern XtErrorHandler XtAppSetWarningHandler(
+@@ -1791,11 +1778,11 @@ extern void XtSetWarningHandler( /* obsolete */
+ extern void XtAppError(
+     XtAppContext 	/* app_context */,
+     _Xconst _XtString	/* message */
+-) _X_NORETURN;
++);
+ 
+ extern void XtError( /* obsolete */
+     _Xconst _XtString	/* message */
+-) _X_NORETURN;
++);
+ 
+ extern void XtAppWarning(
+     XtAppContext 	/* app_context */,
+@@ -1820,7 +1807,7 @@ extern void XtAppGetErrorDatabaseText(
+     _Xconst _XtString	/* type */,
+     _Xconst _XtString	/* class */,
+     _Xconst _XtString 	/* default */,
+-    _XtString 		/* buffer_return */,
++    String 		/* buffer_return */,
+     int 		/* nbytes */,
+     XrmDatabase 	/* database */
+ );
+@@ -1830,7 +1817,7 @@ extern void XtGetErrorDatabaseText( /* obsolete */
+     _Xconst _XtString	/* type */,
+     _Xconst _XtString	/* class */,
+     _Xconst _XtString 	/* default */,
+-    _XtString 		/* buffer_return */,
++    String 		/* buffer_return */,
+     int 		/* nbytes */
+ );
+ 
+@@ -1862,7 +1849,7 @@ extern void XtFree(
+ # define _X_RESTRICT_KYWD
+ #endif
+ extern Cardinal XtAsprintf(
+-    _XtString *new_string,
++    String *new_string,
+     _Xconst char * _X_RESTRICT_KYWD format,
+     ...
+ ) _X_ATTRIBUTE_PRINTF(2,3);
+@@ -1871,21 +1858,21 @@ extern Cardinal XtAsprintf(
+ 
+ extern char *_XtMalloc( /* implementation-private */
+     Cardinal	/* size */,
+-    const char */* file */,
++    char *	/* file */,
+     int	        /* line */
+ );
+ 
+ extern char *_XtRealloc( /* implementation-private */
+     char *	/* ptr */,
+     Cardinal    /* size */,
+-    const char */* file */,
++    char *	/* file */,
+     int		/* line */
+ );
+ 
+ extern char *_XtCalloc( /* implementation-private */
+     Cardinal	/* num */,
+     Cardinal 	/* size */,
+-    const char */* file */,
++    char *	/* file */,
+     int		/* line */
+ );
+ 
+@@ -1893,12 +1880,6 @@ extern void _XtFree( /* implementation-private */
+     char *	/* ptr */
+ );
+ 
+-extern Boolean _XtIsValidPointer( /* implementation-private */
+-    char *	/* ptr */);
+-
+-extern void _XtPrintMemory( /* implementation-private */
+-    const char */* filename */);
+-
+ #define XtMalloc(size) _XtMalloc(size, __FILE__, __LINE__)
+ #define XtRealloc(ptr,size) _XtRealloc(ptr, size, __FILE__, __LINE__)
+ #define XtCalloc(num,size) _XtCalloc(num, size, __FILE__, __LINE__)
+@@ -1993,14 +1974,14 @@ extern void XtSetWMColormapWindows(
+     Cardinal		/* count */
+ );
+ 
+-extern _XtString XtFindFile(
++extern String XtFindFile(
+     _Xconst _XtString	/* path */,
+     Substitution	/* substitutions */,
+     Cardinal 		/* num_substitutions */,
+     XtFilePredicate	/* predicate */
+ );
+ 
+-extern _XtString XtResolvePathname(
++extern String XtResolvePathname(
+     Display*		/* dpy */,
+     _Xconst _XtString	/* type */,
+     _Xconst _XtString	/* filename */,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/IntrinsicI.h b/vcxsrv-code/X11/IntrinsicI.h
+index 99c5349..845ab48 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/IntrinsicI.h
++++ b/vcxsrv-code/X11/IntrinsicI.h
+@@ -48,12 +48,11 @@ SOFTWARE.
+ #ifndef _XtintrinsicI_h
+ #define _XtintrinsicI_h
+ 
++#include "Xtos.h"
++#include "IntrinsicP.h"
+ #ifdef WIN32
+ #define _WILLWINSOCK_
+ #endif
+-
+-#include "Xtos.h"
+-#include "IntrinsicP.h"
+ #include <X11/Xos.h>
+ 
+ #include "Object.h"
+@@ -100,14 +99,6 @@ SOFTWARE.
+ 			    (object)->core.ancestor_sensitive) : False)
+ 
+ 
+-/****************************************************************
+- *
+- * Bit utilities
+- *
+- ****************************************************************/
+-#define XtSetBits(dst,src,len)  dst = (((1U << (len)) - 1) & (unsigned)(src))
+-#define XtSetBit(dst,src)  XtSetBits(dst,src,1)
+-
+ /****************************************************************
+  *
+  * Byte utilities
+@@ -118,15 +109,15 @@ SOFTWARE.
+ #include <X11/Xfuncs.h>
+ 
+ #define XtMemmove(dst, src, size)	\
+-    if ((const void *)(dst) != (const void *)(src)) {		    \
+-	(void) memcpy((void *) (dst), (const void *) (src), (size_t) (size)); \
++    if ((char *)(dst) != (char *)(src)) {		    \
++	(void) memcpy((char *) (dst), (char *) (src), (int) (size)); \
+     }
+ 
+ #define XtBZero(dst, size) 	\
+-	memset((void *) (dst), 0, (size_t) (size))
++	bzero((char *) (dst), (int) (size))
+ 
+ #define XtMemcmp(b1, b2, size) 		\
+-	memcmp((const void *) (b1), (const void *) (b2), (size_t) (size))
++	memcmp((char *) (b1), (char *) (b2), (int) (size))
+ 
+ 
+ /****************************************************************
+@@ -138,7 +129,7 @@ SOFTWARE.
+ #define XtStackAlloc(size, stack_cache_array)     \
+     ((size) <= sizeof(stack_cache_array)	  \
+     ?  (XtPointer)(stack_cache_array)		  \
+-    :  XtMalloc((Cardinal)(size)))
++    :  XtMalloc((unsigned)(size)))
+ 
+ #define XtStackFree(pointer, stack_cache_array) \
+     { if ((pointer) != ((XtPointer)(stack_cache_array))) XtFree(pointer); }
+@@ -173,7 +164,7 @@ extern String XtCXtToolkitError;
+ 
+ extern void _XtAllocError(
+     String	/* alloc_type */
+-) _X_NORETURN;
++);
+ 
+ extern void _XtCompileResourceList(
+     XtResourceList 	/* resources */,
+@@ -205,7 +196,6 @@ extern void _XtGClistFree(Display *dpy, XtPerDisplay pd);
+ extern void _XtGeoTab (int);
+ extern void _XtGeoTrace (
+ 			    Widget widget,
+-			    const char *,
+ 			    ...
+ ) _X_ATTRIBUTE_PRINTF(2,3);
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/IntrinsicP.h b/vcxsrv-code/X11/IntrinsicP.h
+index 9f1ae40..d3007ee 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/IntrinsicP.h
++++ b/vcxsrv-code/X11/IntrinsicP.h
+@@ -52,16 +52,16 @@ SOFTWARE.
+ 
+ /*
+  * Field sizes and offsets of XrmResource must match those of XtResource.
+- * Type long is used instead of XrmQuark here because XrmQuark and String
++ * Type intptr_t is used instead of XrmQuark here because XrmQuark and String
+  * are not the same size on all systems.
+  */
+ typedef struct {
+-    long	xrm_name;	  /* Resource name quark		*/
+-    long	xrm_class;	  /* Resource class quark		*/
+-    long	xrm_type;	  /* Resource representation type quark */
++    intptr_t	xrm_name;	  /* Resource name quark		*/
++    intptr_t	xrm_class;	  /* Resource class quark		*/
++    intptr_t	xrm_type;	  /* Resource representation type quark */
+     Cardinal	xrm_size;	  /* Size in bytes of representation	*/
+     int		xrm_offset;	  /* -offset-1				*/
+-    long	xrm_default_type; /* Default representation type quark	*/
++    intptr_t	xrm_default_type; /* Default representation type quark	*/
+     XtPointer	xrm_default_addr; /* Default resource address		*/
+ } XrmResource, *XrmResourceList;
+ 
+@@ -246,15 +246,15 @@ extern Boolean XtIsTopLevelShell(Widget);
+ #ifdef DEBUG
+ #define XtCheckSubclass(w, widget_class_ptr, message)	\
+ 	if (!XtIsSubclass(((Widget)(w)), (widget_class_ptr))) {	\
+-	    String dbgArgV[3];				\
+-	    Cardinal dbgArgC = 3;			\
+-	    dbgArgV[0] = ((Widget)(w))->core.widget_class->core_class.class_name;\
+-	    dbgArgV[1] = (widget_class_ptr)->core_class.class_name;	     \
+-	    dbgArgV[2] = (message);					     \
++	    String params[3];				\
++	    Cardinal num_params = 3;			\
++	    params[0] = ((Widget)(w))->core.widget_class->core_class.class_name;\
++	    params[1] = (widget_class_ptr)->core_class.class_name;	     \
++	    params[2] = (message);					     \
+ 	    XtAppErrorMsg(XtWidgetToApplicationContext((Widget)(w)),	     \
+ 		    "subclassMismatch", "xtCheckSubclass", "XtToolkitError", \
+ 		    "Widget class %s found when subclass of %s expected: %s",\
+-		    dbgArgV, &dbgArgC);			\
++		    params, &num_params);		\
+ 	}
+ #else
+ #define XtCheckSubclass(w, widget_class, message)	/* nothing */
+@@ -266,12 +266,7 @@ extern Widget _XtWindowedAncestor( /* internal; implementation-dependent */
+     Widget 		/* object */
+ );
+ 
+-#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(LIBXT_COMPILATION)
+-__declspec(dllimport)
+-#else
+-extern
+-#endif
+-void _XtInherit(
++extern void _XtInherit(
+     void
+ );
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Object.h b/vcxsrv-code/X11/Object.h
+index 4be1f39..584fe3d 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Object.h
++++ b/vcxsrv-code/X11/Object.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ObjectP.h b/vcxsrv-code/X11/ObjectP.h
+index 6e296f7..d71d22f 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ObjectP.h
++++ b/vcxsrv-code/X11/ObjectP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/PassivGraI.h b/vcxsrv-code/X11/PassivGraI.h
+index 6b8cb52..353732f 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/PassivGraI.h
++++ b/vcxsrv-code/X11/PassivGraI.h
+@@ -3,13 +3,13 @@
+ Copyright 1988 by Hewlett-Packard Company
+ Copyright 1987, 1988, 1989 by Digital Equipment Corporation, Maynard
+ 
+-Permission to use, copy, modify, and distribute this software
+-and its documentation for any purpose and without fee is hereby
+-granted, provided that the above copyright notice appear in all
+-copies and that both that copyright notice and this permission
+-notice appear in supporting documentation, and that the names of
+-Hewlett-Packard or Digital not be used in advertising or
+-publicity pertaining to distribution of the software without specific,
++Permission to use, copy, modify, and distribute this software 
++and its documentation for any purpose and without fee is hereby 
++granted, provided that the above copyright notice appear in all 
++copies and that both that copyright notice and this permission 
++notice appear in supporting documentation, and that the names of 
++Hewlett-Packard or Digital not be used in advertising or 
++publicity pertaining to distribution of the software without specific, 
+ written prior permission.
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+@@ -58,7 +58,7 @@ in this Software without prior written authorization from The Open Group.
+ _XFUNCPROTOBEGIN
+ 
+ typedef enum {
+-    XtNoServerGrab,
++    XtNoServerGrab, 
+     XtPassiveServerGrab,
+     XtActiveServerGrab,
+     XtPseudoPassiveServerGrab,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/RectObj.h b/vcxsrv-code/X11/RectObj.h
+index fba883a..e582112 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/RectObj.h
++++ b/vcxsrv-code/X11/RectObj.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/RectObjP.h b/vcxsrv-code/X11/RectObjP.h
+index bb5a7d3..1fc06f2 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/RectObjP.h
++++ b/vcxsrv-code/X11/RectObjP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ResConfigP.h b/vcxsrv-code/X11/ResConfigP.h
+index 1e1d85a..0c94577 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ResConfigP.h
++++ b/vcxsrv-code/X11/ResConfigP.h
+@@ -66,8 +66,8 @@ _XFUNCPROTOBEGIN
+ #define RCM_INIT "Custom Init"
+ 
+ extern void _XtResourceConfigurationEH(
+-	Widget 		/* w */,
+-	XtPointer 	/* client_data */,
++	Widget 		/* w */, 
++	XtPointer 	/* client_data */, 
+ 	XEvent * 	/* event */
+ );
+ 
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ShellP.h b/vcxsrv-code/X11/ShellP.h
+index f7aa4c1..58ce1b4 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/ShellP.h
++++ b/vcxsrv-code/X11/ShellP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+@@ -45,9 +45,9 @@ SOFTWARE.
+ 
+ ******************************************************************/
+ 
+-/*
++/* 
+  * ShellP.h - Private definitions for Shell widget
+- *
++ * 
+  * Author:	Paul Asente
+  * 		Digital Equipment Corporation
+  * 		Western Software Laboratory
+@@ -255,7 +255,7 @@ typedef  struct {
+ 	ShellPart 	shell;
+ 	WMShellPart	wm;
+ 	VendorShellPart	vendor;
+-	TransientShellPart transient;
++	TransientShellPart transient;	
+ } TransientShellRec, *TransientShellWidget;
+ 
+ /***********************************************************************
+@@ -332,7 +332,7 @@ typedef struct {
+ #endif
+     XrmClass xrm_class;
+     int argc;
+-    _XtString *argv;
++    char **argv;
+ } ApplicationShellPart;
+ 
+ typedef  struct {
+@@ -375,15 +375,17 @@ typedef struct _XtSaveYourselfRec *XtSaveYourself; /* implementation-private */
+ /* New fields for the session shell widget */
+ 
+ typedef struct {
++#ifndef XT_NO_SM
+     SmcConn         connection;
+-    _XtString       session_id;
+-    _XtString*      restart_command;
+-    _XtString*      clone_command;
+-    _XtString*      discard_command;
+-    _XtString*      resign_command;
+-    _XtString*      shutdown_command;
+-    _XtString*      environment;
+-    _XtString       current_dir;
++#endif
++    String          session_id;
++    String*         restart_command;
++    String*         clone_command;
++    String*         discard_command;
++    String*         resign_command;
++    String*         shutdown_command;
++    String*         environment;
++    String          current_dir;
+     String          program_path;
+     unsigned char   restart_style;
+     unsigned char   checkpoint_state;
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/TranslateI.h b/vcxsrv-code/X11/TranslateI.h
+index 02e2f3d..9ff59e9 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/TranslateI.h
++++ b/vcxsrv-code/X11/TranslateI.h
+@@ -45,9 +45,9 @@ SOFTWARE.
+ 
+ ******************************************************************/
+ 
+-/*
++/* 
+  * TranslateI.h - Header file private to translation management
+- *
++ * 
+  * Author:	Gabe Beged-Dov, HP
+  *
+  * Former Author:	Charles Haynes
+@@ -380,7 +380,7 @@ extern void _XtPopup(
+     _XtBoolean	/* spring_loaded */
+ );
+ 
+-extern _XtString _XtPrintXlations(
++extern String _XtPrintXlations(
+     Widget		/* w */,
+     XtTranslations 	/* xlations */,
+     Widget		/* accelWidget */,
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/VarargsI.h b/vcxsrv-code/X11/VarargsI.h
+index 790a271..b3e6827 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/VarargsI.h
++++ b/vcxsrv-code/X11/VarargsI.h
+@@ -24,11 +24,11 @@ in this Software without prior written authorization from The Open Group.
+ 
+ */
+ 
+-#ifndef _VarargsI_h_
+-#define _VarargsI_h_
++#ifndef _VarargsI_h_ 
++#define _VarargsI_h_ 
+ 
+ #include <stdarg.h>
+-
++ 
+ /* private routines */
+ 
+ _XFUNCPROTOBEGIN
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Vendor.h b/vcxsrv-code/X11/Vendor.h
+index 6d783c6..f7a6639 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/Vendor.h
++++ b/vcxsrv-code/X11/Vendor.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+diff --git a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/VendorP.h b/vcxsrv-code/X11/VendorP.h
+index 4eb9404..2815e57 100644
+--- a/xserver-vcpkg/build/ninja/release/_deps/vcpkg-src/buildtrees/xt/src/4f82626eb7-41d5c361f9.clean/include/X11/VendorP.h
++++ b/vcxsrv-code/X11/VendorP.h
+@@ -27,13 +27,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+ 
+                         All Rights Reserved
+ 
+-Permission to use, copy, modify, and distribute this software and its
+-documentation for any purpose and without fee is hereby granted,
++Permission to use, copy, modify, and distribute this software and its 
++documentation for any purpose and without fee is hereby granted, 
+ provided that the above copyright notice appear in all copies and that
+-both that copyright notice and this permission notice appear in
++both that copyright notice and this permission notice appear in 
+ supporting documentation, and that the name of Digital not be
+ used in advertising or publicity pertaining to distribution of the
+-software without specific, written prior permission.
++software without specific, written prior permission.  
+ 
+ DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+@@ -45,9 +45,9 @@ SOFTWARE.
+ 
+ ******************************************************************/
+ 
+-/*
++/* 
+  * VendorP.h - Private definitions for VendorShell widget
+- *
++ * 
+  * Author:	Paul Asente
+  * 		Digital Equipment Corporation
+  * 		Western Software Laboratory
