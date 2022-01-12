@@ -8,6 +8,7 @@
     "configurePresets": [
         {
             "name" : "cmake-general",
+            "hidden" : true,
             "cacheVariables" : {
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "TRUE"
             }
@@ -109,7 +110,7 @@
             "generator": "Visual Studio 17 2022",
             "toolset": "ClangCL,host=x64",
             "binaryDir": "${sourceDir}/build/vs-llvm",
-            "inherits": ["CMakeJSON_Settings" , "win-vcpkg_settings" ],
+            "inherits": [ "win-vcpkg_settings" ],
             "cacheVariables": {
                 "CMAKE_GENERATOR_INSTANCE": "$env{VS2022INSTALLDIR}",
                 "StoPhys_ARCH_LIST": "NONE;AVX2",
