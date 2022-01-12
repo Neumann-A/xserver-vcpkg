@@ -39,6 +39,7 @@
     },
     "xtrans",
     "xv",
+    "xcvt",
     {
       "name": "xxf86dga",
       "platform": "!windows"
@@ -101,6 +102,13 @@
         {
           "name": "opengl-registry",
           "platform": "!windows"
+        },
+        {
+          "name": "mesa",
+          "default-features": false,
+          "features": [
+            "egl"
+          ]
         }
       ]
     }
