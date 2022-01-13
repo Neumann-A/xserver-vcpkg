@@ -1,0 +1,52 @@
+diff --git a/configure.ac b/configure.ac
+index 8afe7a621..607d886f7 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -77,7 +77,7 @@ fi
+ 
+ PTHREAD_LIBS=
+ if test "x$PTHREAD" = "xyes"; then
+-	AC_CHECK_LIB(pthread,pthread_create,[PTHREAD_LIBS=-lpthread],[PTHREAD_LIBS=])
++	AC_SEARCH_LIBS(pthread_create, [pthread pthreadVC3 pthreadVC3d],[PTHREAD_LIBS=${ac_cv_search_pthread_create}],[PTHREAD_LIBS=])
+ fi
+ 
+ AC_SUBST([PTHREAD_LIBS])
+diff --git a/src/xshmfence_alloc.c b/src/xshmfence_alloc.c
+index 05cf953ba..49fcff8c6 100644
+--- a/src/xshmfence_alloc.c
++++ b/src/xshmfence_alloc.c
+@@ -54,6 +54,20 @@ static int memfd_create(const char *name,
+ 
+ #endif
+ 
++#ifdef _MSC_VER
++#include <io.h>
++int
++mkstemp (char *tmpl)
++{
++  int len;
++  len = strlen (tmpl);
++  return _mktemp_s(tmpl,len + 1); // + 1 for \0
++}
++
++#define ftruncate _chsize
++#endif
++
++
+ /**
+  * xshmfence_alloc_shm:
+  *
+diff --git a/src/xshmfenceint.h b/src/xshmfenceint.h
+index 178cbdd5e..e29f46c59 100644
+--- a/src/xshmfenceint.h
++++ b/src/xshmfenceint.h
+@@ -24,7 +24,9 @@
+ #define _XSHMFENCEINT_H_
+ 
+ #include <stdlib.h>
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif
+ #include <sys/mman.h>
+ #include "xshmfence.h"
+ 

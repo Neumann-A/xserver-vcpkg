@@ -1,0 +1,23 @@
+diff --git a/lib/libxcvt.def b/lib/libxcvt.def
+new file mode 100644
+index 000000000..c553104e9
+--- /dev/null
++++ b/lib/libxcvt.def
+@@ -0,0 +1,3 @@
++LIBRARY   xcvt-0
++EXPORTS
++   libxcvt_gen_mode_info
+diff --git a/lib/meson.build b/lib/meson.build
+index b3ff615c6..49ebe3f83 100644
+--- a/lib/meson.build
++++ b/lib/meson.build
+@@ -1,6 +1,7 @@
+ libxcvt_sources = ['libxcvt.c']
+-libxcvt = shared_library('xcvt',
++libxcvt = library('xcvt',
+                          libxcvt_sources,
+                          include_directories : inc,
+                          version: meson.project_version(),
+-                         install : true)
++                         install : true,
++                         vs_module_defs: 'libxcvt.def')

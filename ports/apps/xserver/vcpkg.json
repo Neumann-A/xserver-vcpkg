@@ -33,10 +33,7 @@
     "xkbfile",
     "xorg-macros",
     "xproto",
-    {
-      "name": "xshmfence",
-      "platform": "!windows"
-    },
+    "xshmfence",
     "xtrans",
     "xv",
     "xcvt",
