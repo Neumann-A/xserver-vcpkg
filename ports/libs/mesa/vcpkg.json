@@ -45,7 +45,25 @@
           "name": "mesa",
           "default-features": false,
           "features": [
-            "llvm"
+            "platform-win",
+            "gallium-d3d12"
+          ],
+          "platform": "windows"
+        },
+        {
+          "name": "mesa",
+          "default-features": false,
+          "features": [
+            "platform-x11"
+          ],
+          "platform": "linux"
+        },
+        {
+          "name": "mesa",
+          "default-features": false,
+          "features": [
+            "llvm",
+            "gallium-swrast"
           ],
           "platform": "x64"
         }

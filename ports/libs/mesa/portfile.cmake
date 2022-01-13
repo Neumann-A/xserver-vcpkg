@@ -5,15 +5,13 @@
 set(PATCHES
     # Fix swrAVX512 build
     swravx512-post-static-link.patch
-    # Fix swr build with MSVC
-    # swr-msvc-2.patch
     # Fix swr build with LLVM 13
     swr-llvm13.patch
     # Fix radv MSVC build with LLVM 13
     # radv-msvc-llvm13-2.patch
     # Fix d3d10sw MSVC build
     d3d10sw.patch
-    modules.patch
+    directx-headers.patch
 )
 
 vcpkg_check_linkage(ONLY_DYNAMIC_CRT)
@@ -114,6 +112,10 @@ if(WIN32) # WIN32 HOST probably has win_flex and win_bison!
     endif()
 endif()
 
+if(VCPKG_TARGET_IS_WINDOWS)
+    vcpkg_host_path_list(PREPEND ENV{INCLUDE} "${CURRENT_INSTALLED_DIR}/include")
+endif()
+
 # For features https://github.com/pal1000/mesa-dist-win should be probably studied a bit more. 
 #string(APPEND GALLIUM_DRIVERS 'auto')
 list(APPEND MESA_OPTIONS -Dzstd=enabled)
@@ -122,7 +124,7 @@ list(APPEND MESA_OPTIONS -Dlibunwind=disabled)
 list(APPEND MESA_OPTIONS -Dlmsensors=disabled)
 list(APPEND MESA_OPTIONS -Dvalgrind=disabled)
 list(APPEND MESA_OPTIONS -Dglvnd=false)
-#list(APPEND MESA_OPTIONS -Dglx=xlib) #gallium-xlib) # dri) # requires x11
+list(APPEND MESA_OPTIONS -Dglx=dri) #gallium-xlib) # dri) # requires x11
 list(APPEND MESA_OPTIONS -Dgbm=disabled)
 list(APPEND MESA_OPTIONS -Dosmesa=true)
 
