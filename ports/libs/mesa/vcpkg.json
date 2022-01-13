@@ -99,17 +99,35 @@
         }
       ]
     },
-    "platform-x11" : {
-      "description": "Build for the x11 platform",
+    "platform-win": {
+      "description": "Build with windows platform support",
       "dependencies": [
-        "xlib",
-        "xfixes",
-        "xext"
       ]
     },
-    "platform-win" : {
-      "description": "Build for the windows platform",
-      "dependencies": [  ]
+    "platform-x11": {
+      "description": "Build with x11 platform support",
+      "dependencies": [
+        "xlib",
+        "xcb",
+        "xext",
+        "xrandr",
+        "xfixes"
+      ]
+    },
+    "gallium-swrast": {
+      "description": "Build gallium swrast driver",
+      "dependencies": [
+      ]
+    },
+    "gallium-d3d12": {
+      "description": "Build gallium d3d12 driver",
+      "dependencies": [
+      ]
+    },
+    "gallium-swr": {
+      "description": "Build gallium swr driver",
+      "dependencies": [
+      ]
     }
   }
 }

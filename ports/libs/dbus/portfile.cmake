@@ -8,6 +8,7 @@ vcpkg_from_gitlab(
     PATCHES 
         cmake.dep.patch #patch name
         rt_pc_link.patch
+        pkgconfig.patch
 ) 
 
 vcpkg_cmake_configure(
@@ -21,6 +22,8 @@ vcpkg_cmake_configure(
         -DDBUS_WITH_GLIB=ON
         -DXSLTPROC_EXECUTABLE=FALSE
         -DENABLE_SYSTEMD=ON
+        -DBUS_ENABLE_PKGCONFIG=ON
+        -DPKG_CONFIG_FOUND=TRUE
         "-DCMAKE_INSTALL_SYSCONFDIR=${CURRENT_PACKAGES_DIR}/etc/${PORT}"
         "-DWITH_SYSTEMD_SYSTEMUNITDIR=lib/systemd/system"
         "-DWITH_SYSTEMD_USERUNITDIR=lib/systemd/user"

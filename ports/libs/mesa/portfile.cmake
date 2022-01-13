@@ -8,12 +8,12 @@ set(PATCHES
     # Fix swr build with MSVC
     # swr-msvc-2.patch
     # Fix swr build with LLVM 13
-    # swr-llvm13.patch
+    swr-llvm13.patch
     # Fix radv MSVC build with LLVM 13
     # radv-msvc-llvm13-2.patch
     # Fix d3d10sw MSVC build
     d3d10sw.patch
-    directx-headers.patch
+    modules.patch
 )
 
 vcpkg_check_linkage(ONLY_DYNAMIC_CRT)
@@ -122,9 +122,21 @@ list(APPEND MESA_OPTIONS -Dlibunwind=disabled)
 list(APPEND MESA_OPTIONS -Dlmsensors=disabled)
 list(APPEND MESA_OPTIONS -Dvalgrind=disabled)
 list(APPEND MESA_OPTIONS -Dglvnd=false)
-#list(APPEND MESA_OPTIONS -Dglx=gallium-xlib) #gallium-xlib) # dri) # requires x11
+#list(APPEND MESA_OPTIONS -Dglx=xlib) #gallium-xlib) # dri) # requires x11
 list(APPEND MESA_OPTIONS -Dgbm=disabled)
 list(APPEND MESA_OPTIONS -Dosmesa=true)
+
+set(platforms "")
+if("platform-win" IN_LIST FEATURES)
+    list(APPEND platforms "windows")
+endif()
+if("platform-x11" IN_LIST FEATURES)
+    list(APPEND platforms "x11")
+endif()
+list(TRANSFORM platforms PREPEND "'")
+list(TRANSFORM platforms APPEND "'")
+list(JOIN platforms " ," platforms_string)
+list(APPEND MESA_OPTIONS "-Dplatforms=[${platforms_string}]")
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     list(APPEND MESA_OPTIONS -Dshared-swr=false)
@@ -134,18 +146,26 @@ else()
     list(APPEND MESA_OPTIONS "-Dswr-arches=['avx','avx2','knl','skx']")
 endif()
 
-string(APPEND GALLIUM_DRIVERS 'swrast')
+set(gallium_drivers "")
+if("gallium-swrast" IN_LIST FEATURES)
+    list(APPEND gallium_drivers "swrast")
+endif()
+if("gallium-d3d12" IN_LIST FEATURES)
+    list(APPEND gallium_drivers "d3d12")
+endif()
+if("gallium-swr" IN_LIST FEATURES)
+    list(APPEND gallium_drivers "swr")
+endif()
+list(TRANSFORM gallium_drivers PREPEND "'")
+list(TRANSFORM gallium_drivers APPEND "'")
+list(JOIN gallium_drivers " ," gallium_string)
+list(APPEND MESA_OPTIONS "-Dgallium-drivers=[${gallium_string}]")
+
 if("llvm" IN_LIST FEATURES)
     list(APPEND MESA_OPTIONS -Dllvm=enabled)
-    string(APPEND GALLIUM_DRIVERS ",'swr'") # SWR always requires llvm
 else()
     list(APPEND MESA_OPTIONS -Dllvm=disabled)
 endif()
-if(VCPKG_TARGET_IS_WINDOWS)
- string(APPEND GALLIUM_DRIVERS ",'d3d12'")
-endif()
-
-list(APPEND MESA_OPTIONS -Dgallium-drivers=[${GALLIUM_DRIVERS}])
 
 if("gles1" IN_LIST FEATURES)
     list(APPEND MESA_OPTIONS -Dgles1=enabled)
@@ -162,7 +182,7 @@ if("opengl" IN_LIST FEATURES)
 else()
     list(APPEND MESA_OPTIONS -Dopengl=false)
 endif()
-if("egl" IN_LIST FEATURES) # EGL feature only works on Linux
+if("egl" IN_LIST FEATURES)
     list(APPEND MESA_OPTIONS -Degl=enabled)
 else()
     list(APPEND MESA_OPTIONS -Degl=disabled)
@@ -171,7 +191,6 @@ endif()
 list(APPEND MESA_OPTIONS -Dshared-glapi=enabled)  #shared GLAPI required when building two or more of the following APIs - opengl, gles1 gles2
 
 if(VCPKG_TARGET_IS_WINDOWS)
-    list(APPEND MESA_OPTIONS "-Dplatforms=['windows']") #'x11'
     list(APPEND MESA_OPTIONS -Dmicrosoft-clc=disabled)
 endif()
 
@@ -186,14 +205,14 @@ vcpkg_configure_meson(
 vcpkg_install_meson()
 vcpkg_fixup_pkgconfig()
 
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/include)
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/share)
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 #installed by egl-registry
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/include/KHR)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/include/EGL/egl.h)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/include/EGL/eglext.h)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/include/EGL/eglplatform.h)
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/include/KHR")
+file(REMOVE "${CURRENT_PACKAGES_DIR}/include/EGL/egl.h")
+file(REMOVE "${CURRENT_PACKAGES_DIR}/include/EGL/eglext.h")
+file(REMOVE "${CURRENT_PACKAGES_DIR}/include/EGL/eglplatform.h")
 #installed by opengl-registry
 set(_double_files include/GL/glcorearb.h include/GL/glext.h include/GL/glxext.h 
     include/GLES/egl.h include/GLES/gl.h include/GLES/glext.h include/GLES/glplatform.h 
@@ -202,8 +221,8 @@ set(_double_files include/GL/glcorearb.h include/GL/glext.h include/GL/glxext.h
 list(TRANSFORM _double_files PREPEND "${CURRENT_PACKAGES_DIR}/")
 file(REMOVE ${_double_files})
 
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/include/GLES)
-file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/include/GLES2)
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/include/GLES")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/include/GLES2")
 # Handle copyright
 file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 file(TOUCH "${CURRENT_PACKAGES_DIR}/share/${PORT}/copyright")
