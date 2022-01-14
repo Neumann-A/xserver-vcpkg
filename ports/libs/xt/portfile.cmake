@@ -12,6 +12,7 @@ vcpkg_from_gitlab(
     HEAD_REF master # branch name
     PATCHES windows_build.patch # Still needs a fix for the asm on x64
             xt.patch
+            include.patch
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
