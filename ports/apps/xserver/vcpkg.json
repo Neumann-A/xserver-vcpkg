@@ -98,7 +98,7 @@
         "xfixes",
         {
           "name": "opengl-registry",
-          "platform": "!windows"
+          "platform": "windows"
         },
         {
           "name": "mesa",

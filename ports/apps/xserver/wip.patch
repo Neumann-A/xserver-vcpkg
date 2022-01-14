@@ -1,0 +1,183 @@
+diff --git a/29b2eca768-b03ee1ad64.clean/glx/meson.build b/29b2eca768-b03ee1ad64/glx/meson.build
+index 2ec00ce22..3f8f4c6ea 100644
+--- a/29b2eca768-b03ee1ad64.clean/glx/meson.build
++++ b/29b2eca768-b03ee1ad64/glx/meson.build
+@@ -29,7 +29,8 @@ srcs_glx = [
+     'swap_interval.c',
+     'xfont.c',
+ ]
+-
++gl_proto = dependency('glproto', version: '>= 1.4.17')
++gl_dep = dependency('OpenGL', modules: ['OpenGL::GL']) #dependency('gl', version: '>= 1.2', required: gl_dep)
+ libxserver_glx = []
+ if build_glx
+     libxserver_glx = static_library('libxserver_glx',
+@@ -39,8 +40,8 @@ if build_glx
+             common_dep,
+             dl_dep,
+             dri_dep,
+-            dependency('glproto', version: '>= 1.4.17'),
+-            dependency('gl', version: '>= 1.2'),
++            gl_proto,
++            gl_dep,
+         ],
+         c_args: [
+             glx_align64,
+@@ -74,8 +75,8 @@ if build_glx
+         dependencies: [
+             common_dep,
+             dl_dep,
+-            dependency('glproto', version: '>= 1.4.17'),
+-            dependency('gl', version: '>= 1.2'),
++            gl_proto,
++            gl_dep,
+         ],
+     )
+ 
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glshim.c b/29b2eca768-b03ee1ad64/hw/xwin/glx/glshim.c
+index a27040257..1ae119ca5 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glshim.c
++++ b/29b2eca768-b03ee1ad64/hw/xwin/glx/glshim.c
+@@ -41,7 +41,6 @@
+ #undef GL_ARB_imaging
+ #undef GL_VERSION_1_3
+ #include <GL/glext.h>
+-
+ #include <X11/Xwindows.h>
+ #include <os.h>
+ #include "glwindows.h"
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glthunk.c b/29b2eca768-b03ee1ad64/hw/xwin/glx/glthunk.c
+index 3d2702ddb..1f705f0ff 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glthunk.c
++++ b/29b2eca768-b03ee1ad64/hw/xwin/glx/glthunk.c
+@@ -68,7 +68,7 @@ glWinResolveHelper(PROC * cache, const char *symbol)
+ 
+ #define RESOLVE_RET(proctype, symbol, retval) \
+     static PROC cache = NULL; \
+-    __stdcall proctype proc = (proctype)glWinResolveHelper(&cache, symbol); \
++        proctype proc = (proctype)glWinResolveHelper(&cache, symbol); \
+     if (proc == NULL) { \
+         return retval; \
+     }
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glwindows.h b/29b2eca768-b03ee1ad64/hw/xwin/glx/glwindows.h
+index 34ff24c24..1bd3c4c7e 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/glwindows.h
++++ b/29b2eca768-b03ee1ad64/hw/xwin/glx/glwindows.h
+@@ -50,8 +50,8 @@ void glAddSwapHintRectWINWrapper(GLint x, GLint y, GLsizei width, GLsizei height
+ int glWinSelectImplementation(int native);
+ 
+ #if 1
+-#define GLWIN_TRACE_MSG(msg, args...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
+-#define GLWIN_DEBUG_MSG(msg, args...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
++#define GLWIN_TRACE_MSG(msg, ...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##__VA_ARGS__ , __FUNCTION__, __LINE__ )
++#define GLWIN_DEBUG_MSG(msg, ...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##__VA_ARGS__ , __FUNCTION__, __LINE__ )
+ #else
+ #define GLWIN_TRACE_MSG(a, ...)
+ #define GLWIN_DEBUG_MSG(a, ...)
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/indirect.c b/29b2eca768-b03ee1ad64/hw/xwin/glx/indirect.c
+index ff015f763..a88942699 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/indirect.c
++++ b/29b2eca768-b03ee1ad64/hw/xwin/glx/indirect.c
+@@ -78,6 +78,8 @@
+ #include <xwin-config.h>
+ #endif
+ 
++#include <X11/Xwindows.h>
++
+ #include "glwindows.h"
+ #include <glx/glxserver.h>
+ #include <glx/glxutil.h>
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/meson.build b/29b2eca768-b03ee1ad64/hw/xwin/glx/meson.build
+index 95f248953..fc1db51c8 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/glx/meson.build
++++ b/29b2eca768-b03ee1ad64/hw/xwin/glx/meson.build
+@@ -9,7 +9,7 @@ endif
+ khronos_spec_dir = dependency('khronos-opengl-registry').get_pkgconfig_variable('specdir')
+ 
+ gen_gl_wrappers_opts= ['-nodebug']
+-gen_gl_wrappers_cmd = ['env', 'PYTHONPATH=' + khronos_spec_dir, py3, files('./gen_gl_wrappers.py'), gen_gl_wrappers_opts]
++gen_gl_wrappers_cmd = [py3, files('./gen_gl_wrappers.py'), gen_gl_wrappers_opts]
+ 
+ wgl_wrappers = custom_target(
+     'gen_wgl_wrappers',
+@@ -76,7 +76,7 @@ xwin_glx = static_library(
+         include_directories('../'),
+     ],
+     dependencies: common_dep,
+-    c_args: xwin_glx_c_args,
++    c_args: xwin_glx_c_args+ ['/showIncludes'],
+ )
+ 
+ srcs_wgl_thunk = [
+@@ -91,11 +91,7 @@ WGLthunk = shared_library(
+         inc,
+         top_dir_inc,
+     ],
+-    c_args: xwin_glx_c_args + [
+-      '-Wno-unused-function',
+-      '-Wno-missing-prototypes',
+-      '-Wno-missing-declarations',
+-    ],
++    c_args: xwin_glx_c_args ,
+     link_args: ['-lopengl32'],
+     vs_module_defs: gl_thunks_def,
+     install: true,
+diff --git a/29b2eca768-b03ee1ad64.clean/hw/xwin/winscrinit.c b/29b2eca768-b03ee1ad64/hw/xwin/winscrinit.c
+index ae6bc12a6..a4af424af 100644
+--- a/29b2eca768-b03ee1ad64.clean/hw/xwin/winscrinit.c
++++ b/29b2eca768-b03ee1ad64/hw/xwin/winscrinit.c
+@@ -38,6 +38,10 @@
+ #include "win.h"
+ #include "winmsg.h"
+ 
++#ifdef CreateWindow
++#undef CreateWindow
++#endif
++
+ /*
+  * Determine what type of screen we are initializing
+  * and call the appropriate procedure to initialize
+diff --git a/29b2eca768-b03ee1ad64.clean/include/meson.build b/29b2eca768-b03ee1ad64/include/meson.build
+index 66a76f1f5..5e88dc3e5 100644
+--- a/29b2eca768-b03ee1ad64.clean/include/meson.build
++++ b/29b2eca768-b03ee1ad64/include/meson.build
+@@ -6,7 +6,7 @@ patch = version_split[2].to_int()
+ # convert to the old-style 1.x.y version scheme used up to 1.20.x for backwards compatibility
+ release = 1 * 10000000 + major * 100000 + minor * 1000 + patch
+ 
+-dri_dep = dependency('dri', required: build_glx)
++dri_dep = dependency('dri', required: (build_glx and host_machine.system() != 'windows' ))
+ 
+ conf_data = configuration_data()
+ conf_data.set('_DIX_CONFIG_H_', '1')
+@@ -208,7 +208,7 @@ conf_data.set('DGA', build_dga ? '1' : false)
+ conf_data.set('DPMSExtension', build_dpms ? '1' : false)
+ conf_data.set('DRI2', build_dri2 ? '1' : false)
+ conf_data.set('DRI3', build_dri3 ? '1' : false)
+-if build_glx
++if build_glx and host_machine.system() != 'windows'
+     conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_pkgconfig_variable('dridriverdir'))
+ endif
+ conf_data.set('HAS_SHM', build_mitshm ? '1' : false)
+diff --git a/29b2eca768-b03ee1ad64.clean/include/misc.h b/29b2eca768-b03ee1ad64/include/misc.h
+index fbf1a5aed..6040300ed 100644
+--- a/29b2eca768-b03ee1ad64.clean/include/misc.h
++++ b/29b2eca768-b03ee1ad64/include/misc.h
+@@ -71,6 +71,7 @@ OF THIS SOFTWARE.
+  *
+  */
+ 
++#include <X11/Xwindows.h>
+ #include <X11/Xosdefs.h>
+ #include <X11/Xfuncproto.h>
+ #include <X11/Xmd.h>
+@@ -101,6 +102,9 @@ OF THIS SOFTWARE.
+ #define EXTENSION_EVENT_BASE 64
+ #define EXTENSION_BASE 128
+ 
++#if defined(ATOM)
++#undef ATOM
++#endif
+ typedef uint32_t ATOM;
+ 
+ #ifndef TRUE

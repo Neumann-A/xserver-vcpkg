@@ -1,3 +1,55 @@
+function(vcpkg_get_python_package PYTHON_DIR )
+    cmake_parse_arguments(PARSE_ARGV 0 _vgpp "" "PYTHON_EXECUTABLE" "PACKAGES")
+    
+    if(NOT _vgpp_PYTHON_EXECUTABLE)
+        message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} requires parameter PYTHON_EXECUTABLE!")
+    endif()
+    if(NOT _vgpp_PACKAGES)
+        message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} requires parameter PACKAGES!")
+    endif()
+    if(NOT _vgpp_PYTHON_DIR)
+        get_filename_component(_vgpp_PYTHON_DIR "${_vgpp_PYTHON_EXECUTABLE}" DIRECTORY)
+    endif()
+
+    if (WIN32)
+        set(PYTHON_OPTION "")
+    else()
+        set(PYTHON_OPTION "--user")
+    endif()
+
+    if("${_vgpp_PYTHON_DIR}" MATCHES "${DOWNLOADS}") # inside vcpkg
+        if(NOT EXISTS "${_vgpp_PYTHON_DIR}/easy_install${VCPKG_HOST_EXECUTABLE_SUFFIX}")
+            if(NOT EXISTS "${_vgpp_PYTHON_DIR}/Scripts/pip${VCPKG_HOST_EXECUTABLE_SUFFIX}")
+                vcpkg_from_github(
+                    OUT_SOURCE_PATH PYFILE_PATH
+                    REPO pypa/get-pip
+                    REF 309a56c5fd94bd1134053a541cb4657a4e47e09d #2019-08-25
+                    SHA512 bb4b0745998a3205cd0f0963c04fb45f4614ba3b6fcbe97efe8f8614192f244b7ae62705483a5305943d6c8fedeca53b2e9905aed918d2c6106f8a9680184c7a
+                    HEAD_REF master
+                )
+                execute_process(COMMAND "${_vgpp_PYTHON_EXECUTABLE}" "${PYFILE_PATH}/get-pip.py" ${PYTHON_OPTION})
+            endif()
+            foreach(_package IN LISTS _vgpp_PACKAGES)
+                execute_process(COMMAND "${_vgpp_PYTHON_DIR}/Scripts/pip${VCPKG_HOST_EXECUTABLE_SUFFIX}" install ${_package} ${PYTHON_OPTION})
+            endforeach()
+        else()
+            foreach(_package IN LISTS _vgpp_PACKAGES)
+                execute_process(COMMAND "${_vgpp_PYTHON_DIR}/easy_install${VCPKG_HOST_EXECUTABLE_SUFFIX}" ${_package})
+            endforeach()
+        endif()
+        if(NOT VCPKG_TARGET_IS_WINDOWS)
+            execute_process(COMMAND pip3 install ${_vgpp_PACKAGES})
+        endif()
+    else() # outside vcpkg
+        foreach(_package IN LISTS _vgpp_PACKAGES)
+            execute_process(COMMAND ${_vgpp_PYTHON_EXECUTABLE} -c "import ${_package}" RESULT_VARIABLE HAS_ERROR)
+            if(HAS_ERROR)
+                message(FATAL_ERROR "Python package '${_package}' needs to be installed for port '${PORT}'.\nComplete list of required python packages: ${_vgpp_PACKAGES}")
+            endif()
+        endforeach()
+    endif()
+endfunction()
+
 if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
     set(PATCHES windows.patch windows2.patch win_random.patch)
 endif()
@@ -17,33 +69,13 @@ set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
 vcpkg_find_acquire_program(PYTHON3)
 get_filename_component(PYTHON3_DIR "${PYTHON3}" DIRECTORY)
 vcpkg_add_to_path("${PYTHON3_DIR}")
-file(TO_NATIVE_PATH "${PYTHON3}" PYTHON3_NATIVE)
-set(ENV{PYTHON3} "${PYTHON3_NATIVE}")
 vcpkg_add_to_path("${PYTHON3_DIR}/Scripts")
+vcpkg_host_path_list(APPEND ENV{PYTHONPATH} "${CURRENT_INSTALLED_DIR}/share/opengl")
 
-set(PYTHON_OPTION "--user")
-if(NOT EXISTS "${PYTHON3_DIR}/easy_install${VCPKG_HOST_EXECUTABLE_SUFFIX}")
-    if(NOT EXISTS "${PYTHON3_DIR}/Scripts/pip${VCPKG_HOST_EXECUTABLE_SUFFIX}")
-        vcpkg_from_github(
-            OUT_SOURCE_PATH PYFILE_PATH
-            REPO pypa/get-pip
-            REF 309a56c5fd94bd1134053a541cb4657a4e47e09d #2019-08-25
-            SHA512 bb4b0745998a3205cd0f0963c04fb45f4614ba3b6fcbe97efe8f8614192f244b7ae62705483a5305943d6c8fedeca53b2e9905aed918d2c6106f8a9680184c7a
-            HEAD_REF master
-        )
-        execute_process(COMMAND "${PYTHON3_DIR}/python${VCPKG_HOST_EXECUTABLE_SUFFIX}" "${PYFILE_PATH}/get-pip.py" ${PYTHON_OPTION} COMMAND_ECHO STDOUT)
-    endif()
-    execute_process(COMMAND "${PYTHON3_DIR}/easy_install${VCPKG_HOST_EXECUTABLE_SUFFIX}" lxml COMMAND_ECHO STDOUT)
-else()
-    find_program(PIP3 NAMES pip3 pip)
-    execute_process(COMMAND "${PIP3}" install lxml --user COMMAND_ECHO STDOUT)
-endif()
+set(ENV{PYTHON} "${PYTHON3}")
+set(ENV{PYTHON3} "${PYTHON3}")
 
-if(VCPKG_TARGET_IS_LINUX)
-    message(STATUS "Trying to install lxml")
-    find_program(PIP3 NAMES pip3 pip)
-    execute_process(COMMAND "${PIP3}" install lxml --user COMMAND_ECHO STDOUT)
-endif()
+vcpkg_get_python_package(PYTHON_EXECUTABLE "${PYTHON3}" PACKAGES env lxml)
 
 vcpkg_find_acquire_program(FLEX)
 get_filename_component(FLEX_DIR "${FLEX}" DIRECTORY )
@@ -83,7 +115,7 @@ else()
     list(APPEND OPTIONS -Dxorg=false)
 endif()
 if(VCPKG_TARGET_IS_WINDOWS)
-    list(APPEND OPTIONS -Dglx=false) #Requires Mesa3D for gl.pc
+    list(APPEND OPTIONS -Dglx=true) #Requires Mesa3D for gl.pc
     list(APPEND OPTIONS -Dsecure-rpc=false) #Problem encountered: secure-rpc requested, but neither libtirpc or libc RPC support were found
     list(APPEND OPTIONS -Dlisten_tcp=true)
     list(APPEND OPTIONS -Dlisten_local=false)

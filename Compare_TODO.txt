@@ -20,3 +20,13 @@ xorg-server/xserver
 
 X11/Xtrans -> Done; Mainly HypverV support; + Some manual adjusment to remove FatalError
 xproto/xorgproto -> Done; Adjusted my Patches; mainly ControlMask, None and Status patched + additional inlcude in xwinsock
+
+
+xbitmaps - xorg_server/bitmaps
+
+
+
+https://gitlab.freedesktop.org/xorg/font
+
+xkeyboardsym
+xkeyboard-config
