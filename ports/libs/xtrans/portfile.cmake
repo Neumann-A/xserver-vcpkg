@@ -9,12 +9,12 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
     REPO lib/libxtrans
-    REF  c4262efc9688e495261d8b23a12f956ab38e006f #v1.4
-    SHA512 137f0ffcae97f2375e5babbf21d336b67e7bf35f6a74377b14f035cdba66992d21f8d90f3c1dc243f8fd3d27d32af36c59af45443db59908969d0d65598865a2
+    REF  3b5df889f58a99980a35a7b4a18eb4e7d2abeac4 #v1.4
+    SHA512 d1a1ecd8aa07d19a8b4936a37109cecd0c965b859a17ea838835230f9326c1a353feef388052df03173562cbf0f3e3764146c3669b1928698cd55ccc4f92992c
     HEAD_REF master # branch name
-    PATCHES ip6.patch #patch name
-            _win32.patch
+    PATCHES win32.patch
             symbols.patch
+            vcxtrans.diff # vcxserver HyperV Patch
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
