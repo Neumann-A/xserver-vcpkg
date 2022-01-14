@@ -23,8 +23,8 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org
     OUT_SOURCE_PATH SOURCE_PATH
     REPO mesa/mesa
-    REF mesa-21.3.3
-    SHA512 d64db47a4c1084d6c55b6959640043b51bd52e7ad0acc1daec5cc260bf2ab8a1286ead6956ded52da6d5adadf6818c3fa0deb861a5cde31bba206ee1bb35a509
+    REF mesa-21.3.4
+    SHA512 15e221c47be6ad520b1b6bf44e99d8a45afde997c50edd46c7fe4d6a534c2b7f90f23ae92ef8bcf12bdea076c0e6b573776d801b964e308609ef45c9727810eb
     HEAD_REF master
     PATCHES ${PATCHES}
 ) 
@@ -124,7 +124,7 @@ list(APPEND MESA_OPTIONS -Dlibunwind=disabled)
 list(APPEND MESA_OPTIONS -Dlmsensors=disabled)
 list(APPEND MESA_OPTIONS -Dvalgrind=disabled)
 list(APPEND MESA_OPTIONS -Dglvnd=false)
-list(APPEND MESA_OPTIONS -Dglx=dri) #gallium-xlib) # dri) # requires x11
+#list(APPEND MESA_OPTIONS -Dglx=dri) #gallium-xlib) # dri) # requires x11
 list(APPEND MESA_OPTIONS -Dgbm=disabled)
 list(APPEND MESA_OPTIONS -Dosmesa=true)
 

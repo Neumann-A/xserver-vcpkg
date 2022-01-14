@@ -1,6 +1,6 @@
 {
   "name": "mesa",
-  "version": "21.3.3",
+  "version": "21.3.4",
   "description": "Mesa - The 3D Graphics Library",
   "homepage": "https://www.mesa3d.org/",
   "supports": "!(windows & arm)",
@@ -10,8 +10,7 @@
       "host": true
     },
     "zlib",
-    "zstd",
-    "directx-headers"
+    "zstd"
   ],
   "default-features": [
     "default-features"
@@ -24,21 +23,10 @@
           "name": "mesa",
           "default-features": false,
           "features": [
-            "gles1"
-          ]
-        },
-        {
-          "name": "mesa",
-          "default-features": false,
-          "features": [
-            "gles2"
-          ]
-        },
-        {
-          "name": "mesa",
-          "default-features": false,
-          "features": [
-            "opengl"
+            "gles1",
+            "gles2",
+            "opengl",
+            "egl"
           ]
         },
         {
@@ -119,8 +107,7 @@
     },
     "platform-win": {
       "description": "Build with windows platform support",
-      "dependencies": [
-      ]
+      "supports" : "windows"
     },
     "platform-x11": {
       "description": "Build with x11 platform support",
@@ -130,7 +117,8 @@
         "xext",
         "xrandr",
         "xfixes"
-      ]
+      ],
+      "supports" : "!windows"
     },
     "gallium-swrast": {
       "description": "Build gallium swrast driver",
@@ -140,11 +128,22 @@
     "gallium-d3d12": {
       "description": "Build gallium d3d12 driver",
       "dependencies": [
+        "directx-headers",
+        {
+          "name": "mesa",
+          "default-features": false,
+          "features" : [ "platform-win" ]
+        }
       ]
     },
     "gallium-swr": {
       "description": "Build gallium swr driver",
       "dependencies": [
+        {
+          "name": "mesa",
+          "default-features": false,
+          "features" : [ "llvm" ]
+        }
       ]
     }
   }
