@@ -1,0 +1,75 @@
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/Makefile.am b/vcxsrv-code/libXext/Makefile.am
+index b76bc6c..091d920 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/Makefile.am
++++ b/vcxsrv-code/libXext/Makefile.am
+@@ -20,5 +20,3 @@ if LINT
+ lint:
+ 	(cd src && $(MAKE) $(MFLAGS) lint)
+ endif LINT
+-
+-EXTRA_DIST = README.md
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/configure.ac b/vcxsrv-code/libXext/configure.ac
+index b2a28d1..5c241f5 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/configure.ac
++++ b/vcxsrv-code/libXext/configure.ac
+@@ -1,8 +1,8 @@
+ 
+ # Initialize Autoconf
+ AC_PREREQ([2.60])
+-AC_INIT([libXext], [1.3.4],
+-        [https://gitlab.freedesktop.org/xorg/lib/libXext/issues], [libXext])
++AC_INIT([libXext], [1.3.3],
++        [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg], [libXext])
+ AC_CONFIG_SRCDIR([Makefile.am])
+ AC_CONFIG_HEADERS([config.h])
+ AC_CONFIG_MACRO_DIR([m4])
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/include/X11/extensions/Xge.h b/vcxsrv-code/libXext/include/X11/extensions/Xge.h
+index 76b5a6a..295a390 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/include/X11/extensions/Xge.h
++++ b/vcxsrv-code/libXext/include/X11/extensions/Xge.h
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright © 2007-2008 Peter Hutterer
++ * Copyright ? 2007-2008 Peter Hutterer
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a
+  * copy of this software and associated documentation files (the "Software"),
+@@ -55,3 +55,4 @@ Bool XGEQueryVersion(Display* dpy, int *major, int* minor);
+ _XFUNCPROTOEND
+ 
+ #endif /* _XGE_H_ */
++
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/include/X11/extensions/extutil.h b/vcxsrv-code/libXext/include/X11/extensions/extutil.h
+index b228430..074cc18 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/include/X11/extensions/extutil.h
++++ b/vcxsrv-code/libXext/include/X11/extensions/extutil.h
+@@ -34,6 +34,7 @@ in this Software without prior written authorization from The Open Group.
+ #ifndef _EXTUTIL_H_
+ #define _EXTUTIL_H_
+ 
++#include <unistd.h>
+ #include <X11/extensions/Xext.h>
+ 
+ /*
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/src/XAppgroup.c b/vcxsrv-code/libXext/src/XAppgroup.c
+index b5642f3..b1c6fd1 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xext/src/c4ed209625-575a7e12ff.clean/src/XAppgroup.c
++++ b/vcxsrv-code/libXext/src/XAppgroup.c
+@@ -337,7 +337,7 @@ Bool
+ XagCreateAssociation(Display* dpy, Window* window_return, void* system_window)
+ {
+ #ifdef WIN32
+-    long tmp = *(HWND*) system_window;
++    HWND tmp = *(HWND*) system_window;
+     XExtDisplayInfo *info = find_display (dpy);
+     xXagCreateAssocReq *req;
+ 
+@@ -350,7 +350,7 @@ XagCreateAssociation(Display* dpy, Window* window_return, void* system_window)
+     *window_return = req->window = XAllocID(dpy);
+     req->window_type = XagWindowTypeWin32;
+     req->system_window_len = sizeof(HWND);
+-    Data32 (dpy, (long*) tmp, 1L);
++    Data32 (dpy, (HWND*) tmp, sizeof(HWND)/4);
+     req->length++;
+     UnlockDisplay(dpy);
+     SyncHandle();

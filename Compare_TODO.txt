@@ -1,0 +1,22 @@
+fontenc - uses v 1.1.3 instead of the newer 1.1.4
+Xau - no changes
+Xaw
+xcb - uses v. 1.1.2 instead of 1.1.4. Patches are similar to mine. 
+Xdmcp - no changes
+Xext - one small patch; also is 1.3.3 vs 1.3.4 but basically no changes?
+Xfixes - 6.0 vs 5.0.3; one include patch which doesn't matter 
+Xfont2/Xfont 2.0.5 vs 2.0.3; diff probably due to version difference
+Xft - 2.3.4 vs 2.3.2; probably no changes. (all due to version mismatch)
+Xinerama - only version diff of 0.0.1
+xkbfile - 1.1.0 vs 1.0.8; has changes most of them due to version difference and single build xserver 
+Xmu
+Xpm
+Xrender - no relevant change
+Xt - very old xt version?
+X11/Xlib - Mainly fixes for building + changing default location to relativ paths
+xcb-utils-errors
+xkbcomp 1.4.3 vs 1.3.1; Most changes due to version diff; Some changes similar to my changes.  (!! One maybe import define)
+xorg-server/xserver
+
+X11/Xtrans -> Done; Mainly HypverV support; + Some manual adjusment to remove FatalError
+xproto/xorgproto -> Done; Adjusted my Patches; mainly ControlMask, None and Status patched + additional inlcude in xwinsock

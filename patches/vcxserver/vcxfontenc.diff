@@ -1,0 +1,119 @@
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/Makefile.am b/vcxsrv-code/libfontenc/Makefile.am
+index 28145c8..481f272 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/Makefile.am
++++ b/vcxsrv-code/libfontenc/Makefile.am
+@@ -40,5 +40,3 @@ if LINT
+ lint:
+ 	(cd src && $(MAKE) $(MFLAGS) lint)
+ endif LINT
+-
+-EXTRA_DIST = README.md
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/autogen.sh b/vcxsrv-code/libfontenc/autogen.sh
+index 46bb4bf..fc34bd5 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/autogen.sh
++++ b/vcxsrv-code/libfontenc/autogen.sh
+@@ -1,17 +1,14 @@
+ #! /bin/sh
+ 
+-srcdir=`dirname "$0"`
++srcdir=`dirname $0`
+ test -z "$srcdir" && srcdir=.
+ 
+ ORIGDIR=`pwd`
+-cd "$srcdir"
++cd $srcdir
+ 
+ autoreconf -v --install || exit 1
+-cd "$ORIGDIR" || exit $?
+-
+-git config --local --get format.subjectPrefix >/dev/null 2>&1 ||
+-    git config --local format.subjectPrefix "PATCH libfontenc"
++cd $ORIGDIR || exit $?
+ 
+ if test -z "$NOCONFIGURE"; then
+-    exec "$srcdir"/configure "$@"
++    $srcdir/configure "$@"
+ fi
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/configure.ac b/vcxsrv-code/libfontenc/configure.ac
+index 29cc8ba..c2a23b7 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/configure.ac
++++ b/vcxsrv-code/libfontenc/configure.ac
+@@ -21,8 +21,8 @@
+ 
+ # Initialize Autoconf
+ AC_PREREQ([2.60])
+-AC_INIT([libfontenc], [1.1.4],
+-        [https://gitlab.freedesktop.org/xorg/lib/libfontenc/issues], [libfontenc])
++AC_INIT([libfontenc], [1.1.3],
++        [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg], [libfontenc])
+ AC_CONFIG_SRCDIR([Makefile.am])
+ AC_CONFIG_HEADERS([config.h])
+ 
+@@ -47,7 +47,7 @@ XORG_FONTSUBDIR([ENCODINGSDIR], [encodingsdir], [encodings])
+ # zlib
+ AC_CHECK_HEADER([zlib.h], [],
+                 AC_MSG_FAILURE([zlib.h is required to compile libfontenc]))
+-AC_SEARCH_LIBS(gzclose, [z zlib zlibd], [],
++AC_CHECK_LIB(z, gzclose, [],
+              AC_MSG_FAILURE([zlib is required to compile libfontenc]))
+ 
+ # Obtain compiler/linker options for depedencies
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/src/encparse.c b/vcxsrv-code/libfontenc/src/encparse.c
+index a691c6d..4693d4d 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/src/encparse.c
++++ b/vcxsrv-code/libfontenc/src/encparse.c
+@@ -28,16 +28,13 @@ THE SOFTWARE.
+    to be pure ASCII.  Bloody ``Code Set Independence''. */
+ 
+ #include <string.h>
+-#ifndef _MSC_VER
+ #include <strings.h>
+-#else
+-#define strcasecmp _stricmp
+-#endif
+ #include <stdio.h>
+ 
+ #include <stdlib.h>
++#include <unistd.h>
+ 
+-#include <zlib.h>
++#include "zlib.h"
+ typedef gzFile FontFilePtr;
+ 
+ #define FontFileGetc(f) gzgetc(f)
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/src/fontenc.c b/vcxsrv-code/libfontenc/src/fontenc.c
+index e87d108..98200c9 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/fontenc/src/93b554d30a-05d25436b9.clean/src/fontenc.c
++++ b/vcxsrv-code/libfontenc/src/fontenc.c
+@@ -23,12 +23,9 @@ THE SOFTWARE.
+ /* Backend-independent encoding code */
+ 
+ #include <string.h>
+-#ifndef _MSC_VER
+ #include <strings.h>
+-#else
+-#define strcasecmp _stricmp
+-#endif
+ #include <stdlib.h>
++#include <unistd.h>
+ 
+ #define FALSE 0
+ #define TRUE 1
+@@ -278,14 +275,14 @@ iso8859_7_to_unicode(unsigned isocode, void *client_data)
+         isocode == 0xB7 || isocode == 0xBB || isocode == 0xBD)
+         return isocode;
+     else if (isocode == 0xA1)
+-        return 0x2018;
++        return 0x02BD;
+     else if (isocode == 0xA2)
+-        return 0x2019;
++        return 0x02BC;
+     else if (isocode == 0xAF)
+         return 0x2015;
+     else if (isocode == 0xD2)   /* unassigned */
+         return 0;
+-    else if (isocode >= 0xB4 && isocode <= 0xFE)
++    else if (isocode >= 0xB4)
+         return isocode - 0xA0 + 0x0370;
+     else
+         return 0;

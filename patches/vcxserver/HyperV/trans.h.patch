@@ -1,5 +1,5 @@
---- a/X11/xtrans/Xtrans.h
-+++ b/X11/xtrans/Xtrans.h
+--- a/Xtrans.h
++++ b/Xtrans.h
 @@ -292,6 +292,18 @@
      int *		/* status */
  );

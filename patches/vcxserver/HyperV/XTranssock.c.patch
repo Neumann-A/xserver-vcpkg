@@ -1,5 +1,5 @@
---- a/X11/xtrans/Xtranssock.c
-+++ b/X11/xtrans/Xtranssock.c
+--- a/Xtranssock.c
++++ b/Xtranssock.c
 @@ -95,7 +95,6 @@
  #include <sys/stat.h>
  #endif
