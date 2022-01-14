@@ -7,8 +7,8 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
     REPO lib/libxcb
-    REF  21414e7c447f18224c577ed5e32bd5d6e45c44f9 #4b40b44cb6d088b6ffa2fb5cf3ad8f12da588cef #v1.14
-    SHA512 467c53dad0838080a2f15ed6175322926ba2e2f2b6d002f690c31f859f21912172378a1211df9ee3e0644570cb4397c7d55b4f9656c8d6566a1668d3bfd6eff4 # bd600b9e321f39758bf32582933b4167d335af74acd7312ecc1072bc8df3f511b4f7a85ead3075b73449a3167764cd0fc77f799a86dfe42012f94a4d20a20bd7
+    REF  43fbf03e549bf6da8d1d8522e0ceddc4d49c37c6 #v1.14 + some patches
+    SHA512 49e1bf6654814d1513ad8b9142f81fefd43bc939411bf7b2ce9f9fde0961658bec5d1578ca8fd099974898a99a54ff7c6220e58c0d422375d035cd17edbdb072 # bd600b9e321f39758bf32582933b4167d335af74acd7312ecc1072bc8df3f511b4f7a85ead3075b73449a3167764cd0fc77f799a86dfe42012f94a4d20a20bd7
     HEAD_REF master # branch name
     PATCHES makefile.patch #without the patch target xproto.c is missing target XCBPROTO_XCBINCLUDEDIR
             configure.patch
