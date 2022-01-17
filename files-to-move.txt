@@ -1,0 +1,6 @@
+Copy:
+share/xlib/X11 to xserver dir
+etc/X11/system.XWinRC to xserver/.XWinRC
+tools/xkbcomp/bin -> to xserver
+inlcude/X11/bitmaps -> to xserver
+share/x11/xkb -> xserver/xkb

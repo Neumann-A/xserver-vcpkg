@@ -1,0 +1,871 @@
+diff --git a/include/GL/mesa_glinterop.h b/include/GL/mesa_glinterop.h
+index 45fda93ca..f838f9b60 100644
+--- a/include/GL/mesa_glinterop.h
++++ b/include/GL/mesa_glinterop.h
+@@ -249,7 +249,7 @@ struct mesa_glinterop_export_out {
+  *
+  * \return MESA_GLINTEROP_SUCCESS or MESA_GLINTEROP_* != 0 on error
+  */
+-int
++PUBLIC int
+ MesaGLInteropGLXQueryDeviceInfo(struct _XDisplay *dpy, struct __GLXcontextRec *context,
+                                 struct mesa_glinterop_device_info *out);
+ 
+@@ -258,7 +258,7 @@ MesaGLInteropGLXQueryDeviceInfo(struct _XDisplay *dpy, struct __GLXcontextRec *c
+  * Same as MesaGLInteropGLXQueryDeviceInfo except that it accepts EGLDisplay
+  * and EGLContext.
+  */
+-int
++PUBLIC int
+ MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
+                                 struct mesa_glinterop_device_info *out);
+ 
+@@ -274,7 +274,7 @@ MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
+  *
+  * \return MESA_GLINTEROP_SUCCESS or MESA_GLINTEROP_* != 0 on error
+  */
+-int
++PUBLIC int
+ MesaGLInteropGLXExportObject(struct _XDisplay *dpy, struct __GLXcontextRec *context,
+                              struct mesa_glinterop_export_in *in,
+                              struct mesa_glinterop_export_out *out);
+@@ -284,7 +284,7 @@ MesaGLInteropGLXExportObject(struct _XDisplay *dpy, struct __GLXcontextRec *cont
+  * Same as MesaGLInteropGLXExportObject except that it accepts
+  * EGLDisplay and EGLContext.
+  */
+-int
++PUBLIC int
+ MesaGLInteropEGLExportObject(EGLDisplay dpy, EGLContext context,
+                              struct mesa_glinterop_export_in *in,
+                              struct mesa_glinterop_export_out *out);
+diff --git a/include/c11/threads_win32.h b/include/c11/threads_win32.h
+index 02c2a73dd..5d275a6db 100644
+--- a/include/c11/threads_win32.h
++++ b/include/c11/threads_win32.h
+@@ -145,7 +145,7 @@ static DWORD impl_abs2relmsec(const struct timespec *abs_time)
+ 
+ #ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+ struct impl_call_once_param { void (*func)(void); };
+-static BOOL CALLBACK impl_call_once_callback(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *Context)
++static int CALLBACK impl_call_once_callback(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *Context)
+ {
+     struct impl_call_once_param *param = (struct impl_call_once_param*)Parameter;
+     (param->func)();
+diff --git a/include/drm-uapi/drm_fourcc.h b/include/drm-uapi/drm_fourcc.h
+index 957c7be29..5d0e06ec5 100644
+--- a/include/drm-uapi/drm_fourcc.h
++++ b/include/drm-uapi/drm_fourcc.h
+@@ -24,7 +24,9 @@
+ #ifndef DRM_FOURCC_H
+ #define DRM_FOURCC_H
+ 
++#ifndef _MSC_VER 
+ #include "drm.h"
++#endif
+ 
+ #if defined(__cplusplus)
+ extern "C" {
+diff --git a/meson.build b/meson.build
+index dad79adc8..e701ea17c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -635,6 +635,9 @@ if with_gallium_d3d12 or with_microsoft_clc
+   dep_dxheaders = dependency('DirectX-Headers', modules : ['Microsoft::DirectX-Headers'], fallback : ['DirectX-Headers', 'dep_dxheaders'],
+     required : with_gallium_d3d12
+   )
++  dep_dxguidlibs = dependency('DirectX-Headers', modules : ['Microsoft::DirectX-Guids'], fallback : ['DirectX-Headers', 'dep_dxheaders'],
++    required : with_gallium_d3d12
++  )
+ endif
+ 
+ if with_vulkan_overlay_layer or with_aco_tests
+diff --git a/src/egl/main/eglapi.c b/src/egl/main/eglapi.c
+index 437865df0..6d45bcfa1 100644
+--- a/src/egl/main/eglapi.c
++++ b/src/egl/main/eglapi.c
+@@ -384,9 +384,11 @@ _eglGetPlatformDisplayCommon(EGLenum platform, void *native_display,
+ 
+    switch (platform) {
+ #ifdef HAVE_X11_PLATFORM
++#define Display void
+    case EGL_PLATFORM_X11_EXT:
+       disp = _eglGetX11Display((Display*) native_display, attrib_list);
+       break;
++#undef Display
+ #endif
+ #ifdef HAVE_XCB_PLATFORM
+    case EGL_PLATFORM_XCB_EXT:
+@@ -1016,6 +1018,7 @@ static void *
+ _fixupNativeWindow(_EGLDisplay *disp, void *native_window)
+ {
+ #ifdef HAVE_X11_PLATFORM
++#define Window unsigned int
+    if (disp && disp->Platform == _EGL_PLATFORM_X11 && native_window != NULL) {
+       /* The `native_window` parameter for the X11 platform differs between
+        * eglCreateWindowSurface() and eglCreatePlatformPixmapSurfaceEXT(). In
+@@ -1026,6 +1029,7 @@ _fixupNativeWindow(_EGLDisplay *disp, void *native_window)
+        */
+       return (void *)(* (Window*) native_window);
+    }
++#undef Window
+ #endif
+    return native_window;
+ }
+@@ -1071,6 +1075,7 @@ static void *
+ _fixupNativePixmap(_EGLDisplay *disp, void *native_pixmap)
+ {
+ #ifdef HAVE_X11_PLATFORM
++#define Pixmap unsigned int
+    /* The `native_pixmap` parameter for the X11 platform differs between
+     * eglCreatePixmapSurface() and eglCreatePlatformPixmapSurfaceEXT(). In
+     * eglCreatePixmapSurface(), the type of `native_pixmap` is an Xlib
+@@ -1080,6 +1085,7 @@ _fixupNativePixmap(_EGLDisplay *disp, void *native_pixmap)
+     */
+    if (disp && disp->Platform == _EGL_PLATFORM_X11 && native_pixmap != NULL)
+       return (void *)(* (Pixmap*) native_pixmap);
++#undef Pixmap
+ #endif
+    return native_pixmap;
+ }
+diff --git a/src/egl/main/egldisplay.c b/src/egl/main/egldisplay.c
+index 131fc2278..bc1b95129 100644
+--- a/src/egl/main/egldisplay.c
++++ b/src/egl/main/egldisplay.c
+@@ -501,6 +501,7 @@ _eglUnlinkResource(_EGLResource *res, _EGLResourceType type)
+ }
+ 
+ #ifdef HAVE_X11_PLATFORM
++#define Display void
+ _EGLDisplay*
+ _eglGetX11Display(Display *native_display,
+                   const EGLAttrib *attrib_list)
+@@ -518,6 +519,7 @@ _eglGetX11Display(Display *native_display,
+    }
+    return _eglFindDisplay(_EGL_PLATFORM_X11, native_display, attrib_list);
+ }
++#undef Display
+ #endif /* HAVE_X11_PLATFORM */
+ 
+ #ifdef HAVE_XCB_PLATFORM
+diff --git a/src/egl/main/egldisplay.h b/src/egl/main/egldisplay.h
+index 0ee06a487..610434360 100644
+--- a/src/egl/main/egldisplay.h
++++ b/src/egl/main/egldisplay.h
+@@ -293,8 +293,10 @@ _eglNumAttribs(const EGLAttrib *attribs)
+ }
+ 
+ #ifdef HAVE_X11_PLATFORM
++#define Display void
+ _EGLDisplay*
+ _eglGetX11Display(Display *native_display, const EGLAttrib *attrib_list);
++#undef Display
+ #endif
+ 
+ #ifdef HAVE_XCB_PLATFORM
+diff --git a/src/gallium/frontends/dri/dri2.c b/src/gallium/frontends/dri/dri2.c
+index 6c087b2fc..9eafd5c2a 100644
+--- a/src/gallium/frontends/dri/dri2.c
++++ b/src/gallium/frontends/dri/dri2.c
+@@ -28,8 +28,6 @@
+  *    <wallbraker@gmail.com> Chia-I Wu <olv@lunarg.com>
+  */
+ 
+-#include <xf86drm.h>
+-#include "GL/mesa_glinterop.h"
+ #include "util/disk_cache.h"
+ #include "util/u_memory.h"
+ #include "util/u_inlines.h"
+@@ -45,12 +43,36 @@
+ #include "main/bufferobj.h"
+ #include "main/texobj.h"
+ 
++#ifndef _WIN32
++#include <xf86drm.h>
++#else
++#include <X11/Xwindows.h>
++#include <GL/gl.h>
++#endif
++#include "GL/internal/dri_interface.h"
++#include "GL/mesa_glinterop.h"
++
+ #include "dri_util.h"
+ 
+ #include "dri_helpers.h"
+ #include "dri_drawable.h"
+ #include "dri_query_renderer.h"
+ 
++#ifdef _MSC_VER
++#include <stdint.h>
++#include <sys/types.h>
++typedef int8_t   __s8;
++typedef uint8_t  __u8;
++typedef int16_t  __s16;
++typedef uint16_t __u16;
++typedef int32_t  __s32;
++typedef uint32_t __u32;
++typedef int64_t  __s64;
++typedef uint64_t __u64;
++typedef size_t   __kernel_size_t;
++typedef unsigned long drm_handle_t;
++#define __inline__ inline
++#endif
+ #include "drm-uapi/drm_fourcc.h"
+ 
+ struct dri2_buffer
+@@ -2277,7 +2299,7 @@ dri2_init_screen_extensions(struct dri_screen *screen,
+ 
+    if (pscreen->get_param(pscreen, PIPE_CAP_DMABUF)) {
+       uint64_t cap;
+-
++#ifndef _MSC_VER
+       if (drmGetCap(screen->sPriv->fd, DRM_CAP_PRIME, &cap) == 0 &&
+           (cap & DRM_PRIME_CAP_IMPORT)) {
+          screen->image_extension.createImageFromFds = dri2_from_fds;
+@@ -2293,6 +2315,7 @@ dri2_init_screen_extensions(struct dri_screen *screen,
+                dri2_query_dma_buf_format_modifier_attribs;
+          }
+       }
++#endif
+    }
+    *nExt++ = &screen->image_extension.base;
+ 
+@@ -2324,6 +2347,8 @@ dri2_init_screen_extensions(struct dri_screen *screen,
+ static const __DRIconfig **
+ dri2_init_screen(__DRIscreen * sPriv)
+ {
++#ifdef _MSC_VER
++   return NULL;
++#else
+    const __DRIconfig **configs;
+    struct dri_screen *screen;
+    struct pipe_screen *pscreen = NULL;
+@@ -2379,8 +2405,10 @@ release_pipe:
+ 
+    FREE(screen);
+    return NULL;
++#endif
+ }
+ 
+ /**
+  * This is the driver specific part of the createNewScreen entry point.
+  *
+@@ -2389,7 +2417,7 @@ release_pipe:
+ static const __DRIconfig **
+ dri_kms_init_screen(__DRIscreen * sPriv)
+ {
+-#if defined(GALLIUM_SOFTPIPE)
++#if defined(GALLIUM_SOFTPIPE) && !defined(_MSC_VER)
+    const __DRIconfig **configs;
+    struct dri_screen *screen;
+    struct pipe_screen *pscreen = NULL;
+diff --git a/src/gallium/frontends/dri/dri_helpers.c b/src/gallium/frontends/dri/dri_helpers.c
+index a2c864ae1..85158505a 100644
+--- a/src/gallium/frontends/dri/dri_helpers.c
++++ b/src/gallium/frontends/dri/dri_helpers.c
+@@ -21,6 +21,23 @@
+  */
+ 
+ #include <dlfcn.h>
++#ifdef _MSC_VER
++
++#include <stdint.h>
++#include <sys/types.h>
++typedef int8_t   __s8;
++typedef uint8_t  __u8;
++typedef int16_t  __s16;
++typedef uint16_t __u16;
++typedef int32_t  __s32;
++typedef uint32_t __u32;
++typedef int64_t  __s64;
++typedef uint64_t __u64;
++typedef size_t   __kernel_size_t;
++typedef unsigned long drm_handle_t;
++#define __inline__ inline
++
++#endif
+ #include "drm-uapi/drm_fourcc.h"
+ #include "util/u_memory.h"
+ #include "pipe/p_screen.h"
+diff --git a/src/gallium/frontends/dri/meson.build b/src/gallium/frontends/dri/meson.build
+index 36c9ba07a..c0ca38867 100644
+--- a/src/gallium/frontends/dri/meson.build
++++ b/src/gallium/frontends/dri/meson.build
+@@ -37,9 +37,9 @@ if with_dri
+   files_libdri += files('drisw.c')
+ endif
+ 
+-if with_dri2
++# if with_dri2 # required for any gallium dri driver which is not swrast
+   files_libdri += files('dri2.c')
+-endif
++# endif
+ 
+ libdri_c_args = []
+ if with_gallium_softpipe
+diff --git a/src/gallium/targets/dri/meson.build b/src/gallium/targets/dri/meson.build
+index 86f66a65a..de727d965 100644
+--- a/src/gallium/targets/dri/meson.build
++++ b/src/gallium/targets/dri/meson.build
+@@ -45,7 +45,7 @@ libgallium_dri = shared_library(
+     inc_gallium_winsys, include_directories('../../frontends/dri'),
+   ],
+   gnu_symbol_visibility : 'hidden',
+-  link_args : [ld_args_build_id, ld_args_gc_sections, gallium_dri_ld_args],
++  link_args : [ld_args_build_id, ld_args_gc_sections, gallium_dri_ld_args, 'dl.lib'], # Meson removes -ldl on windows
+   link_depends : gallium_dri_link_depends,
+   link_with : [
+     libdri, libmesa_gallium, libdricommon, libmegadriver_stub, libgalliumvl,
+@@ -58,12 +58,12 @@ libgallium_dri = shared_library(
+     driver_kmsro, driver_v3d, driver_vc4, driver_freedreno, driver_etnaviv,
+     driver_tegra, driver_i915, driver_svga, driver_virgl,
+     driver_swr, driver_panfrost, driver_iris, driver_lima, driver_zink, driver_d3d12,
+-    driver_asahi, driver_crocus
++    driver_asahi, driver_crocus, dep_dxguidlibs
+   ],
+   # Will be deleted during installation, see install_megadrivers.py
+   install : true,
+   install_dir : dri_drivers_path,
+-  name_suffix : 'so',
++  name_suffix : 'so'
+ )
+ 
+ foreach d : [[with_gallium_kmsro, [
+diff --git a/src/gallium/targets/dri/target.c b/src/gallium/targets/dri/target.c
+index 30c9ee9a4..00b4acfd1 100644
+--- a/src/gallium/targets/dri/target.c
++++ b/src/gallium/targets/dri/target.c
+@@ -4,7 +4,7 @@
+ #include "dri_screen.h"
+ 
+ #define DEFINE_LOADER_DRM_ENTRYPOINT(drivername)                          \
+-const __DRIextension **__driDriverGetExtensions_##drivername(void);       \
++PUBLIC const __DRIextension **__driDriverGetExtensions_##drivername(void);       \
+ PUBLIC const __DRIextension **__driDriverGetExtensions_##drivername(void) \
+ {                                                                         \
+    globalDriverAPI = &galliumdrm_driver_api;                              \
+@@ -13,7 +13,7 @@ PUBLIC const __DRIextension **__driDriverGetExtensions_##drivername(void) \
+ 
+ #if defined(GALLIUM_SOFTPIPE)
+ 
+-const __DRIextension **__driDriverGetExtensions_swrast(void);
++PUBLIC const __DRIextension **__driDriverGetExtensions_swrast(void);
+ 
+ PUBLIC const __DRIextension **__driDriverGetExtensions_swrast(void)
+ {
+@@ -23,7 +23,7 @@ PUBLIC const __DRIextension **__driDriverGetExtensions_swrast(void)
+ 
+ #if defined(HAVE_LIBDRM)
+ 
+-const __DRIextension **__driDriverGetExtensions_kms_swrast(void);
++PUBLIC const __DRIextension **__driDriverGetExtensions_kms_swrast(void);
+ 
+ PUBLIC const __DRIextension **__driDriverGetExtensions_kms_swrast(void)
+ {
+diff --git a/src/glx/clientattrib.c b/src/glx/clientattrib.c
+index 181ad0604..c10e02301 100644
+--- a/src/glx/clientattrib.c
++++ b/src/glx/clientattrib.c
+@@ -29,6 +29,7 @@
+  */
+ 
+ #include <assert.h>
++#include <X11/Xwindows.h>
+ #include "glxclient.h"
+ #include "indirect.h"
+ #include "indirect_vertex_array.h"
+diff --git a/src/glx/clientinfo.c b/src/glx/clientinfo.c
+index 9ea7cb2d8..7e54675d4 100644
+--- a/src/glx/clientinfo.c
++++ b/src/glx/clientinfo.c
+@@ -24,6 +24,10 @@
+ #include <string.h>
+ #include <ctype.h>
+ 
++#ifdef _WIN32
++#include <X11/XWindows.h>
++#endif
++
+ #include "glxclient.h"
+ #include <xcb/glx.h>
+ #include <X11/Xlib-xcb.h>
+diff --git a/src/glx/compsize.c b/src/glx/compsize.c
+index 805591914..110fc7897 100644
+--- a/src/glx/compsize.c
++++ b/src/glx/compsize.c
+@@ -28,6 +28,7 @@
+  * Silicon Graphics, Inc.
+  */
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "glxclient.h"
+ 
+diff --git a/src/glx/dri_common.c b/src/glx/dri_common.c
+index 99e3ac0df..e51ac13f2 100644
+--- a/src/glx/dri_common.c
++++ b/src/glx/dri_common.c
+@@ -35,7 +35,9 @@
+ 
+ #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+ 
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif
+ #include <dlfcn.h>
+ #include <stdarg.h>
+ #include "glxclient.h"
+diff --git a/src/glx/glxclient.h b/src/glx/glxclient.h
+index 50aa4d892..83e27df3a 100644
+--- a/src/glx/glxclient.h
++++ b/src/glx/glxclient.h
+@@ -37,6 +37,7 @@
+ 
+ #ifndef _GLX_client_h_
+ #define _GLX_client_h_
++#include <X11/Xwindows.h>
+ #include <X11/Xproto.h>
+ #include <X11/Xlibint.h>
+ #include <X11/Xfuncproto.h>
+diff --git a/src/glx/glxcmds.c b/src/glx/glxcmds.c
+index ecf94eeb0..f5e3116a7 100644
+--- a/src/glx/glxcmds.c
++++ b/src/glx/glxcmds.c
+@@ -54,6 +54,7 @@
+ #include <X11/Xlib-xcb.h>
+ #include <xcb/xcb.h>
+ #include <xcb/glx.h>
++#include "util/macros.h"
+ #include "GL/mesa_glinterop.h"
+ 
+ static const char __glXGLXClientVendorName[] = "Mesa Project and SGI";
+@@ -2731,7 +2732,7 @@ GLX_ALIAS(__GLXextFuncPtr, glXGetProcAddress,
+ 
+ #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+ 
+-PUBLIC int
++GLAPI int GLAPIENTRY
+ MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,
+                                 struct mesa_glinterop_device_info *out)
+ {
+@@ -2755,7 +2756,7 @@ MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,
+    return ret;
+ }
+ 
+-PUBLIC int
++GLAPI int GLAPIENTRY
+ MesaGLInteropGLXExportObject(Display *dpy, GLXContext context,
+                              struct mesa_glinterop_export_in *in,
+                              struct mesa_glinterop_export_out *out)
+diff --git a/src/glx/glxconfig.c b/src/glx/glxconfig.c
+index 925345567..fafdc6338 100644
+--- a/src/glx/glxconfig.c
++++ b/src/glx/glxconfig.c
+@@ -31,6 +31,7 @@
+  * \author Ian Romanick <idr@us.ibm.com>
+  */
+ 
++#include <X11/Xwindows.h>
+ #include <GL/glx.h>
+ #include <stdlib.h>
+ #include <string.h>
+diff --git a/src/glx/glxhash.c b/src/glx/glxhash.c
+index 5a89bf99b..a872678f0 100644
+--- a/src/glx/glxhash.c
++++ b/src/glx/glxhash.c
+@@ -88,6 +88,12 @@
+ 
+ #define HASH_ALLOC malloc
+ #define HASH_FREE  free
++#ifdef _MSC_VER // probably good enough forh the hash table implementation
++#define HASH_RANDOM_DECL 
++#define HASH_RANDOM_INIT(seed) srand(seed)
++#define HASH_RANDOM            rand()
++#define HASH_RANDOM_DESTROY
++#else
+ #ifndef HAVE_RANDOM_R
+ #define HASH_RANDOM_DECL	char *ps, rs[256]
+ #define HASH_RANDOM_INIT(seed)	ps = initstate(seed, rs, sizeof(rs))
+@@ -103,6 +109,7 @@
+ #define HASH_RANDOM             ((void) random_r(&rd, &rv), rv)
+ #define HASH_RANDOM_DESTROY
+ #endif
++#endif
+ 
+ typedef struct __glxHashBucket
+ {
+diff --git a/src/glx/indirect_glx.c b/src/glx/indirect_glx.c
+index 7b0cf3b71..c4aa38813 100644
+--- a/src/glx/indirect_glx.c
++++ b/src/glx/indirect_glx.c
+@@ -32,6 +32,7 @@
+ 
+ #include <stdbool.h>
+ 
++#include <X11/Xwindows.h>
+ #include "glapi.h"
+ #include "glxclient.h"
+ #include "indirect.h"
+diff --git a/src/glx/indirect_transpose_matrix.c b/src/glx/indirect_transpose_matrix.c
+index 8cb53f359..628b369ae 100644
+--- a/src/glx/indirect_transpose_matrix.c
++++ b/src/glx/indirect_transpose_matrix.c
+@@ -22,6 +22,7 @@
+  * USE OR OTHER DEALINGS IN THE SOFTWARE.
+  */
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "indirect.h"
+ 
+diff --git a/src/glx/indirect_vertex_program.c b/src/glx/indirect_vertex_program.c
+index 54a936d29..1a13e8563 100644
+--- a/src/glx/indirect_vertex_program.c
++++ b/src/glx/indirect_vertex_program.c
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include <inttypes.h>
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "indirect.h"
+ #include "glxclient.h"
+diff --git a/src/glx/indirect_window_pos.c b/src/glx/indirect_window_pos.c
+index 6c072bfd3..c91a14d1a 100644
+--- a/src/glx/indirect_window_pos.c
++++ b/src/glx/indirect_window_pos.c
+@@ -24,6 +24,7 @@
+  * SOFTWARE.
+  */
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "indirect.h"
+ 
+diff --git a/src/glx/meson.build b/src/glx/meson.build
+index 8f642d5e1..9a8800500 100644
+--- a/src/glx/meson.build
++++ b/src/glx/meson.build
+@@ -25,6 +25,8 @@ if with_dri_platform == 'windows'
+   subdir('windows')
+ endif
+ 
++pthread_dep = dependency('pthread-stubs')
++
+ files_libglx = files(
+   'clientattrib.c',
+   'clientinfo.c',
+@@ -128,10 +130,12 @@ libglx = static_library(
+   include_directories : [inc_include, inc_src, inc_mapi, inc_mesa, inc_gallium, inc_gallium_aux, inc_glapi, inc_loader],
+   c_args : [
+     '-DGL_LIB_NAME="lib@0@.so.@1@"'.format(gl_lib_name, gl_lib_version.split('.')[0]),
+-  ],
++    '-DWIN32_LEAN_AND_MEAN'
++    ],
+   gnu_symbol_visibility : 'hidden',
+   link_with : [
+-    libloader, libloader_dri3_helper,
++    libloader,
++    libloader_dri3_helper,
+     extra_libs_libglx,
+   ],
+   dependencies : [
+@@ -139,17 +143,17 @@ libglx = static_library(
+     dep_libdrm, dep_dri2proto, dep_glproto, dep_x11, dep_glvnd,
+   ],
+ )
+-
++# WIN32_LEAN_AND_MEAN
+ libgl = shared_library(
+   gl_lib_name,
+   [],
+   link_with : [libglapi_static, libglapi],
+   link_whole : libglx,
+-  link_args : [ld_args_bsymbolic, ld_args_gc_sections, extra_ld_args_libgl],
++  link_args : [ld_args_bsymbolic, ld_args_gc_sections, extra_ld_args_libgl, 'dl.lib'],
+   dependencies : [
+     dep_libdrm, dep_dl, dep_m, dep_thread, dep_x11, dep_xcb_glx, dep_xcb,
+     dep_x11_xcb, dep_xcb_dri2, dep_xext, dep_xfixes, dep_xxf86vm,
+-    dep_xcb_shm, extra_deps_libgl,
++    dep_xcb_shm, extra_deps_libgl, pthread_dep
+   ],
+   version : gl_lib_version,
+   darwin_versions : '4.0.0',
+diff --git a/src/glx/windows/windowsgl.c b/src/glx/windows/windowsgl.c
+index 475c2f54c..ba5f665ef 100644
+--- a/src/glx/windows/windowsgl.c
++++ b/src/glx/windows/windowsgl.c
+@@ -30,7 +30,11 @@
+ #include <dlfcn.h>
+ #include <assert.h>
+ #include <stdio.h>
+-#include <strings.h>
++//#include <strings.h>
++
++#ifdef _WIN32
++#define strcasecmp _stricmp
++#endif
+ 
+ static struct _glapi_table *windows_api = NULL;
+ 
+@@ -40,7 +44,7 @@ windows_get_dl_handle(void)
+    static void *dl_handle = NULL;
+ 
+    if (!dl_handle)
+-      dl_handle = dlopen("cygnativeGLthunk.dll", RTLD_NOW);
++      dl_handle = dlopen("nativeGLthunk.dll", RTLD_NOW);
+ 
+    return dl_handle;
+ }
+diff --git a/src/loader/asprintf.h b/src/loader/asprintf.h
+new file mode 100644
+index 000000000..18e01ca14
+--- /dev/null
++++ b/src/loader/asprintf.h
+@@ -0,0 +1,67 @@
++//From https://stackoverflow.com/questions/40159892/using-asprintf-on-windows/49873938#49873938
++
++#ifndef ASPRINTF_H
++#define ASPRINTF_H
++
++#if defined(__GNUC__) && ! defined(_GNU_SOURCE)
++#define _GNU_SOURCE /* needed for (v)asprintf, affects '#include <stdio.h>' */
++#endif
++#include <stdio.h>  /* needed for vsnprintf    */
++#include <stdlib.h> /* needed for malloc, free */
++#include <stdarg.h> /* needed for va_*         */
++
++/*
++ * vscprintf:
++ * MSVC implements this as _vscprintf, thus we just 'symlink' it here
++ * GNU-C-compatible compilers do not implement this, thus we implement it here
++ */
++#ifdef _MSC_VER
++#define vscprintf _vscprintf
++#endif
++
++#ifdef __GNUC__
++int vscprintf(const char *format, va_list ap)
++{
++    va_list ap_copy;
++    va_copy(ap_copy, ap);
++    int retval = vsnprintf(NULL, 0, format, ap_copy);
++    va_end(ap_copy);
++    return retval;
++}
++#endif
++
++/*
++ * asprintf, vasprintf:
++ * MSVC does not implement these, thus we implement them here
++ * GNU-C-compatible compilers implement these with the same names, thus we
++ * don't have to do anything
++ */
++#ifdef _MSC_VER
++int vasprintf(char **strp, const char *format, va_list ap)
++{
++    int len = vscprintf(format, ap);
++    if (len == -1)
++        return -1;
++    char *str = (char*)malloc((size_t) len + 1);
++    if (!str)
++        return -1;
++    int retval = vsnprintf(str, len + 1, format, ap);
++    if (retval == -1) {
++        free(str);
++        return -1;
++    }
++    *strp = str;
++    return retval;
++}
++
++int asprintf(char **strp, const char *format, ...)
++{
++    va_list ap;
++    va_start(ap, format);
++    int retval = vasprintf(strp, format, ap);
++    va_end(ap);
++    return retval;
++}
++#endif
++
++#endif // ASPRINTF_H
+diff --git a/src/loader/loader.c b/src/loader/loader.c
+index 587271550..c9b81beba 100644
+--- a/src/loader/loader.c
++++ b/src/loader/loader.c
+@@ -26,6 +26,11 @@
+  *    Rob Clark <robclark@freedesktop.org>
+  */
+ 
++#ifdef _MSC_VER
++#include "asprintf.h"
++#include <io.h>
++#endif
++
+ #include <dlfcn.h>
+ #include <errno.h>
+ #include <fcntl.h>
+@@ -34,16 +39,21 @@
+ #include <stdio.h>
+ #include <stdbool.h>
+ #include <string.h>
+-#include <unistd.h>
++#ifdef HAVE_UNISTD_H
++# include <unistd.h>
++#endif
+ #include <stdlib.h>
+ #include <limits.h>
++#ifndef _MSC_VER
+ #include <sys/param.h>
++#endif
+ #ifdef MAJOR_IN_MKDEV
+ #include <sys/mkdev.h>
+ #endif
+ #ifdef MAJOR_IN_SYSMACROS
+ #include <sys/sysmacros.h>
+ #endif
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include <GL/internal/dri_interface.h>
+ #include "loader.h"
+@@ -67,6 +77,7 @@
+ #define PATH_MAX 4096
+ #endif
+ 
++
+ static void default_logger(int level, const char *fmt, ...)
+ {
+    if (level <= _LOADER_WARNING) {
+@@ -88,9 +99,13 @@ loader_open_device(const char *device_name)
+    if (fd == -1 && errno == EINVAL)
+ #endif
+    {
++#ifndef _MSC_VER
+       fd = open(device_name, O_RDWR);
+       if (fd != -1)
+          fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
++#else
++      fd = open(device_name, O_RDWR | _O_NOINHERIT);
++#endif
+    }
+    if (fd == -1 && errno == EACCES) {
+       log_(_LOADER_WARNING, "failed to open %s: %s\n",
+@@ -474,11 +489,14 @@ loader_get_driver_for_fd(int fd)
+     * user's problem, but this allows vc4 simulator to run on an i965 host,
+     * and may be useful for some touch testing of i915 on an i965 host.
+     */
++#ifndef _MSC_VER
+    if (geteuid() == getuid()) {
+       driver = getenv("MESA_LOADER_DRIVER_OVERRIDE");
+       if (driver)
+          return strdup(driver);
++     
+    }
++#endif
+ 
+ #if defined(HAVE_LIBDRM) && defined(USE_DRICONF)
+    driver = loader_get_dri_config_driver(fd);
+@@ -538,6 +556,7 @@ loader_open_driver_lib(const char *driver_name,
+    const char *search_paths, *next, *end;
+ 
+    search_paths = NULL;
++   #ifndef _MSC_VER
+    if (geteuid() == getuid() && search_path_vars) {
+       for (int i = 0; search_path_vars[i] != NULL; i++) {
+          search_paths = getenv(search_path_vars[i]);
+@@ -545,6 +564,7 @@ loader_open_driver_lib(const char *driver_name,
+             break;
+       }
+    }
++   #endif
+    if (search_paths == NULL)
+       search_paths = default_search_path;
+ 
+diff --git a/src/loader/loader_dri_helper.c b/src/loader/loader_dri_helper.c
+index ff6ce3595..17d493243 100644
+--- a/src/loader/loader_dri_helper.c
++++ b/src/loader/loader_dri_helper.c
+@@ -25,8 +25,15 @@
+ 
+ #include <GL/gl.h> /* dri_interface needs GL types */
+ #include <GL/internal/dri_interface.h>
+-
++#ifndef _MSC_VER
+ #include "drm-uapi/drm_fourcc.h"
++#else
++#define DRM_FORMAT_MOD_VENDOR_NONE    0
++#define DRM_FORMAT_RESERVED	      ((1ULL << 56) - 1)
++#define fourcc_mod_code(vendor, val) \
++	((((uint64_t)DRM_FORMAT_MOD_VENDOR_## vendor) << 56) | ((val) & 0x00ffffffffffffffULL))
++#define DRM_FORMAT_MOD_INVALID fourcc_mod_code(NONE, DRM_FORMAT_RESERVED)
++#endif
+ #include "loader_dri_helper.h"
+ 
+ __DRIimage *loader_dri_create_image(__DRIscreen *screen,
+diff --git a/src/mapi/glapi/gen/glX_proto_send.py b/src/mapi/glapi/gen/glX_proto_send.py
+index d37ac6a0a..49a37e4de 100644
+--- a/src/mapi/glapi/gen/glX_proto_send.py
++++ b/src/mapi/glapi/gen/glX_proto_send.py
+@@ -164,6 +164,7 @@ class PrintGlxProtoStubs(glX_proto_common.glx_print_proto):
+ 
+     def printRealHeader(self):
+         print('')
++        print('#include <X11/Xwindows.h>')
+         print('#include <GL/gl.h>')
+         print('#include "indirect.h"')
+         print('#include "glxclient.h"')
+@@ -971,7 +972,7 @@ class PrintGlxProtoInit_c(gl_XML.gl_print_base):
+  * \\author Brian Paul <brian@precisioninsight.com>
+  * \\author Ian Romanick <idr@us.ibm.com>
+  */
+-
++#include <X11/Xwindows.h>
+ #include "indirect_init.h"
+ #include "indirect.h"
+ #include "glapi.h"
+@@ -1072,6 +1073,7 @@ class PrintGlxProtoInit_h(gl_XML.gl_print_base):
+ 
+         print("""
+ #include <X11/Xfuncproto.h>
++#include <X11/Xwindows.h>
+ #include "glxclient.h"
+ 
+ extern _X_HIDDEN NOINLINE CARD32 __glXReadReply( Display *dpy, size_t size,
+diff --git a/src/mapi/glapi/gen/glX_proto_size.py b/src/mapi/glapi/gen/glX_proto_size.py
+index 37c896bc2..4f4203764 100644
+--- a/src/mapi/glapi/gen/glX_proto_size.py
++++ b/src/mapi/glapi/gen/glX_proto_size.py
+@@ -313,6 +313,7 @@ class PrintGlxSizeStubs_c(PrintGlxSizeStubs_common):
+     def printRealHeader(self):
+         print('')
+         print('#include <X11/Xfuncproto.h>')
++        print('#include <X11/Xwindows.h>')
+         print('#include <GL/gl.h>')
+         if self.emit_get:
+             print('#include "indirect_size_get.h"')
+diff --git a/src/mapi/glapi/gen/gl_gentable.py b/src/mapi/glapi/gen/gl_gentable.py
+index c0e604465..f33f7d284 100644
+--- a/src/mapi/glapi/gen/gl_gentable.py
++++ b/src/mapi/glapi/gen/gl_gentable.py
+@@ -85,7 +85,7 @@ __glapi_gentable_set_remaining_noop(struct _glapi_table *disp) {
+ """
+ 
+ footer = """
+-struct _glapi_table *
++GLAPI struct _glapi_table *
+ _glapi_create_table_from_handle(void *handle, const char *symbol_prefix) {
+     struct _glapi_table *disp = calloc(_glapi_get_dispatch_table_size(), sizeof(_glapi_proc));
+     char symboln[512];
+diff --git a/src/mapi/glapi/glapi.h b/src/mapi/glapi/glapi.h
+index 275bc1f3d..3463d4843 100644
+--- a/src/mapi/glapi/glapi.h
++++ b/src/mapi/glapi/glapi.h
+@@ -153,7 +153,7 @@ _glapi_get_proc_name(unsigned int offset);
+ 
+ 
+ #if defined(GLX_USE_APPLEGL) || defined(GLX_USE_WINDOWSGL)
+-_GLAPI_EXPORT struct _glapi_table *
++ struct _glapi_table *
+ _glapi_create_table_from_handle(void *handle, const char *symbol_prefix);
+ 
+ _GLAPI_EXPORT void

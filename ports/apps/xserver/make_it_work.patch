@@ -1,0 +1,604 @@
+diff --git a/glx/createcontext.c b/glx/createcontext.c
+index 37d14fe99..4d7e536d0 100644
+--- a/glx/createcontext.c
++++ b/glx/createcontext.c
+@@ -23,7 +23,9 @@
+ #ifdef HAVE_DIX_CONFIG_H
+ #include <dix-config.h>
+ #endif
+-
++#ifdef _MSC_VER
++#include <X11/Xwindows.h>
++#endif
+ #include <GL/glxtokens.h>
+ #include "glxserver.h"
+ #include "glxext.h"
+diff --git a/glx/glxcmds.c b/glx/glxcmds.c
+index fc26a2e34..47f671127 100644
+--- a/glx/glxcmds.c
++++ b/glx/glxcmds.c
+@@ -1656,7 +1656,7 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
+     __GLXcontext *ctx;
+     xGLXQueryContextInfoEXTReply reply;
+     int nProps = 5;
+-    int sendBuf[nProps * 2];
++    int sendBuf[10]; // 2*nprops
+     int nReplyBytes;
+     int err;
+ 
+diff --git a/glx/glxdricommon.c b/glx/glxdricommon.c
+index 35a539629..e281e86d0 100644
+--- a/glx/glxdricommon.c
++++ b/glx/glxdricommon.c
+@@ -31,7 +31,10 @@
+ #include <stdint.h>
+ #include <errno.h>
+ #include <dlfcn.h>
++#ifndef _MSC_VER
+ #include <sys/time.h>
++#endif
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include <GL/glxtokens.h>
+ #include <GL/internal/dri_interface.h>
+@@ -278,7 +281,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
+     return head.next;
+ }
+ 
+-static const char dri_driver_path[] = DRI_DRIVER_PATH;
++static const char dri_driver_path[] = ".";
+ 
+ /* Temporary define to allow building without a dri_interface.h from
+  * updated Mesa.  Some day when we don't care about Mesa that old any
+@@ -320,8 +323,13 @@ glxProbeDriver(const char *driverName,
+             next = NULL;
+         }
+ 
++#ifndef _MSC_VER
+         snprintf(filename, sizeof filename, "%.*s/%s_dri.so", path_len, path,
+                  driverName);
++#else
++        snprintf(filename, sizeof filename, "%.*s/%s_dri.so", path_len, path,
++             driverName);
++#endif
+ 
+         driver = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
+         if (driver != NULL)
+diff --git a/glx/glxdriswrast.c b/glx/glxdriswrast.c
+index c57d80db7..8c0a6a263 100644
+--- a/glx/glxdriswrast.c
++++ b/glx/glxdriswrast.c
+@@ -32,9 +32,12 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <errno.h>
++#ifndef _MSC_VER
+ #include <sys/time.h>
++#endif
+ #include <dlfcn.h>
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include <GL/internal/dri_interface.h>
+ #include <GL/glxtokens.h>
+diff --git a/glx/glxserver.h b/glx/glxserver.h
+index 79f4944d0..8c3510742 100644
+--- a/glx/glxserver.h
++++ b/glx/glxserver.h
+@@ -46,6 +46,7 @@
+ #include <resource.h>
+ #include <scrnintstr.h>
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include <GL/glext.h>
+ #include <GL/glxproto.h>
+diff --git a/glx/indirect_dispatch_swap.c b/glx/indirect_dispatch_swap.c
+index 3eeed00f3..001186800 100644
+--- a/glx/indirect_dispatch_swap.c
++++ b/glx/indirect_dispatch_swap.c
+@@ -26,6 +26,9 @@
+  */
+ 
+ #include <inttypes.h>
++#include <X11/Xwindows.h>
++#include <GL/gl.h>
++#include <GL/glext.h>
+ #include "glxserver.h"
+ #include "indirect_size.h"
+ #include "indirect_size_get.h"
+diff --git a/glx/indirect_reqsize.c b/glx/indirect_reqsize.c
+index 020aae2fe..3c53d6e32 100644
+--- a/glx/indirect_reqsize.c
++++ b/glx/indirect_reqsize.c
+@@ -24,7 +24,7 @@
+  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
+-
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "glxserver.h"
+ #include "glxbyteorder.h"
+diff --git a/glx/indirect_size_get.c b/glx/indirect_size_get.c
+index 7e81e6288..08a1f56a5 100644
+--- a/glx/indirect_size_get.c
++++ b/glx/indirect_size_get.c
+@@ -27,12 +27,18 @@
+ 
+ 
+ #include <X11/Xfuncproto.h>
++#include <X11/Xwindows.h>
++
+ #include <GL/gl.h>
++#include <GL/glext.h>
++
+ #include "indirect_size_get.h"
+ #include "glxserver.h"
+ #include "indirect_util.h"
+ #include "indirect_size.h"
+ 
++#define GL_TEXTURE_INDEX_SIZE_EXT         0x80ED
++
+ #if defined(__GNUC__) || (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590))
+ #define PURE __attribute__((pure))
+ #else
+diff --git a/glx/indirect_size_get.h b/glx/indirect_size_get.h
+index 5af11d378..11b90005f 100644
+--- a/glx/indirect_size_get.h
++++ b/glx/indirect_size_get.h
+@@ -36,7 +36,11 @@
+  * \author Ian Romanick <idr@us.ibm.com>
+  */
+ 
++
+ #include <X11/Xfuncproto.h>
++#include <X11/Xwindows.h>
++#include <GL/gl.h>
++#include <GL/glext.h>
+ 
+ #if defined(__GNUC__) || (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590))
+ #define PURE __attribute__((pure))
+@@ -44,7 +48,9 @@
+ #define PURE
+ #endif
+ 
+-#if defined(__i386__) && defined(__GNUC__) && !defined(__CYGWIN__) && !defined(__MINGW32__)
++#if defined(_MSC_VER)
++#define FASTCALL
++#elif defined(__i386__) && defined(__GNUC__) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+ #define FASTCALL __attribute__((fastcall))
+ #else
+ #define FASTCALL
+diff --git a/glx/indirect_table.c b/glx/indirect_table.c
+index f0f0b83c8..50ce64768 100644
+--- a/glx/indirect_table.c
++++ b/glx/indirect_table.c
+@@ -24,7 +24,7 @@
+  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  * SOFTWARE.
+  */
+-
++#include <X11/Xwindows.h>
+ #include <inttypes.h>
+ #include "glxserver.h"
+ #include "glxext.h"
+diff --git a/glx/indirect_util.c b/glx/indirect_util.c
+index ba180b0cc..8b9e5b8d6 100644
+--- a/glx/indirect_util.c
++++ b/glx/indirect_util.c
+@@ -30,6 +30,7 @@
+ #include <string.h>
+ 
+ #include <X11/Xmd.h>
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include <GL/glxproto.h>
+ #include <inttypes.h>
+diff --git a/glx/meson.build b/glx/meson.build
+index 2ec00ce22..c3079bc4d 100644
+--- a/glx/meson.build
++++ b/glx/meson.build
+@@ -29,25 +29,31 @@ srcs_glx = [
+     'swap_interval.c',
+     'xfont.c',
+ ]
+-
++gl_proto = dependency('glproto', version: '>= 1.4.17')
++gl_dep = dependency('OpenGL', modules: ['OpenGL::GL']) #dependency('gl', version: '>= 1.2', required: gl_dep)
+ libxserver_glx = []
+ if build_glx
+-    libxserver_glx = static_library('libxserver_glx',
++    libxserver_glx = static_library('xserver_glx',
+         srcs_glx,
+         include_directories: inc,
+         dependencies: [
+             common_dep,
+             dl_dep,
+             dri_dep,
+-            dependency('glproto', version: '>= 1.4.17'),
+-            dependency('gl', version: '>= 1.2'),
++            gl_proto,
++            gl_dep,
+         ],
+         c_args: [
+-            glx_align64,
++            glx_align64
+             # XXX: generated code includes an unused function
+-            '-Wno-unused-function',
++            #'-Wno-unused-function',
+         ]
+     )
++    libxserver_glx_dep = declare_dependency(
++      include_directories: inc,
++      dependencies: [gl_dep, dl_dep],
++      link_with: libxserver_glx
++    )
+ endif
+ 
+ srcs_glxdri2 = []
+@@ -68,14 +74,14 @@ hdrs_vnd = [
+ 
+ libglxvnd = []
+ if build_glx
+-    libglxvnd = static_library('libglxvnd',
++    libglxvnd = static_library('glxvnd',
+     srcs_vnd,
+     include_directories: inc,
+         dependencies: [
+             common_dep,
+             dl_dep,
+-            dependency('glproto', version: '>= 1.4.17'),
+-            dependency('gl', version: '>= 1.2'),
++            gl_proto,
++            gl_dep,
+         ],
+     )
+ 
+diff --git a/glx/rensize.c b/glx/rensize.c
+index 55ad4a2af..dfc494be1 100644
+--- a/glx/rensize.c
++++ b/glx/rensize.c
+@@ -31,14 +31,26 @@
+ #ifdef HAVE_DIX_CONFIG_H
+ #include <dix-config.h>
+ #endif
+-
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
++#include <GL/glext.h>
+ #include "glxserver.h"
+ #include "GL/glxproto.h"
+ #include "unpack.h"
+ #include "indirect_size.h"
+ #include "indirect_reqsize.h"
+ 
++#ifndef GL_MESA_packed_depth_stencil
++#define GL_MESA_packed_depth_stencil 1
++
++#define GL_DEPTH_STENCIL_MESA			0x8750
++#define GL_UNSIGNED_INT_24_8_MESA		0x8751
++#define GL_UNSIGNED_INT_8_24_REV_MESA		0x8752
++#define GL_UNSIGNED_SHORT_15_1_MESA		0x8753
++#define GL_UNSIGNED_SHORT_1_15_REV_MESA		0x8754
++
++#endif /* GL_MESA_packed_depth_stencil */
++
+ #define SWAPL(a) \
+   (((a & 0xff000000U)>>24) | ((a & 0xff0000U)>>8) | \
+    ((a & 0xff00U)<<8) | ((a & 0xffU)<<24))
+diff --git a/glx/singlesize.c b/glx/singlesize.c
+index 4c60b6920..b9c24ee43 100644
+--- a/glx/singlesize.c
++++ b/glx/singlesize.c
+@@ -32,6 +32,7 @@
+ #include <dix-config.h>
+ #endif
+ 
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #include "glxserver.h"
+ #include "singlesize.h"
+diff --git a/glx/vndcmds.c b/glx/vndcmds.c
+index d6d8719e1..f9d225711 100644
+--- a/glx/vndcmds.c
++++ b/glx/vndcmds.c
+@@ -47,7 +47,7 @@ typedef struct GlxVendorPrivDispatchRec {
+     HashTable hh;
+ } GlxVendorPrivDispatch;
+ 
+-static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = {};
++static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN];
+ static HashTable vendorPrivHash = NULL;
+ static HtGenericHashSetupRec vendorPrivSetup = {
+     .keySize = sizeof(CARD32)
+@@ -208,7 +208,7 @@ static int CommonMakeCurrent(ClientPtr client,
+         GLXDrawable readdrawable,
+         GLXContextID context)
+ {
+-    xGLXMakeCurrentReply reply = {};
++    xGLXMakeCurrentReply reply;
+     GlxContextTagInfo *oldTag = NULL;
+     GlxServerVendor *newVendor = NULL;
+ 
+diff --git a/hw/meson.build b/hw/meson.build
+index f8bd28a25..79caedd50 100644
+--- a/hw/meson.build
++++ b/hw/meson.build
+@@ -2,6 +2,10 @@ if get_option('xephyr')
+     subdir('kdrive')
+ endif
+ 
++if build_xwin
++    subdir('xwin')
++endif
++
+ if get_option('xvfb')
+     subdir('vfb')
+ endif
+@@ -18,6 +22,3 @@ if build_xquartz
+     subdir('xquartz')
+ endif
+ 
+-if build_xwin
+-    subdir('xwin')
+-endif
+diff --git a/hw/vfb/meson.build b/hw/vfb/meson.build
+index 7332866b3..4525df235 100644
+--- a/hw/vfb/meson.build
++++ b/hw/vfb/meson.build
+@@ -9,17 +9,18 @@ xvfb_server = executable(
+     'Xvfb',
+     srcs,
+     include_directories: inc,
+-    dependencies: common_dep,
++    dependencies: [common_dep, libxserver_glx_dep],
+     link_with: [
+         libxserver_main,
+         libxserver_fb,
+         libxserver,
+         libxserver_xkb_stubs,
+         libxserver_xi_stubs,
+-        libxserver_glx,
+         libglxvnd,
++        WGLthunk
+     ],
+     install: true,
++    link_args: ['-lopengl32', '-llibGLESv2_mesa', 'dl.lib']
+ )
+ 
+ install_man(configure_file(
+diff --git a/hw/xwin/InitOutput.c b/hw/xwin/InitOutput.c
+index 77201fee3..1b38871ef 100644
+--- a/hw/xwin/InitOutput.c
++++ b/hw/xwin/InitOutput.c
+@@ -144,7 +144,11 @@ void XwinExtensionInit(void)
+         /* install the native GL provider */
+         glxWinPushNativeProvider();
+     }
++#if defined(GLXEXT) && defined(XWIN_WINDOWS_DRI)
+     LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
++#else
++    LoadExtensionList(NULL, 0, TRUE);
++#endif
+ #endif
+ }
+ 
+diff --git a/hw/xwin/glx/glshim.c b/hw/xwin/glx/glshim.c
+index a27040257..35773553d 100644
+--- a/hw/xwin/glx/glshim.c
++++ b/hw/xwin/glx/glshim.c
+@@ -37,12 +37,11 @@
+ 
+ #define GL_GLEXT_LEGACY
+ #define GL_GLEXT_PROTOTYPES
++#include <X11/Xwindows.h>
+ #include <GL/gl.h>
+ #undef GL_ARB_imaging
+ #undef GL_VERSION_1_3
+ #include <GL/glext.h>
+-
+-#include <X11/Xwindows.h>
+ #include <os.h>
+ #include "glwindows.h"
+ #include <glx/glxserver.h>
+@@ -78,10 +77,10 @@ int glWinSelectImplementation(int native)
+     const char *dllname;
+ 
+     if (native) {
+-        dllname = "cygnativeGLthunk.dll";
++        dllname = "nativeGLthunk.dll";
+     }
+     else {
+-        dllname = "cygGL-1.dll";
++        dllname = "GL-1.dll";
+     }
+ 
+     hMod = LoadLibraryEx(dllname, NULL, 0);
+@@ -106,7 +105,7 @@ int glWinSelectImplementation(int native)
+ #define RESOLVED_PROC proc
+ 
+ /* Include generated shims for direct linkage to GL functions which are in the ABI */
+-#include "generated_gl_shim.ic"
++// #include "generated_gl_shim.ic"
+ 
+ /*
+   Special wrapper for glAddSwapHintRectWIN for copySubBuffers
+diff --git a/hw/xwin/glx/glthunk.c b/hw/xwin/glx/glthunk.c
+index 3d2702ddb..3f71a7b7c 100644
+--- a/hw/xwin/glx/glthunk.c
++++ b/hw/xwin/glx/glthunk.c
+@@ -68,7 +68,7 @@ glWinResolveHelper(PROC * cache, const char *symbol)
+ 
+ #define RESOLVE_RET(proctype, symbol, retval) \
+     static PROC cache = NULL; \
+-    __stdcall proctype proc = (proctype)glWinResolveHelper(&cache, symbol); \
++        proctype proc = (proctype)glWinResolveHelper(&cache, symbol); \
+     if (proc == NULL) { \
+         return retval; \
+     }
+diff --git a/hw/xwin/glx/glwindows.h b/hw/xwin/glx/glwindows.h
+index 34ff24c24..0808ec387 100644
+--- a/hw/xwin/glx/glwindows.h
++++ b/hw/xwin/glx/glwindows.h
+@@ -50,8 +50,8 @@ void glAddSwapHintRectWINWrapper(GLint x, GLint y, GLsizei width, GLsizei height
+ int glWinSelectImplementation(int native);
+ 
+ #if 1
+-#define GLWIN_TRACE_MSG(msg, args...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
+-#define GLWIN_DEBUG_MSG(msg, args...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
++#define GLWIN_TRACE_MSG(msg, ...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##__VA_ARGS__ , __FUNCTION__, __LINE__ )
++#define GLWIN_DEBUG_MSG(msg, ...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##__VA_ARGS__ , __FUNCTION__, __LINE__ )
+ #else
+ #define GLWIN_TRACE_MSG(a, ...)
+ #define GLWIN_DEBUG_MSG(a, ...)
+diff --git a/hw/xwin/glx/indirect.c b/hw/xwin/glx/indirect.c
+index ff015f763..f84060a67 100644
+--- a/hw/xwin/glx/indirect.c
++++ b/hw/xwin/glx/indirect.c
+@@ -78,6 +78,12 @@
+ #include <xwin-config.h>
+ #endif
+ 
++#ifdef _MSC_VER
++#include <malloc.h>
++#endif
++
++#include <X11/Xwindows.h>
++
+ #include "glwindows.h"
+ #include <glx/glxserver.h>
+ #include <glx/glxutil.h>
+@@ -2149,7 +2155,8 @@ glxWinCreateConfigsExt(HDC hdc, glxWinScreen * screen, PixelFormatRejectStats *
+ 
+     /* fill in configs */
+     for (i = 0; i < numConfigs; i++) {
+-        int values[num_attrs];
++        
++        int * values = (int*) _alloca (num_attrs*sizeof(int));
+         GLXWinConfig temp;
+         GLXWinConfig *c = &temp;
+         GLXWinConfig *work;
+diff --git a/hw/xwin/glx/meson.build b/hw/xwin/glx/meson.build
+index 95f248953..4b3f1a41c 100644
+--- a/hw/xwin/glx/meson.build
++++ b/hw/xwin/glx/meson.build
+@@ -9,7 +9,7 @@ endif
+ khronos_spec_dir = dependency('khronos-opengl-registry').get_pkgconfig_variable('specdir')
+ 
+ gen_gl_wrappers_opts= ['-nodebug']
+-gen_gl_wrappers_cmd = ['env', 'PYTHONPATH=' + khronos_spec_dir, py3, files('./gen_gl_wrappers.py'), gen_gl_wrappers_opts]
++gen_gl_wrappers_cmd = [py3, files('./gen_gl_wrappers.py'), gen_gl_wrappers_opts]
+ 
+ wgl_wrappers = custom_target(
+     'gen_wgl_wrappers',
+@@ -77,6 +77,11 @@ xwin_glx = static_library(
+     ],
+     dependencies: common_dep,
+     c_args: xwin_glx_c_args,
++    # link_args: ['-lopengl32']
++)
++
++xwin_glx_dep = declare_dependency(
++  link_with: xwin_glx
+ )
+ 
+ srcs_wgl_thunk = [
+@@ -91,11 +96,7 @@ WGLthunk = shared_library(
+         inc,
+         top_dir_inc,
+     ],
+-    c_args: xwin_glx_c_args + [
+-      '-Wno-unused-function',
+-      '-Wno-missing-prototypes',
+-      '-Wno-missing-declarations',
+-    ],
++    c_args: xwin_glx_c_args ,
+     link_args: ['-lopengl32'],
+     vs_module_defs: gl_thunks_def,
+     install: true,
+diff --git a/hw/xwin/meson.build b/hw/xwin/meson.build
+index 5ff3fd761..388d33761 100644
+--- a/hw/xwin/meson.build
++++ b/hw/xwin/meson.build
+@@ -34,6 +34,8 @@ if build_glx
+     endif
+     xwin_c_args += '-DXWIN_GLX_WINDOWS'
+     xwin_sys_libs += '-lopengl32'
++    xwin_sys_libs += 'dl.lib'
++    xwin_sys_libs += '-llibGLESv2_mesa'
+     subdir('glx')
+ endif
+ 
+@@ -146,19 +148,19 @@ executable(
+     server_name,
+     srcs_windows,
+     include_directories: [inc, top_dir_inc],
+-    dependencies: xwin_dep,
++    dependencies: [xwin_dep, libxserver_glx_dep],
+     link_with: [
+         xwin_windowsdri,
+         xwin_glx,
+         xwin_clipboard,
+         libxserver_fb,
+         libxserver,
+-        libxserver_glx,
+         libglxvnd,
+         libxserver_xkb_stubs,
+         libxserver_miext_shadow,
+         libxserver_pseudoramix,
+         libxserver_xi_stubs,
++        WGLthunk
+     ],
+     link_args: ['-Wl,--disable-stdcall-fixup', '-Wl,--export-all-symbols'] +  xwin_sys_libs,
+     c_args: xwin_c_args,
+diff --git a/hw/xwin/winscrinit.c b/hw/xwin/winscrinit.c
+index ae6bc12a6..05921d00b 100644
+--- a/hw/xwin/winscrinit.c
++++ b/hw/xwin/winscrinit.c
+@@ -38,6 +38,10 @@
+ #include "win.h"
+ #include "winmsg.h"
+ 
++#ifdef CreateWindow
++#undef CreateWindow
++#endif
++
+ /*
+  * Determine what type of screen we are initializing
+  * and call the appropriate procedure to initialize
+diff --git a/include/meson.build b/include/meson.build
+index abfb3f0be..83506b88b 100644
+--- a/include/meson.build
++++ b/include/meson.build
+@@ -6,7 +6,7 @@ patch = version_split[2].to_int()
+ # convert to the old-style 1.x.y version scheme used up to 1.20.x for backwards compatibility
+ release = 1 * 10000000 + major * 100000 + minor * 1000 + patch
+ 
+-dri_dep = dependency('dri', required: build_glx)
++dri_dep = dependency('dri', required: build_glx)
+ 
+ conf_data = configuration_data()
+ conf_data.set('_DIX_CONFIG_H_', '1')
+@@ -208,7 +208,7 @@ conf_data.set('DGA', build_dga ? '1' : false)
+ conf_data.set('DPMSExtension', build_dpms ? '1' : false)
+ conf_data.set('DRI2', build_dri2 ? '1' : false)
+ conf_data.set('DRI3', build_dri3 ? '1' : false)
+-if build_glx
++if build_glx # and host_machine.system() != 'windows'
+     conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_pkgconfig_variable('dridriverdir'))
+ endif
+ conf_data.set('HAS_SHM', build_mitshm ? '1' : false)
+diff --git a/include/xwin-config.h.in b/include/xwin-config.h.in
+index 176c01980..256ddcb3a 100644
+--- a/include/xwin-config.h.in
++++ b/include/xwin-config.h.in
+@@ -6,6 +6,8 @@
+  */
+ #include <dix-config.h>
+ 
++//#define HYPERV
++
+ /* Winsock networking */
+ #undef HAS_WINSOCK
+ 

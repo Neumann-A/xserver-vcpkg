@@ -1,0 +1,13 @@
+{
+  "name": "xpm",
+  "version": "3.5.13",
+  "description": "X Pixmap (XPM) image file format library",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxpm",
+  "dependencies": [
+    "bzip2",
+    "x11",
+    "xext",
+    "xorg-macros",
+    "xproto"
+  ]
+}

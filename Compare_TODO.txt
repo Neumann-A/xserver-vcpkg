@@ -14,7 +14,7 @@ Xpm
 Xrender - no relevant change
 Xt - very old xt version?
 X11/Xlib - Mainly fixes for building + changing default location to relativ paths
-xcb-utils-errors
+xcb-utils-errors - no major changes - maybe a version diff. 
 xkbcomp 1.4.3 vs 1.3.1; Most changes due to version diff; Some changes similar to my changes.  (!! One maybe import define)
 xorg-server/xserver
 

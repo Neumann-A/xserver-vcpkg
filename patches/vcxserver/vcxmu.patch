@@ -1,0 +1,463 @@
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/Makefile.am b/vcxsrv-code/libXmu/Makefile.am
+index 271d872..9a875e3 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/Makefile.am
++++ b/vcxsrv-code/libXmu/Makefile.am
+@@ -20,5 +20,3 @@ if LINT
+ lint:
+ 	(cd src && $(MAKE) $(MFLAGS) lint)
+ endif LINT
+-
+-EXTRA_DIST = README.md
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/configure.ac b/vcxsrv-code/libXmu/configure.ac
+index c036b42..e9d6b69 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/configure.ac
++++ b/vcxsrv-code/libXmu/configure.ac
+@@ -1,8 +1,8 @@
+ 
+ # Initialize Autoconf
+ AC_PREREQ([2.60])
+-AC_INIT([libXmu], [1.1.3],
+-	[https://gitlab.freedesktop.org/xorg/lib/libXmu/issues], [libXmu])
++AC_INIT([libXmu], [1.1.2],
++	[https://bugs.freedesktop.org/enter_bug.cgi?product=xorg], [libXmu])
+ AC_CONFIG_SRCDIR([Makefile.am])
+ AC_CONFIG_HEADERS([config.h])
+ 
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/EditresCom.c b/vcxsrv-code/libXmu/src/EditresCom.c
+index 716a2b3..5933b9b 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/EditresCom.c
++++ b/vcxsrv-code/libXmu/src/EditresCom.c
+@@ -247,7 +247,7 @@ _XEditResCheckMessages(Widget w, XtPointer data, XEvent *event, Boolean *cont)
+ 	}
+ 
+ 	XtGetSelectionValue(w, res_comm, res_editor_command,
+-			    GetCommand, (XtPointer)(long)ident, time);
++			    GetCommand, (XtPointer)(uintptr_t)ident, time);
+     }
+ }
+ 
+@@ -450,7 +450,7 @@ static void
+ GetCommand(Widget w, XtPointer data, Atom *selection, Atom *type,
+ 	   XtPointer value, unsigned long *length, int *format)
+ {
+-    ResIdent ident = (ResIdent)(long)data;
++    ResIdent ident = (ResIdent)(uintptr_t)data;
+     EditresEvent *event;
+ 
+     if (*type != res_editor_protocol || *format != EDITRES_FORMAT)
+@@ -906,16 +906,16 @@ VerifyWidget(Widget w, WidgetInfo *info)
+ 
+     while (True)
+     {
+-	if (!IsChild(top, parent, (Widget) *child))
++	if (!IsChild(top, parent, (Widget)(uintptr_t) *child))
+ 	    return ("This widget no longer exists in the client.");
+ 
+ 	if (++count == info->num_widgets)
+ 	    break;
+ 
+-	parent = (Widget)*child++;
++	parent = (Widget)(uintptr_t)*child++;
+     }
+ 
+-    info->real_widget = (Widget)*child;
++    info->real_widget = (Widget)(uintptr_t)*child;
+ 
+     return (NULL);
+ }
+@@ -1621,7 +1621,7 @@ InsertWidget(ProtocolStream *stream, Widget w)
+      * make sure that they are inserted in the list from parent -> child
+      */
+     for (i--, temp = w; temp != NULL; temp = XtParent(temp), i--)
+-    widget_list[i] = (unsigned long)temp;
++    widget_list[i] = (unsigned long)(uintptr_t)temp;
+ 
+     _XEditResPut16(stream, num_widgets);	/* insert number of widgets */
+     for (i = 0; i < num_widgets; i++)		/* insert Widgets themselves */
+@@ -2081,7 +2081,7 @@ _XEditresGetStringValues(Widget w, Arg *warg, int numargs)
+     XtResourceList res_list;
+     Cardinal num_res;
+     XtResource *res = NULL;
+-    long value;
++    uintptr_t value;
+     Cardinal i;
+     char *string = "";
+     Arg args[1];
+@@ -2132,23 +2132,23 @@ _XEditresGetStringValues(Widget w, Arg *warg, int numargs)
+     case 1:
+ 	XtSetArg(args[0], res->resource_name, &v1);
+ 	XtGetValues(w, args, 1);
+-	value = (int)v1;
++	value = (uintptr_t)v1;
+ 	break;
+     case 2:
+ 	XtSetArg(args[0], res->resource_name, &v2);
+ 	XtGetValues(w, args, 1);
+-	value = (int)v2;
++	value = (uintptr_t)v2;
+ 	break;
+     case 4:
+ 	XtSetArg(args[0], res->resource_name, &v4);
+ 	XtGetValues(w, args, 1);
+-	value = (int)v4;
++	value = (uintptr_t)v4;
+ 	break;
+ #ifdef LONG64
+     case 8:
+ 	XtSetArg(args[0], res->resource_name, &v8);
+ 	XtGetValues(w, args, 1);
+-	value = (long)v8;
++	value = (uintptr_t)v8;
+ 	break;
+ #endif
+     default:
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/RdBitF.c b/vcxsrv-code/libXmu/src/RdBitF.c
+index 240c4c8..42b53a7 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/RdBitF.c
++++ b/vcxsrv-code/libXmu/src/RdBitF.c
+@@ -270,7 +270,7 @@ XmuReadBitmapData(FILE *fstream, unsigned int *width, unsigned int *height,
+ 
+ #if defined(WIN32)
+ static int
+-access_file(char *path, char *pathbuf, int len_pathbuf, char **pathret)
++access_file(_Xconst char *path, char *pathbuf, int len_pathbuf, char **pathret)
+ {
+     if (access (path, F_OK) == 0) {
+ 	if (strlen (path) < len_pathbuf)
+@@ -286,7 +286,7 @@ access_file(char *path, char *pathbuf, int len_pathbuf, char **pathret)
+ }
+ 
+ static int
+-AccessFile(char *path, char *pathbuf, int len_pathbuf, char **pathret)
++AccessFile(_Xconst char *path, char *pathbuf, int len_pathbuf, char **pathret)
+ {
+ #ifndef MAX_PATH
+ #define MAX_PATH 512
+@@ -354,10 +354,10 @@ AccessFile(char *path, char *pathbuf, int len_pathbuf, char **pathret)
+ }
+ 
+ FILE *
+-fopen_file(char *path, char *mode)
++fopen_file(_Xconst char *path, char *mode)
+ {
+     char buf[MAX_PATH];
+-    char* bufp;
++    char* bufp=buf;
+     void* ret = NULL;
+     UINT olderror = SetErrorMode (SEM_FAILCRITICALERRORS);
+ 
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/StrToCurs.c b/vcxsrv-code/libXmu/src/StrToCurs.c
+index fc064c6..ca44605 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/StrToCurs.c
++++ b/vcxsrv-code/libXmu/src/StrToCurs.c
+@@ -57,6 +57,7 @@ SOFTWARE.
+ #include	<X11/Xmu/Drawing.h>
+ #include	<X11/Xmu/CurUtil.h>
+ #include	<X11/Xmu/CharSet.h>
++#include <unistd.h>
+ 
+ #include <stdlib.h>
+ 
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/StrToWidg.c b/vcxsrv-code/libXmu/src/StrToWidg.c
+index b6288d4..c22b827 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/StrToWidg.c
++++ b/vcxsrv-code/libXmu/src/StrToWidg.c
+@@ -53,60 +53,63 @@ in this Software without prior written authorization from The Open Group.
+ /*ARGSUSED*/
+ void
+ XmuCvtStringToWidget(XrmValuePtr args, Cardinal *num_args,
+-                     XrmValuePtr fromVal, XrmValuePtr toVal)
++		     XrmValuePtr fromVal, XrmValuePtr toVal)
+ {
+     static Widget widget, *widgetP, parent;
+     XrmName name = XrmStringToName(fromVal->addr);
+     Cardinal i;
+ 
+-    if (*num_args != 1) {
+-        i = 0;
+-        XtErrorMsg("wrongParameters", "cvtStringToWidget", "xtToolkitError",
+-                   "StringToWidget conversion needs parent arg", NULL, &i);
++    if (*num_args != 1)
++    {
++	i = 0;
++	XtErrorMsg("wrongParameters", "cvtStringToWidget", "xtToolkitError",
++		   "StringToWidget conversion needs parent arg", NULL, &i);
+     }
+ 
+-    parent = *(Widget *) args[0].addr;
++    parent = *(Widget*)args[0].addr;
+     /* try to match names of normal children */
+-    if (XtIsComposite(parent)) {
+-        i = ((CompositeWidget) parent)->composite.num_children;
+-        for (widgetP = ((CompositeWidget) parent)->composite.children;
+-             i; i--, widgetP++) {
+-            if ((*widgetP)->core.xrm_name == name) {
+-                widget = *widgetP;
+-                done(&widget, Widget);
+-            }
+-        }
+-    }
++  if (XtIsComposite(parent))
++    {
++	i = ((CompositeWidget)parent)->composite.num_children;
++	for (widgetP = ((CompositeWidget)parent)->composite.children;
++	   i; i--, widgetP++)
++	if ((*widgetP)->core.xrm_name == name)
++	  {
++		widget = *widgetP;
++		done(&widget, Widget);
++	    }
++	}
+ 
+     /* try to match names of popup children */
+     i = parent->core.num_popups;
+-    for (widgetP = parent->core.popup_list; i; i--, widgetP++) {
+-        if ((*widgetP)->core.xrm_name == name) {
+-            widget = *widgetP;
+-            done(&widget, Widget);
+-        }
+-    }
++  for (widgetP = parent->core.popup_list; i; i--, widgetP++)
++    if ((*widgetP)->core.xrm_name == name)
++      {
++	    widget = *widgetP;
++	    done(&widget, Widget);
++	}
+ 
+     /* try to match classes of normal children */
+-    if (XtIsComposite(parent)) {
+-        i = ((CompositeWidget) parent)->composite.num_children;
+-        for (widgetP = ((CompositeWidget) parent)->composite.children;
+-             i; i--, widgetP++) {
+-            if ((*widgetP)->core.widget_class->core_class.xrm_class == name) {
+-                widget = *widgetP;
+-                done(&widget, Widget);
+-            }
+-        }
+-    }
++  if (XtIsComposite(parent))
++    {
++	i = ((CompositeWidget)parent)->composite.num_children;
++	for (widgetP = ((CompositeWidget)parent)->composite.children;
++	   i; i--, widgetP++)
++	if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
++	  {
++		widget = *widgetP;
++		done(&widget, Widget);
++	    }
++	}
+ 
+     /* try to match classes of popup children */
+     i = parent->core.num_popups;
+-    for (widgetP = parent->core.popup_list; i; i--, widgetP++) {
+-        if ((*widgetP)->core.widget_class->core_class.xrm_class == name) {
+-            widget = *widgetP;
+-            done(&widget, Widget);
+-        }
+-    }
++  for (widgetP = parent->core.popup_list; i; i--, widgetP++)
++    if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
++      {
++	    widget = *widgetP;
++	    done(&widget, Widget);
++	}
+ 
+     XtStringConversionWarning(fromVal->addr, XtRWidget);
+     toVal->addr = NULL;
+@@ -115,109 +118,108 @@ XmuCvtStringToWidget(XrmValuePtr args, Cardinal *num_args,
+ 
+ #undef done
+ 
+-#define newDone(type, value) \
+-        {                                                       \
+-            if (toVal->addr != NULL) {                          \
+-                if (toVal->size < sizeof(type)) {               \
+-                    toVal->size = sizeof(type);                 \
+-                    return False;                               \
+-                }                                               \
+-                *(type*)(toVal->addr) = (value);                \
+-            }                                                   \
+-            else {                                              \
+-                static type static_val;                         \
+-                static_val = (value);                           \
+-                toVal->addr = (XtPointer)&static_val;           \
+-            }                                                   \
+-            toVal->size = sizeof(type);                         \
+-            return True;                                        \
+-        }
++#define	newDone(type, value) \
++	{							\
++	    if (toVal->addr != NULL) {				\
++		if (toVal->size < sizeof(type)) {		\
++		    toVal->size = sizeof(type);			\
++		    return False;				\
++		}						\
++		*(type*)(toVal->addr) = (value);		\
++	    }							\
++	    else {						\
++		static type static_val;				\
++		static_val = (value);				\
++		toVal->addr = (XtPointer)&static_val;		\
++	    }							\
++	    toVal->size = sizeof(type);				\
++	    return True;					\
++	}
+ 
+ 
+ /*ARGSUSED*/
+ Boolean
+ XmuNewCvtStringToWidget(Display *dpy, XrmValue *args, Cardinal *num_args,
+-                        XrmValue *fromVal, XrmValue *toVal,
+-                        XtPointer *converter_data)
++			XrmValue *fromVal, XrmValue *toVal,
++			XtPointer *converter_data)
+ {
+     Widget *widgetP, parent;
+     XrmName name = XrmStringToName(fromVal->addr);
+     int i;
+ 
+     if (*num_args != 1)
+-        XtAppWarningMsg(XtDisplayToApplicationContext(dpy),
+-                        "wrongParameters", "cvtStringToWidget",
+-                        "xtToolkitError",
+-                        "String To Widget conversion needs parent argument",
+-                        (String *) NULL, (Cardinal *) NULL);
++	XtAppWarningMsg(XtDisplayToApplicationContext(dpy),
++			"wrongParameters","cvtStringToWidget","xtToolkitError",
++			"String To Widget conversion needs parent argument",
++			(String *)NULL, (Cardinal *)NULL);
+ 
+-    parent = *(Widget *) args[0].addr;
++    parent = *(Widget*)args[0].addr;
+     /* try to match names of normal children */
+-    if (XtIsComposite(parent)) {
+-        i = ((CompositeWidget) parent)->composite.num_children;
+-        for (widgetP = ((CompositeWidget) parent)->composite.children;
+-             i; i--, widgetP++) {
+-            if ((*widgetP)->core.xrm_name == name)
+-                newDone(Widget, *widgetP);
+-        }
+-    }
++  if (XtIsComposite(parent))
++    {
++	i = ((CompositeWidget)parent)->composite.num_children;
++	for (widgetP = ((CompositeWidget)parent)->composite.children;
++	   i; i--, widgetP++)
++	    if ((*widgetP)->core.xrm_name == name)
++		newDone(Widget, *widgetP);
++	}
+ 
+     /* try to match names of popup children */
+     i = parent->core.num_popups;
+-    for (widgetP = parent->core.popup_list; i; i--, widgetP++) {
+-        if ((*widgetP)->core.xrm_name == name)
+-            newDone(Widget, *widgetP);
+-    }
++  for (widgetP = parent->core.popup_list; i; i--, widgetP++)
++	if ((*widgetP)->core.xrm_name == name)
++	    newDone(Widget, *widgetP);
+ 
+     /* try to match classes of normal children */
+-    if (XtIsComposite(parent)) {
+-        i = ((CompositeWidget) parent)->composite.num_children;
+-        for (widgetP = ((CompositeWidget) parent)->composite.children;
+-             i; i--, widgetP++) {
+-            if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
+-                newDone(Widget, *widgetP);
+-        }
+-    }
++  if (XtIsComposite(parent))
++    {
++	i = ((CompositeWidget)parent)->composite.num_children;
++	for (widgetP = ((CompositeWidget)parent)->composite.children;
++	   i; i--, widgetP++)
++	    if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
++		newDone(Widget, *widgetP);
++	}
+ 
+     /* try to match classes of popup children */
+     i = parent->core.num_popups;
+-    for (widgetP = parent->core.popup_list; i; i--, widgetP++) {
+-        if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
+-            newDone(Widget, *widgetP);
+-    }
++  for (widgetP = parent->core.popup_list; i; i--, widgetP++)
++	if ((*widgetP)->core.widget_class->core_class.xrm_class == name)
++	    newDone(Widget, *widgetP);
+ 
+-    XtDisplayStringConversionWarning(dpy, (String) fromVal->addr, XtRWidget);
+-    return (False);
++    XtDisplayStringConversionWarning(dpy, (String)fromVal->addr, XtRWidget);
++  return (False);
+ }
+ 
+ /*ARGSUSED*/
+ Boolean
+ XmuCvtWidgetToString(Display *dpy, XrmValuePtr args, Cardinal *num_args,
+-                     XrmValuePtr fromVal, XrmValuePtr toVal, XtPointer *data)
++		     XrmValuePtr fromVal, XrmValuePtr toVal,
++		     XtPointer *data)
+ {
+-    static String buffer;
+-    Cardinal size;
+-    Widget widget;
+-
+-    widget = *(Widget *) fromVal->addr;
+-
+-    if (widget)
+-        buffer = XrmQuarkToString(widget->core.xrm_name);
+-    else
+-        buffer = "(null)";
+-
+-    size = strlen(buffer) + 1;
+-    if (toVal->addr != NULL) {
+-        if (toVal->size < size) {
+-            toVal->size = size;
+-            return (False);
+-        }
+-        strcpy((char *) toVal->addr, buffer);
+-    }
+-    else {
+-        toVal->addr = (XPointer) buffer;
++  static String buffer;
++  Cardinal size;
++  Widget widget;
++
++  widget = *(Widget *)fromVal->addr;
++
++  if (widget)
++    buffer = XrmQuarkToString(widget->core.xrm_name);
++  else
++    buffer = "(null)";
++
++  size = strlen(buffer) + 1;
++  if (toVal->addr != NULL)
++    {
++      if (toVal->size < size)
++	{
++	  toVal->size = size;
++	  return (False);
++	}
++      strcpy((char *)toVal->addr, buffer);
+     }
+-    toVal->size = sizeof(String);
++  else
++    toVal->addr = (XPointer)buffer;
++  toVal->size = sizeof(String);
+ 
+-    return (True);
++  return (True);
+ }
+diff --git a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/WidgetNode.c b/vcxsrv-code/libXmu/src/WidgetNode.c
+index 037eb0c..1ab8199 100644
+--- a/xserver-vcpkg/vcpkg/buildtrees/xmu/src/8ad1d1d3c3-c90c76ac3a/src/WidgetNode.c
++++ b/vcxsrv-code/libXmu/src/WidgetNode.c
+@@ -53,7 +53,7 @@ static void mark_resource_owner(XmuWidgetNode*);
+  */
+ static char *
+ binsearch(char *key, char *base, int nelems, int elemsize,
+-	  int compar(_Xconst void*, _Xconst void*))
++	  int (*compar)(_Xconst void*, _Xconst void*))
+      /*
+       * key		- template of object to find
+       * base		- beginning of array

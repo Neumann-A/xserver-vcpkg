@@ -31,7 +31,9 @@ if(VCPKG_TARGET_IS_WINDOWS)
     set(OPTIONS 
         --enable-malloc0returnsnull=yes      #Configure fails to run the test for some reason
         --enable-loadable-i18n=no           #Pointer conversion errors
-        --enable-ipv6=no
+        --enable-ipv6
+        --enable-hyperv
+        --enable-tcp-transport
         --with-launchd=no
         --with-lint=no
         --disable-selective-werror

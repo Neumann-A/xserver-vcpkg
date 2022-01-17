@@ -81,7 +81,7 @@ index 7a03bfb91..77201fee3 100644
  
  static Bool noDriExtension;
  
-+#ifndef _MSC_VER
++#ifdef XWIN_WINDOWS_DRI
  static const ExtensionModule xwinExtensions[] = {
  #ifdef GLXEXT
  #ifdef XWIN_WINDOWS_DRI

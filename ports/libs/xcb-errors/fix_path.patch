@@ -1,0 +1,13 @@
+diff --git a/configure.ac b/configure.ac
+index 0379093c8..33b8f54d2 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -22,7 +22,7 @@ AM_PATH_PYTHON
+ # Checks for xcb-proto's XML files, inspired from libxcb's configure.ac
+ PKG_CHECK_MODULES(XCBPROTO, xcb-proto)
+ AC_MSG_CHECKING(XCBPROTO_XCBINCLUDEDIR)
+-XCBPROTO_XCBINCLUDEDIR=`$PKG_CONFIG --variable=xcbincludedir xcb-proto`
++XCBPROTO_XCBINCLUDEDIR=${XCBPROTO_XCBINCLUDEDIR}
+ AC_MSG_RESULT($XCBPROTO_XCBINCLUDEDIR)
+ AC_SUBST(XCBPROTO_XCBINCLUDEDIR)
+ 

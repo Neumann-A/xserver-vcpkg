@@ -1,0 +1,16 @@
+{
+  "name": "xaw",
+  "version": "1.0.13",
+  "description": "X Athena Widget Set, based on the X Toolkit Intrinsics (Xt) Library",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxaw",
+  "dependencies": [
+    "bzip2",
+    "x11",
+    "xext",
+    "xmu",
+    "xorg-macros",
+    "xpm",
+    "xproto",
+    "xt"
+  ]
+}

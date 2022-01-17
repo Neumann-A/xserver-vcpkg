@@ -51,9 +51,9 @@ function(vcpkg_get_python_package PYTHON_DIR )
 endfunction()
 
 if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
-    set(PATCHES windows.patch windows2.patch win_random.patch)
+    set(PATCHES windows.patch windows2.patch win_random.patch make_it_work.patch)# wip.patch)
 endif()
-
+#set(VCPKG_BUILD_TYPE debug)
 set(VCPKG_POLICY_EMPTY_INCLUDE_FOLDER enabled)
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org
@@ -134,6 +134,7 @@ vcpkg_configure_meson(
     OPTIONS ${OPTIONS}
         -Dlisten_tcp=true
         -Ddocs=false
+        -Dxvfb=false
         # Note: xserver will overwrite the base settings by trying to be relocatable.
         # To start the server you need to copy over xkbcomp + deps from tools/xkbcomp/bin
         # and you need to copy the rules from share/X11/xkb to tools/xserver/xkb
@@ -180,3 +181,6 @@ file(GLOB_RECURSE BIN_FILES "${CURRENT_PACKAGES_DIR}/bin")
 if(NOT BIN_FILES)
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin" "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
+
+
+# Note: Manual copying/moving of some stuff required to make the xserver work correctly!

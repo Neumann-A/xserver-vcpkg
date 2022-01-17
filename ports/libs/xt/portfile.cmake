@@ -2,6 +2,9 @@ if(NOT X_VCPKG_FORCE_VCPKG_X_LIBRARIES AND NOT VCPKG_TARGET_IS_WINDOWS)
     message(STATUS "Utils and libraries provided by '${PORT}' should be provided by your system! Install the required packages or force vcpkg libraries by setting X_VCPKG_FORCE_VCPKG_X_LIBRARIES")
     set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
 else()
+
+vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
+
 # Does not support cl due to one singular asm instruction. 
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
@@ -16,7 +19,12 @@ vcpkg_from_gitlab(
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
-
+if(VCPKG_TARGET_IS_WINDOWS AND VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+    set(stringsfile "${SOURCE_PATH}/util/string.list")
+    vcpkg_replace_string("${SOURCE_PATH}/util/string.list" "#externref extern" "#externref __declspec(dllexport) extern ")
+    vcpkg_replace_string("${SOURCE_PATH}/util/StrDefs.ct" "#define Const const" "#define Const __declspec(dllexport) const")
+endif()
+#externref extern
 vcpkg_configure_make(
     SOURCE_PATH "${SOURCE_PATH}"
     AUTOCONFIG
@@ -29,6 +37,10 @@ vcpkg_configure_make(
 
 vcpkg_install_make()
 vcpkg_fixup_pkgconfig()
+
+if(VCPKG_TARGET_IS_WINDOWS AND VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+    vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/include/X11/StringDefs.h" "__declspec(dllexport)" "__declspec(dllimport)")
+endif()
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
