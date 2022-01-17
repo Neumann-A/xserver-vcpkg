@@ -1,0 +1,15 @@
+diff --git a/src/create.c b/src/create.c
+index a750846bf..19b2bbd7f 100644
+--- a/src/create.c
++++ b/src/create.c
+@@ -51,6 +51,10 @@
+ #include "XpmI.h"
+ #include <ctype.h>
+ 
++#ifdef _MSC_VER
++#define strcasecmp _stricmp
++#endif
++
+ LFUNC(xpmVisualType, int, (Visual *visual));
+ 
+ LFUNC(AllocColor, int, (Display *display, Colormap colormap,

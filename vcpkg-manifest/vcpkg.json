@@ -3,7 +3,10 @@
     "version-string": "0.1.0",
     "dependencies": [
           "xserver",
-          "xkeyboard-config"
+          "xkeyboard-config",
+          "xrandr",
+          "xau",
+          "xaw"
     ],
     "features": {
     }

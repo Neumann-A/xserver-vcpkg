@@ -1,25 +1,16 @@
+set(VCPKG_POLICY_EMPTY_INCLUDE_FOLDER enabled)
 if(NOT X_VCPKG_FORCE_VCPKG_X_LIBRARIES AND NOT VCPKG_TARGET_IS_WINDOWS)
     message(STATUS "Utils and libraries provided by '${PORT}' should be provided by your system! Install the required packages or force vcpkg libraries by setting X_VCPKG_FORCE_VCPKG_X_LIBRARIES")
     set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
 else()
 
-set(OPTIONS "")
-if(VCPKG_TARGET_IS_WINDOWS)
-    # COnfigure is not setup for MSW builds
-    #string(APPEND VCPKG_C_FLAGS " /DFOR_MSW")
-    #string(APPEND VCPKG_CXX_FLAGS " /DFOR_MSW")
-    set(OPTIONS ac_cv_header_dlfcn_h=no)
-endif()
-vcpkg_add_to_path("${CURRENT_HOST_INSTALLED_DIR}/tools/gettext/bin")
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO lib/libxpm
-    REF b0fc485495a694816d76a43978e2cfd5575c554d # 3.5.13
-    SHA512  4637d7b4c1a0aa0a8f3e01eca53dffe61875fc2c1e1c9061d3cafd677cedb4b9e0f095dbb071de16f970c027cba2032d9dddb386032ae0321fa9562a42a9957e
+    REPO app/xeyes
+    REF adde23dc8724dc6f793b0c68143dc34818f7f6f4 # 1.2.0
+    SHA512  54a10cedecc2c78c9529e52f80c29a4f7f15bd9e4ed868bdbaa28d08d66a376eec291215a17f17a44fc2ae10e73ce0c2fd4251b9d7c94a2cca5354eada5f2e93
     HEAD_REF master # branch name
-    PATCHES remove_strings_h.patch
-            win.patch
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
@@ -27,12 +18,10 @@ set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
 vcpkg_configure_make(
     SOURCE_PATH "${SOURCE_PATH}"
     AUTOCONFIG
-    OPTIONS 
-        ${OPTIONS}
 )
 
 vcpkg_install_make()
-vcpkg_fixup_pkgconfig(SYSTEM_LIBRARIES pthread)
+vcpkg_fixup_pkgconfig()
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
@@ -40,7 +29,6 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 # Handle copyright
 file(INSTALL "${SOURCE_PATH}/COPYING" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
 
-if(VCPKG_LIBRARY_LINKAGE STREQUAL static OR NOT VCPKG_TARGET_IS_WINDOWS)
-        file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin" "${CURRENT_PACKAGES_DIR}/debug/bin")
-endif()
+vcpkg_copy_tool_dependencies("${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/tools")
 endif()
