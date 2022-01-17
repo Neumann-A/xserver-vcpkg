@@ -1,0 +1,12 @@
+{
+  "name": "xrandrutils",
+  "description": "High level wrapper utility library for libXrandr",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxrandrutils",
+  "dependencies": [
+    "bzip2",
+    "x11",
+    "xorg-macros",
+    "xproto",
+    "xrandr"
+  ]
+}
