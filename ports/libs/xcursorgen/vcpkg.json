@@ -1,0 +1,13 @@
+{
+  "name": "xcursorgen",
+  "version": "1.0.7",
+  "description": "prepares X11 cursor sets for use with libXcursor",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxrandr",
+  "dependencies": [
+    "bzip2",
+    "libpng",
+    "x11",
+    "xcursor",
+    "xorg-macros"
+  ]
+}

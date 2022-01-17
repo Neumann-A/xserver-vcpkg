@@ -1,26 +1,28 @@
-set(VCPKG_POLICY_EMPTY_INCLUDE_FOLDER enabled)
+#TODO needs asprintf from gettext ('asprintf' undefined; assuming extern returning int)
 if(NOT X_VCPKG_FORCE_VCPKG_X_LIBRARIES AND NOT VCPKG_TARGET_IS_WINDOWS)
     message(STATUS "Utils and libraries provided by '${PORT}' should be provided by your system! Install the required packages or force vcpkg libraries by setting X_VCPKG_FORCE_VCPKG_X_LIBRARIES")
     set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
 else()
-
 vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO app/xeyes
-    REF adde23dc8724dc6f793b0c68143dc34818f7f6f4 # 1.2.0
-    SHA512  54a10cedecc2c78c9529e52f80c29a4f7f15bd9e4ed868bdbaa28d08d66a376eec291215a17f17a44fc2ae10e73ce0c2fd4251b9d7c94a2cca5354eada5f2e93
+    REPO lib/libxcb-cursor
+    REF  95b9a8fd876fdbbc854cdf3d90317be3846c7417 #0.1.3
+    SHA512 cca7bf1f2aeaab8d256052a676098d7c600b90dc47cf9bc84d11229e59fbf5c83f7f877b8538f7cc662983807566d28c87b3501abc7cab76cc553d9db29eceb9
     HEAD_REF master # branch name
+    PATCHES build.patch
 ) 
+
+vcpkg_find_acquire_program(GPERF)
+get_filename_component(GPERF_DIR "${GPERF}" DIRECTORY)
+vcpkg_add_to_path("${GPERF_DIR}")
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")
 
-if(VCPKG_TARGET_IS_WINDOWS)
-    set(ENV{LIBS} "-lWs2_32") # pc file XT?
-endif()
 vcpkg_configure_make(
     SOURCE_PATH "${SOURCE_PATH}"
     AUTOCONFIG
+    COPY_SOURCE
 )
 
 vcpkg_install_make()
@@ -31,7 +33,5 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 # Handle copyright
 file(INSTALL "${SOURCE_PATH}/COPYING" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
-
-vcpkg_copy_tool_dependencies("${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin")
-file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/tools")
 endif()
+

@@ -6,7 +6,11 @@
           "xkeyboard-config",
           "xrandr",
           "xau",
-          "xaw"
+          "xaw",
+          "xdamage",
+          "xcomposite",
+          "xres",
+          "xscrnsaver"
     ],
     "features": {
     }

@@ -1,0 +1,13 @@
+{
+  "name": "xcwm",
+  "version": "1.1.0",
+  "description": "Rootless Compositing Window Manager library",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxcwm",
+  "dependencies": [
+    "xcb",
+    "xcb-image",
+    "xcb-keysyms",
+    "xcb-wm",
+    "xorg-macros"
+  ]
+}

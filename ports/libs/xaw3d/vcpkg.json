@@ -1,0 +1,15 @@
+{
+  "name": "xaw3d",
+  "version": "1.6.3",
+  "description": "3D appearance variant of the X Athena Widget Set, based on the X Toolkit Intrinsics (Xt) Library",
+  "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxaw3d",
+  "dependencies": [
+    "bzip2",
+    "x11",
+    "xext",
+    "xmu",
+    "xorg-macros",
+    "xproto",
+    "xt"
+  ]
+}

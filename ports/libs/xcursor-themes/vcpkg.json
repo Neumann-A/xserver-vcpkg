@@ -1,0 +1,9 @@
+{
+  "name": "xcursor-themes",
+  "version": "1.0.6",
+  "description": "Default set of cursor themes for use with libXcursor.",
+  "homepage": "https://xcb.freedesktop.org/",
+  "dependencies": [
+    "xcursorgen"
+  ]
+}

@@ -1,5 +1,6 @@
 {
   "name": "xrandrutils",
+  "version" : "1",
   "description": "High level wrapper utility library for libXrandr",
   "homepage": "https://gitlab.freedesktop.org/xorg/lib/libxrandrutils",
   "dependencies": [
