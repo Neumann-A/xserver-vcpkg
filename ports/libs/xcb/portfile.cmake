@@ -7,13 +7,13 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
     REPO lib/libxcb
-    REF  43fbf03e549bf6da8d1d8522e0ceddc4d49c37c6 #v1.14 + some patches
+    REF  ddafdba11f6919e6fcf977c09c78b06f94de47aa #v1.14 + some patches
     SHA512 49e1bf6654814d1513ad8b9142f81fefd43bc939411bf7b2ce9f9fde0961658bec5d1578ca8fd099974898a99a54ff7c6220e58c0d422375d035cd17edbdb072 # bd600b9e321f39758bf32582933b4167d335af74acd7312ecc1072bc8df3f511b4f7a85ead3075b73449a3167764cd0fc77f799a86dfe42012f94a4d20a20bd7
     HEAD_REF master # branch name
-    PATCHES makefile.patch #without the patch target xproto.c is missing target XCBPROTO_XCBINCLUDEDIR
-            configure.patch
-            fixes.patch
-            getpid_include.patch
+    PATCHES makefile.patch # without the patch target xproto.c is missing target XCBPROTO_XCBINCLUDEDIR
+            configure.patch 
+            use_xwindows_includes.patch # use the X11 include wrappers for windows headers
+            getpid_include.patch # add include for getpid on windows
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")

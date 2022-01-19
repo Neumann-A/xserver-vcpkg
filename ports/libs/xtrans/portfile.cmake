@@ -14,7 +14,7 @@ vcpkg_from_gitlab(
     HEAD_REF master # branch name
     PATCHES win32.patch
             symbols.patch
-            vcxtrans.diff # vcxserver HyperV Patch
+            vcxtrans-hyperv.patch # vcxserver HyperV Patch
 ) 
 
 set(ENV{ACLOCAL} "aclocal -I \"${CURRENT_INSTALLED_DIR}/share/xorg/aclocal/\"")

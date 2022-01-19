@@ -10,8 +10,8 @@ vcpkg_from_gitlab(
     GITLAB_URL https://gitlab.freedesktop.org/xorg
     OUT_SOURCE_PATH SOURCE_PATH
     REPO lib/libxt
-    REF edd70bdfbbd16247e3d9564ca51d864f82626eb7 # 1.2.1
-    SHA512  c49876253dfd187e7d56a098d3d992157daefa2c25ee732eaae5818ee04513bedd807d2f265085db2e82c0b1821e152a88fb4998c0002f6ac57204543fe18566
+    REF 9bebcedeb378f9fd6ea26767b11dae551b94dc54 # 1.2.1 + patches
+    SHA512  74f60f9d7f942d49781da45d57958d8bf01d677632a7748e89d396b3a8b36efd788a62768a1aaec3254a67b956c1e5d7e5d6e1da6194f7869673574dfbd3ced0
     HEAD_REF master # branch name
     PATCHES windows_build.patch # Still needs a fix for the asm on x64
             xt.patch

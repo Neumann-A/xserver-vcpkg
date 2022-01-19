@@ -124,7 +124,6 @@ list(APPEND MESA_OPTIONS -Dlibunwind=disabled)
 list(APPEND MESA_OPTIONS -Dlmsensors=disabled)
 list(APPEND MESA_OPTIONS -Dvalgrind=disabled)
 list(APPEND MESA_OPTIONS -Dglvnd=false)
-list(APPEND MESA_OPTIONS -Dglx=dri) #gallium-xlib) # dri) # requires x11
 list(APPEND MESA_OPTIONS -Dgbm=disabled)
 list(APPEND MESA_OPTIONS -Dosmesa=true)
 
@@ -134,6 +133,7 @@ if("platform-win" IN_LIST FEATURES)
 endif()
 if("platform-x11" IN_LIST FEATURES)
     list(APPEND platforms "x11")
+    list(APPEND MESA_OPTIONS -Dglx=dri) #gallium-xlib) # dri) # requires x11
 endif()
 list(TRANSFORM platforms PREPEND "'")
 list(TRANSFORM platforms APPEND "'")
